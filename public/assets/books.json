@@ -1,310 +1,486 @@
 [
-  {
-    "id": "xiaxiaomai",
-    "title": "失乐园",
-    "author": "渡边淳一",
-    "reader": "夏小麦",
-    "starColor": "#ffb3c8",
-    "audio": "assets/audio/xiaxiaomai.mp3",
-    "episodes": [
-      {
-        "title": "第 1 集 · 试音样片",
-        "audio": "assets/audio/xiaxiaomai.mp3"
-      },
-      {
-        "title": "第 2 集 · 样片",
-        "audio": "assets/audio/ep2.mp3"
-      },
-      {
-        "title": "第 3 集 · 样片",
-        "audio": "assets/audio/ep3.mp3"
-      }
-    ]
-  },
-  {
-    "id": "daxia",
-    "title": "最好金龟换酒",
-    "author": "傅真",
-    "reader": "大夏",
-    "starColor": "#b48cff",
-    "audio": "assets/audio/daxia.mp3",
-    "episodes": [
-      {
-        "title": "第 1 集 · 试音样片",
-        "audio": "assets/audio/daxia.mp3"
-      },
-      {
-        "title": "第 2 集 · 样片",
-        "audio": "assets/audio/ep2.mp3"
-      },
-      {
-        "title": "第 3 集 · 样片",
-        "audio": "assets/audio/ep3.mp3"
-      }
-    ]
-  },
-  {
-    "id": "zixin",
-    "title": "梦里花落知多少",
-    "author": "三毛",
-    "reader": "子欣",
-    "starColor": "#aee6ff",
-    "audio": "assets/audio/zixin.mp3",
-    "episodes": [
-      {
-        "title": "第 1 集 · 试音样片",
-        "audio": "assets/audio/zixin.mp3"
-      },
-      {
-        "title": "第 2 集 · 样片",
-        "audio": "assets/audio/ep2.mp3"
-      },
-      {
-        "title": "第 3 集 · 样片",
-        "audio": "assets/audio/ep3.mp3"
-      }
-    ]
-  },
-  {
-    "id": "andrey",
-    "title": "老人与海",
-    "author": "欧内斯特·海明威",
-    "reader": "安德烈司机",
-    "starColor": "#ffb86b",
-    "audio": "assets/audio/andrey.mp3",
-    "episodes": [
-      {
-        "title": "第 1 集 · 试音样片",
-        "audio": "assets/audio/andrey.mp3"
-      },
-      {
-        "title": "第 2 集 · 样片",
-        "audio": "assets/audio/ep2.mp3"
-      },
-      {
-        "title": "第 3 集 · 样片",
-        "audio": "assets/audio/ep3.mp3"
-      }
-    ]
-  },
-  {
-    "id": "wenda",
-    "title": "小王子",
-    "author": "圣·埃克苏佩里",
-    "reader": "闻达",
-    "starColor": "#8fe3c0",
-    "audio": "assets/audio/wenda.mp3",
-    "episodes": [
-      {
-        "title": "第 1 集 · 试音样片",
-        "audio": "assets/audio/wenda.mp3"
-      },
-      {
-        "title": "第 2 集 · 样片",
-        "audio": "assets/audio/ep2.mp3"
-      },
-      {
-        "title": "第 3 集 · 样片",
-        "audio": "assets/audio/ep3.mp3"
-      }
-    ]
-  },
-  {
-    "id": "maizi",
-    "title": "硅谷钢铁侠",
-    "author": "阿什利·万斯",
-    "reader": "麦子",
-    "starColor": "#6be8e0",
-    "audio": "assets/audio/maizi.mp3",
-    "episodes": [
-      {
-        "title": "第 1 集 · 试音样片",
-        "audio": "assets/audio/maizi.mp3"
-      },
-      {
-        "title": "第 2 集 · 样片",
-        "audio": "assets/audio/ep2.mp3"
-      },
-      {
-        "title": "第 3 集 · 样片",
-        "audio": "assets/audio/ep3.mp3"
-      }
-    ]
-  },
-  {
-    "id": "hailu",
-    "title": "舌尖上的新年",
-    "author": "张之常",
-    "reader": "海璐",
-    "starColor": "#ff9d7a",
-    "audio": "assets/audio/hailu.mp3",
-    "episodes": [
-      {
-        "title": "第 1 集 · 试音样片",
-        "audio": "assets/audio/hailu.mp3"
-      },
-      {
-        "title": "第 2 集 · 样片",
-        "audio": "assets/audio/ep2.mp3"
-      },
-      {
-        "title": "第 3 集 · 样片",
-        "audio": "assets/audio/ep3.mp3"
-      }
-    ]
-  },
-  {
-    "id": "misike",
-    "title": "了不起的面包",
-    "author": "林江",
-    "reader": "蜜思珂",
-    "starColor": "#ffc95e",
-    "audio": "assets/audio/misike.mp3",
-    "episodes": [
-      {
-        "title": "第 1 集 · 试音样片",
-        "audio": "assets/audio/misike.mp3"
-      },
-      {
-        "title": "第 2 集 · 样片",
-        "audio": "assets/audio/ep2.mp3"
-      },
-      {
-        "title": "第 3 集 · 样片",
-        "audio": "assets/audio/ep3.mp3"
-      }
-    ]
-  },
-  {
-    "id": "xiaotang",
-    "title": "博物人生",
-    "author": "刘华杰",
-    "reader": "晓棠",
-    "starColor": "#9fe8b7",
-    "audio": "assets/audio/xiaotang.mp3",
-    "episodes": [
-      {
-        "title": "第 1 集 · 试音样片",
-        "audio": "assets/audio/xiaotang.mp3"
-      },
-      {
-        "title": "第 2 集 · 样片",
-        "audio": "assets/audio/ep2.mp3"
-      },
-      {
-        "title": "第 3 集 · 样片",
-        "audio": "assets/audio/ep3.mp3"
-      }
-    ]
-  },
-  {
-    "id": "xizi",
-    "title": "简·爱",
-    "author": "夏洛蒂·勃朗特",
-    "reader": "西子",
-    "starColor": "#e3b8ff",
-    "audio": "assets/audio/xizi.mp3",
-    "episodes": [
-      {
-        "title": "第 1 集 · 试音样片",
-        "audio": "assets/audio/xizi.mp3"
-      },
-      {
-        "title": "第 2 集 · 样片",
-        "audio": "assets/audio/ep2.mp3"
-      },
-      {
-        "title": "第 3 集 · 样片",
-        "audio": "assets/audio/ep3.mp3"
-      }
-    ]
-  },
-  {
-    "id": "xiaoguang",
-    "title": "牧羊少年奇幻之旅",
-    "author": "保罗·柯艾略",
-    "reader": "小光",
-    "starColor": "#f0e6a0",
-    "audio": "assets/audio/xiaoguang.mp3",
-    "episodes": [
-      {
-        "title": "第 1 集 · 试音样片",
-        "audio": "assets/audio/xiaoguang.mp3"
-      },
-      {
-        "title": "第 2 集 · 样片",
-        "audio": "assets/audio/ep2.mp3"
-      },
-      {
-        "title": "第 3 集 · 样片",
-        "audio": "assets/audio/ep3.mp3"
-      }
-    ]
-  },
-  {
-    "id": "zhanghenxiang",
-    "title": "西藏生死书",
-    "author": "索甲仁波切",
-    "reader": "张很香",
-    "starColor": "#ff8f8f",
-    "audio": "assets/audio/zhanghenxiang.mp3",
-    "episodes": [
-      {
-        "title": "第 1 集 · 试音样片",
-        "audio": "assets/audio/zhanghenxiang.mp3"
-      },
-      {
-        "title": "第 2 集 · 样片",
-        "audio": "assets/audio/ep2.mp3"
-      },
-      {
-        "title": "第 3 集 · 样片",
-        "audio": "assets/audio/ep3.mp3"
-      }
-    ]
-  },
-  {
-    "id": "yitiaodahe",
-    "title": "反好莱坞",
-    "author": "贾晓伟",
-    "reader": "一条大河",
-    "starColor": "#7ab8ff",
-    "audio": "assets/audio/yitiaodahe.mp3",
-    "episodes": [
-      {
-        "title": "第 1 集 · 试音样片",
-        "audio": "assets/audio/yitiaodahe.mp3"
-      },
-      {
-        "title": "第 2 集 · 样片",
-        "audio": "assets/audio/ep2.mp3"
-      },
-      {
-        "title": "第 3 集 · 样片",
-        "audio": "assets/audio/ep3.mp3"
-      }
-    ]
-  },
-  {
-    "id": "xiaoyu",
-    "title": "遇见未知的自己",
-    "author": "张德芬",
-    "reader": "小雨",
-    "starColor": "#f5f0e6",
-    "audio": "assets/audio/xiaoyu.mp3",
-    "episodes": [
-      {
-        "title": "第 1 集 · 试音样片",
-        "audio": "assets/audio/xiaoyu.mp3"
-      },
-      {
-        "title": "第 2 集 · 样片",
-        "audio": "assets/audio/ep2.mp3"
-      },
-      {
-        "title": "第 3 集 · 样片",
-        "audio": "assets/audio/ep3.mp3"
-      }
-    ]
-  }
+ {
+  "id": "xiaxiaomai",
+  "title": "失乐园",
+  "author": "渡边淳一",
+  "reader": "夏小麦",
+  "starColor": "#ffb3c8",
+  "audio": "assets/audio/xiaxiaomai.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/xiaxiaomai.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   }
+  ]
+ },
+ {
+  "id": "daxia",
+  "title": "最好金龟换酒",
+  "author": "傅真",
+  "reader": "大夏",
+  "starColor": "#b48cff",
+  "audio": "assets/audio/daxia.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/daxia.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   }
+  ]
+ },
+ {
+  "id": "zixin",
+  "title": "梦里花落知多少",
+  "author": "三毛",
+  "reader": "子欣",
+  "starColor": "#aee6ff",
+  "audio": "assets/audio/zixin.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/zixin.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   }
+  ]
+ },
+ {
+  "id": "andrey",
+  "title": "老人与海",
+  "author": "欧内斯特·海明威",
+  "reader": "安德烈司机",
+  "starColor": "#ffb86b",
+  "audio": "assets/audio/andrey.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/andrey.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   }
+  ]
+ },
+ {
+  "id": "wenda",
+  "title": "小王子",
+  "author": "圣·埃克苏佩里",
+  "reader": "闻达",
+  "starColor": "#8fe3c0",
+  "audio": "assets/audio/wenda.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/wenda.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   }
+  ]
+ },
+ {
+  "id": "maizi",
+  "title": "硅谷钢铁侠",
+  "author": "阿什利·万斯",
+  "reader": "麦子",
+  "starColor": "#6be8e0",
+  "audio": "assets/audio/maizi.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/maizi.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   }
+  ]
+ },
+ {
+  "id": "hailu",
+  "title": "舌尖上的新年",
+  "author": "张之常",
+  "reader": "海璐",
+  "starColor": "#ff9d7a",
+  "audio": "assets/audio/hailu.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/hailu.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   }
+  ]
+ },
+ {
+  "id": "misike",
+  "title": "了不起的面包",
+  "author": "林江",
+  "reader": "蜜思珂",
+  "starColor": "#ffc95e",
+  "audio": "assets/audio/misike.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/misike.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   }
+  ]
+ },
+ {
+  "id": "xiaotang",
+  "title": "博物人生",
+  "author": "刘华杰",
+  "reader": "晓棠",
+  "starColor": "#9fe8b7",
+  "audio": "assets/audio/xiaotang.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/xiaotang.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   }
+  ]
+ },
+ {
+  "id": "xizi",
+  "title": "简·爱",
+  "author": "夏洛蒂·勃朗特",
+  "reader": "西子",
+  "starColor": "#e3b8ff",
+  "audio": "assets/audio/xizi.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/xizi.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   }
+  ]
+ },
+ {
+  "id": "xiaoguang",
+  "title": "牧羊少年奇幻之旅",
+  "author": "保罗·柯艾略",
+  "reader": "小光",
+  "starColor": "#f0e6a0",
+  "audio": "assets/audio/xiaoguang.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/xiaoguang.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   }
+  ]
+ },
+ {
+  "id": "zhanghenxiang",
+  "title": "西藏生死书",
+  "author": "索甲仁波切",
+  "reader": "张很香",
+  "starColor": "#ff8f8f",
+  "audio": "assets/audio/zhanghenxiang.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/zhanghenxiang.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   }
+  ]
+ },
+ {
+  "id": "yitiaodahe",
+  "title": "反好莱坞",
+  "author": "贾晓伟",
+  "reader": "一条大河",
+  "starColor": "#7ab8ff",
+  "audio": "assets/audio/yitiaodahe.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/yitiaodahe.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   }
+  ]
+ },
+ {
+  "id": "xiaoyu",
+  "title": "遇见未知的自己",
+  "author": "张德芬",
+  "reader": "小雨",
+  "starColor": "#f5f0e6",
+  "audio": "assets/audio/xiaoyu.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/xiaoyu.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   }
+  ]
+ },
+ {
+  "id": "mufeng",
+  "title": "吴哥之美",
+  "author": "蒋勋",
+  "reader": "牧风",
+  "starColor": "#d9a05b",
+  "audio": "assets/audio/ep2.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   }
+  ]
+ },
+ {
+  "id": "huaer",
+  "title": "造物有灵且美",
+  "author": "赤木明登",
+  "reader": "花儿",
+  "starColor": "#f2a2c0",
+  "audio": "assets/audio/ep2.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   }
+  ]
+ },
+ {
+  "id": "zixiao",
+  "title": "寂静的春天",
+  "author": "蕾切尔·卡森",
+  "reader": "紫晓",
+  "starColor": "#86dcb9",
+  "audio": "assets/audio/ep2.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   }
+  ]
+ },
+ {
+  "id": "miaomiao",
+  "title": "岛上书店",
+  "author": "加布瑞埃拉·泽文",
+  "reader": "淼淼",
+  "starColor": "#7fb8e8",
+  "audio": "assets/audio/ep2.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   }
+  ]
+ },
+ {
+  "id": "xiaotuma",
+  "title": "杀死一只知更鸟",
+  "author": "哈珀·李",
+  "reader": "肖图玛",
+  "starColor": "#a8b6f0",
+  "audio": "assets/audio/ep2.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   }
+  ]
+ },
+ {
+  "id": "xiali",
+  "title": "匠人",
+  "author": "申赋渔",
+  "reader": "夏利",
+  "starColor": "#e8987a",
+  "audio": "assets/audio/ep2.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   }
+  ]
+ },
+ {
+  "id": "xiaoxu",
+  "title": "搭车去柏林",
+  "author": "谷岳",
+  "reader": "小旭",
+  "starColor": "#f5d06a",
+  "audio": "assets/audio/ep2.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   }
+  ]
+ },
+ {
+  "id": "youmai",
+  "title": "画魂",
+  "author": "石楠",
+  "reader": "优迈",
+  "starColor": "#c9a2e8",
+  "audio": "assets/audio/ep2.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   }
+  ]
+ }
 ]

@@ -130,6 +130,9 @@ export default function RoomView() {
 
   const roomIndex = Math.max(0, roomOrder.indexOf(room.id))
 
+  /* 朗读书目 + 播放器：创始人书房（noPlayer）不展示 */
+  const showReading = !room.noPlayer
+
   /* R3 朗读书目：当前曲目（书+单集）→ 播放器 */
   const books =
     room.books && room.books.length > 0
@@ -262,17 +265,19 @@ export default function RoomView() {
                 </div>
                 <RoomHeading room={room} roomIndex={roomIndex} ds={ds} reduced={reduced} />
                 <RoomQuote room={room} roomIndex={roomIndex} ds={ds} reduced={reduced} />
-                {player}
-                <RoomBook
-                  key={`book-${room.id}`}
-                  room={room}
-                  roomIndex={roomIndex}
-                  ds={ds}
-                  reduced={reduced}
-                  selB={trackSel.b}
-                  selE={trackSel.e}
-                  onSelect={handleSelectTrack}
-                />
+                {showReading && player}
+                {showReading && (
+                  <RoomBook
+                    key={`book-${room.id}`}
+                    room={room}
+                    roomIndex={roomIndex}
+                    ds={ds}
+                    reduced={reduced}
+                    selB={trackSel.b}
+                    selE={trackSel.e}
+                    onSelect={handleSelectTrack}
+                  />
+                )}
                 {/* 物件导览（每行：label + 一句话，点击滚回插画并闪烁热点） */}
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -309,9 +314,11 @@ export default function RoomView() {
                 <HudNote room={room} roomIndex={roomIndex} ds={ds} reduced={reduced} />
               </div>
               {/* sticky 底部紧凑播放器（§7：随时可控音频） */}
-              <div className="sticky bottom-0 z-20">
-                <ShelfPlayer room={room} compact reduced={reduced} onWake={() => setWake((w) => w + 1)} />
-              </div>
+              {showReading && (
+                <div className="sticky bottom-0 z-20">
+                  <ShelfPlayer room={room} compact reduced={reduced} onWake={() => setWake((w) => w + 1)} />
+                </div>
+              )}
             </div>
           ) : (
             /* ── 桌面端：双栏 max-w 1200px 居中（§1）── */
@@ -326,17 +333,19 @@ export default function RoomView() {
                 <div className="flex max-h-full w-[45%] flex-col gap-5 overflow-y-auto pr-1 lg:w-[42%] lg:gap-6">
                   <RoomHeading room={room} roomIndex={roomIndex} ds={ds} reduced={reduced} />
                   <RoomQuote room={room} roomIndex={roomIndex} ds={ds} reduced={reduced} />
-                  <RoomBook
-                    key={`book-${room.id}`}
-                    room={room}
-                    roomIndex={roomIndex}
-                    ds={ds}
-                    reduced={reduced}
-                    selB={trackSel.b}
-                    selE={trackSel.e}
-                    onSelect={handleSelectTrack}
-                  />
-                  {player}
+                  {showReading && (
+                    <RoomBook
+                      key={`book-${room.id}`}
+                      room={room}
+                      roomIndex={roomIndex}
+                      ds={ds}
+                      reduced={reduced}
+                      selB={trackSel.b}
+                      selE={trackSel.e}
+                      onSelect={handleSelectTrack}
+                    />
+                  )}
+                  {showReading && player}
                 </div>
               </div>
               {/* 底栏：物件导览 chips + HUD 角注 */}

@@ -15,7 +15,7 @@ import { STAR_POSITIONS, directionToYawPitch, starWorldPosition } from './starPo
 import { makeCoreTexture, makeGlowTexture, makeRingTexture } from './textures'
 
 /**
- * 书房星 ×15（universe.md §1-B / §3 / §4）
+ * 书房星 ×23（universe.md §1-B / §3 / §4）
  * 每颗星 = 星核（亮白小点）+ 辉光（starColor 径向渐变 sprite，加法混合）
  *         + hover 光晕环（弹簧弹出）+ 隐形 hit 球（Raycaster 目标）。
  *

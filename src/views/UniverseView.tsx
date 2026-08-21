@@ -18,7 +18,7 @@ import { STAR_POSITIONS } from './universe/starPositions'
 /**
  * Universe · 星空漫游（universe.md）
  * 第一人称 360° 星野：~3700 背景星（单次 draw call，双层球壳 + 闪烁）+ 近景星尘 +
- * 漂移呼吸星云 + 15 颗书房星（悬停提示 / 点击飞星转场）。
+ * 漂移呼吸星云 + 23 颗书房星（悬停提示 / 点击飞星转场）。
  * 相机角度记忆：离开前保存 yaw/pitch，返回时恢复。
  * 拖动 / 方向键 / 滚轮 / 自动巡游。星尘光标跟随鼠标轨迹。
  *
@@ -47,20 +47,22 @@ function TooltipLayer({
 }) {
   const hoveredRoomId = useAppStore((s) => s.hoveredRoomId)
   const room = rooms.find((r) => r.id === hoveredRoomId) ?? null
-  const [pos, setPos] = useState({ x: 0, y: 0 })
+  const [pos, setPos] = useState({ x: 0, y: 0, flipX: false, flipY: false })
 
   useEffect(() => {
     if (!hoveredRoomId) return
     let raf = 0
     const tick = () => {
-      let x = controls.tooltipX
-      let y = controls.tooltipY
-      // 边缘自动翻转防出屏（卡片 ≈ 200×64，偏移 +20/−16 + 提示行）
-      if (x + 260 > window.innerWidth) x -= 280
-      if (y - 16 < 8) y += 48
-      if (y + 110 > window.innerHeight) y -= 80
+      const x = controls.tooltipX
+      const y = controls.tooltipY
+      // 边缘翻转防出屏（卡片 ≈ 220×90）：不再移动锚点，只做镜像翻转，
+      // 保证任何位置的卡片与光点距离一致
+      const flipX = x + 260 > window.innerWidth
+      const flipY = y + 140 > window.innerHeight
       setPos((prev) =>
-        Math.abs(prev.x - x) > 1 || Math.abs(prev.y - y) > 1 ? { x, y } : prev,
+        Math.abs(prev.x - x) > 1 || Math.abs(prev.y - y) > 1 || prev.flipX !== flipX || prev.flipY !== flipY
+          ? { x, y, flipX, flipY }
+          : prev,
       )
       raf = requestAnimationFrame(tick)
     }
@@ -70,14 +72,17 @@ function TooltipLayer({
 
   return (
     <>
-      <StarTooltip room={room} x={pos.x} y={pos.y} />
+      <StarTooltip room={room} x={pos.x} y={pos.y} flipX={pos.flipX} flipY={pos.flipY} />
       {/* 提示行：共享 StarTooltip 不含此行（universe.md §2-B 第三行），叠加在卡片下方 */}
       <AnimatePresence>
         {room && (
           <motion.p
             key={room.id}
             className="pointer-events-none fixed z-[80] font-hud text-[11px] tracking-[0.2em] text-gold"
-            style={{ left: pos.x + 36, top: pos.y + 52 }}
+            style={{
+              left: pos.flipX ? pos.x - 182 : pos.x + 36,
+              top: pos.flipY ? pos.y - 108 : pos.y + 52,
+            }}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}

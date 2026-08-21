@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 /**
- * 星空图书馆数据层：读取 /assets/books.json（15 册星光藏书）。
+ * 星空图书馆数据层：读取 /assets/books.json（星光藏书）。
  * audio 字段在 json 中为 'assets/audio/x.mp3'（无前导斜杠），此处归一化为 '/assets/...'。
  */
 

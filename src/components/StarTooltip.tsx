@@ -13,12 +13,16 @@ import type { Room } from '@/data/rooms'
 interface StarTooltipProps {
   /** 为 null 时不渲染（内部已包 AnimatePresence，有退出动画） */
   room: Room | null
-  /** 视口像素坐标 */
+  /** 视口像素坐标（星球光点中心） */
   x?: number
   y?: number
+  /** 靠近屏幕右缘时向左翻转到光点左侧（保持与光点距离一致） */
+  flipX?: boolean
+  /** 靠近屏幕下缘时向上翻转到光点上方 */
+  flipY?: boolean
 }
 
-export default function StarTooltip({ room, x = 0, y = 0 }: StarTooltipProps) {
+export default function StarTooltip({ room, x = 0, y = 0, flipX = false, flipY = false }: StarTooltipProps) {
   return (
     <AnimatePresence>
       {room && (
@@ -28,14 +32,19 @@ export default function StarTooltip({ room, x = 0, y = 0 }: StarTooltipProps) {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 4 }}
           transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
-          className="glass-panel pointer-events-none fixed z-[80] rounded-md px-4 py-3"
-          style={{
-            left: x + 20,
-            top: y - 16,
-            border: `1px solid ${room.starColor}59`, // starColor / 35%
-            boxShadow: `0 0 24px ${room.starColor}26`,
-          }}
+          className="pointer-events-none fixed z-[80]"
+          style={{ left: x, top: y }}
         >
+          {/* framer-motion 会覆写 transform，偏移翻转放在内层 div */}
+          <div
+            className="glass-panel rounded-md px-4 py-3"
+            style={{
+              /* 以光点为锚点偏移；翻转时镜像到另一侧，间距恒定 18px */
+              transform: `translate(${flipX ? 'calc(-100% - 18px)' : '18px'}, ${flipY ? 'calc(-100% - 14px)' : '-14px'})`,
+              border: `1px solid ${room.starColor}59`, // starColor / 35%
+              boxShadow: `0 0 24px ${room.starColor}26`,
+            }}
+          >
           <div className="flex items-center gap-2.5">
             <span
               aria-hidden
@@ -53,6 +62,7 @@ export default function StarTooltip({ room, x = 0, y = 0 }: StarTooltipProps) {
                 {room.style}
               </p>
             </div>
+          </div>
           </div>
         </motion.div>
       )}

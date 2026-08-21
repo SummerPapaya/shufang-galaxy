@@ -142,11 +142,12 @@ void main() {
   float edge = clamp(length(mv.xy) / 24.0, 0.3, 1.6);
   mv.xy *= 1.0 + w * w * 3.2 * edge;
   mv.z += w * 28.0;
-  float breathe = 1.0 + 0.15 * sin(uTime * 1.5708 + aPhase * 6.2831) * uMotion;
+  // 呼吸感光芒：放慢周期（约 7s）、加大幅度，透明度随呼吸一起起伏
+  float breathe = 1.0 + 0.3 * sin(uTime * 0.9 + aPhase * 6.2831) * uMotion;
   float hovered = step(abs(aIndex - uHoverIndex), 0.5);
   float boost = 1.0 + hovered * 0.5;
   vColor = aColor;
-  vAlpha = (0.75 + 0.25 * breathe) * boost;
+  vAlpha = (0.52 + 0.37 * breathe) * boost;
   gl_Position = projectionMatrix * mv;
   gl_PointSize = aSize * breathe * boost * uPixelRatio * (130.0 / max(1.0, -mv.z)) * (1.0 + w);
 }
@@ -406,7 +407,8 @@ function GalaxyScene({
       pos[i * 3 + 1] = bandDir.y * t + perp.y * spread
       pos[i * 3 + 2] = -18 - rand() * 14
       size[i] = 4.2 + rand() * 1.6
-      const c = new THREE.Color(star.color)
+      // 低饱和处理：向暖白混合 62%，只留很浅的色相（与星空视角的朗读者光点一致）
+      const c = new THREE.Color(star.color).lerp(new THREE.Color('#f5f0e6'), 0.62)
       color[i * 3] = c.r
       color[i * 3 + 1] = c.g
       color[i * 3 + 2] = c.b

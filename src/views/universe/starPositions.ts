@@ -23,20 +23,29 @@ export interface StarPosition {
 
 export const STAR_POSITIONS: StarPosition[] = [
   { id: 'duanjing', az: 0, el: 15, r: 14, size: 1.35 },
-  { id: 'xizi', az: 20, el: 33, r: 19, size: 0.9 },
+  { id: 'xizi', az: 13, el: 40, r: 19, size: 0.9 },
   { id: 'xiaxiaomai', az: 41, el: -5, r: 20, size: 1.0 },
-  { id: 'daxia', az: 76, el: 25, r: 16, size: 1.2 },
+  { id: 'daxia', az: 72, el: 28, r: 16, size: 1.2 },
   { id: 'xiaoguang', az: 96, el: -22, r: 21, size: 0.9 },
   { id: 'zixin', az: 114, el: -12, r: 17, size: 1.15 },
   { id: 'zhanghenxiang', az: 133, el: 38, r: 20, size: 0.85 },
   { id: 'andrey', az: 151, el: 8, r: 21, size: 0.95 },
   { id: 'xiaoyu', az: 168, el: -16, r: 18, size: 0.95 },
-  { id: 'wenda', az: 184, el: 30, r: 19, size: 1.0 },
-  { id: 'yitiaodahe', az: 201, el: -8, r: 16, size: 1.0 },
+  { id: 'wenda', az: 192, el: 35, r: 19, size: 1.0 },
+  { id: 'yitiaodahe', az: 204, el: -12, r: 16, size: 1.0 },
   { id: 'maizi', az: 219, el: -18, r: 22, size: 0.9 },
   { id: 'hailu', az: 256, el: 5, r: 18, size: 1.0 },
   { id: 'misike', az: 294, el: 20, r: 21, size: 0.95 },
   { id: 'xiaotang', az: 329, el: -8, r: 15, size: 1.05 },
+  /* ── 书房十周年 · 第二批 8 位朗读者（填补方位角空隙，保持全向可见） ── */
+  { id: 'mufeng', az: 35, el: 18, r: 18, size: 0.95 },
+  { id: 'huaer', az: 60, el: -14, r: 21, size: 0.9 },
+  { id: 'zixiao', az: 92, el: 8, r: 17, size: 1.0 },
+  { id: 'miaomiao', az: 142, el: -20, r: 20, size: 0.9 },
+  { id: 'xiaotuma', az: 168, el: 26, r: 16, size: 1.05 },
+  { id: 'xiali', az: 194, el: 6, r: 21, size: 0.9 },
+  { id: 'xiaoxu', az: 237, el: -6, r: 19, size: 0.95 },
+  { id: 'youmai', az: 275, el: 30, r: 18, size: 0.95 },
 ]
 
 const DEG = Math.PI / 180

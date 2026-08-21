@@ -49,6 +49,8 @@ export interface Room {
   /** 朗读 sample URL，已归一化为 `/assets/audio/{id}.mp3` */
   audio: string
   hotspots: RoomHotspot[]
+  /** 隐藏朗读书目与播放器（如创始人书房仅作展示） */
+  noPlayer?: boolean
 }
 
 /** rooms.json 中的相对路径（"assets/..."）→ 站点绝对路径（"/assets/..."） */
