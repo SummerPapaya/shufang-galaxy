@@ -1,0 +1,142 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ── 「一个人的书房 · 平行宇宙」设计 token（design.md §3） ── */
+    --void: #030510;
+    --nebula-deep: #070c20;
+    --nebula-mid: #131a42;
+    --nebula-violet: #2c2258;
+    --nebula-rose: #4a1f42;
+    --starlight: #f5f0e6;
+    --starlight-dim: rgba(245, 240, 230, 0.55);
+    --starlight-faint: rgba(245, 240, 230, 0.28);
+    --gold: #ffd9a0;
+    --gold-glow: rgba(255, 217, 160, 0.35);
+    --cyan: #aee6ff;
+
+    /* ── shadcn/ui token（本作为沉浸式暗色体验，直接使用深色值） ── */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+    --radius: 0.625rem;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    background-color: var(--void);
+    color: var(--starlight);
+    font-family: "Noto Sans SC", "PingFang SC", sans-serif;
+    overflow: hidden; /* 沉浸式全屏，无传统滚动（landing 滚动被劫持为镜头推进） */
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: rgba(255, 217, 160, 0.25);
+    color: var(--starlight);
+  }
+
+  /* 自定义光标（StarfieldCursor）：fine pointer 设备隐藏原生光标 */
+  @media (pointer: fine) {
+    html.has-starfield-cursor,
+    html.has-starfield-cursor * {
+      cursor: none !important;
+    }
+  }
+}
+
+@layer utilities {
+  /* 玻璃拟态面板（StarTooltip / 详情卡共用基底） */
+  .glass-panel {
+    background: rgba(11, 16, 38, 0.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .text-glow-gold {
+    text-shadow: 0 0 24px var(--gold-glow);
+  }
+
+  /* Landing 整页 SLOGAN（伍尔夫引言打字机）：月白 + 柔和星光/暖金辉光 */
+  .slogan-text {
+    text-shadow:
+      0 0 14px rgba(245, 240, 230, 0.35),
+      0 0 40px rgba(255, 217, 160, 0.22),
+      0 0 90px rgba(255, 217, 160, 0.12);
+  }
+
+  .slogan-keyword {
+    color: var(--gold);
+    text-shadow:
+      0 0 12px rgba(255, 217, 160, 0.55),
+      0 0 36px rgba(255, 217, 160, 0.3);
+  }
+
+  /* 打字机竖线光标：暖金，闪烁；--fade 变体闪烁 3 次后停在透明 */
+  .slogan-caret {
+    display: inline-block;
+    width: 2px;
+    height: 1em;
+    margin-left: 3px;
+    vertical-align: -0.12em;
+    background: var(--gold);
+    box-shadow: 0 0 10px rgba(255, 217, 160, 0.7);
+  }
+
+  .slogan-caret--blink {
+    animation: caret-blink 0.85s ease-in-out infinite;
+  }
+
+  .slogan-caret--fade {
+    animation: caret-blink 0.85s ease-in-out 3 forwards;
+  }
+
+  @keyframes caret-blink {
+    0%,
+    40% {
+      opacity: 1;
+    }
+    50%,
+    100% {
+      opacity: 0;
+    }
+  }
+}

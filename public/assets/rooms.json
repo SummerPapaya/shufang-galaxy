@@ -1,0 +1,755 @@
+[
+  {
+    "id": "duanjing",
+    "reader": "段静",
+    "title": "段老板的书房",
+    "role": "创始人",
+    "style": "一个人的图书馆",
+    "starColor": "#ffd9a0",
+    "quote": "若以书而论，每本书都会变成你自己的房间，给你一个庇护，让你安静下来。",
+    "book": "《一个人的房间》· 弗吉尼亚·伍尔夫",
+    "img": "assets/rooms/duanjing.jpg",
+    "audio": "assets/audio/duanjing.mp3",
+    "hotspots": [
+      {
+        "x": 0.2,
+        "y": 0.3,
+        "label": "圆盘挂图 · 旧航线的梦"
+      },
+      {
+        "x": 0.3,
+        "y": 0.17,
+        "label": "高窗 · 斜进来的光"
+      },
+      {
+        "x": 0.42,
+        "y": 0.55,
+        "label": "写字台 · 摊开的稿纸"
+      }
+    ],
+    "books": [
+      {
+        "title": "一个人的房间",
+        "author": "弗吉尼亚",
+        "episodes": [
+          {
+            "title": "第 1 集 · 试音样片",
+            "audio": "assets/audio/duanjing.mp3"
+          },
+          {
+            "title": "第 2 集 · 样片",
+            "audio": "assets/audio/ep2.mp3"
+          },
+          {
+            "title": "第 3 集 · 样片",
+            "audio": "assets/audio/ep3.mp3"
+          }
+        ]
+      },
+      {
+        "title": "普通读者",
+        "author": "弗吉尼亚·伍尔夫",
+        "episodes": [
+          {
+            "title": "第 1 集 · 试音样片",
+            "audio": "assets/audio/duanjing.mp3"
+          },
+          {
+            "title": "第 2 集 · 样片",
+            "audio": "assets/audio/ep2.mp3"
+          },
+          {
+            "title": "第 3 集 · 样片",
+            "audio": "assets/audio/ep3.mp3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "xiaxiaomai",
+    "reader": "夏小麦",
+    "title": "小麦的北欧木屋",
+    "role": "朗读者",
+    "style": "北欧极简木屋",
+    "starColor": "#ffb3c8",
+    "quote": "把我在那颗寂寞的午夜失去了的灵魂，找回来。",
+    "book": "《失乐园》· 渡边淳一",
+    "img": "assets/rooms/xiaxiaomai.jpg",
+    "audio": "assets/audio/xiaxiaomai.mp3",
+    "hotspots": [
+      {
+        "x": 0.3,
+        "y": 0.35,
+        "label": "白色书架 · 满墙的书"
+      },
+      {
+        "x": 0.66,
+        "y": 0.25,
+        "label": "百叶窗 · 午后的光"
+      },
+      {
+        "x": 0.5,
+        "y": 0.62,
+        "label": "藤椅 · 阅读角"
+      }
+    ],
+    "books": [
+      {
+        "title": "失乐园",
+        "author": "渡边淳一",
+        "episodes": [
+          {
+            "title": "第 1 集 · 试音样片",
+            "audio": "assets/audio/xiaxiaomai.mp3"
+          },
+          {
+            "title": "第 2 集 · 样片",
+            "audio": "assets/audio/ep2.mp3"
+          },
+          {
+            "title": "第 3 集 · 样片",
+            "audio": "assets/audio/ep3.mp3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "daxia",
+    "reader": "大夏",
+    "title": "大夏的魔法阁楼",
+    "role": "朗读者",
+    "style": "魔法阁楼图书室",
+    "starColor": "#b48cff",
+    "quote": "独自漂泊的日子里，我构筑了一座属于自己的「移动城堡」。",
+    "book": "《最好金龟换酒》· 傅真",
+    "img": "assets/rooms/daxia.jpg",
+    "audio": "assets/audio/daxia.mp3",
+    "hotspots": [
+      {
+        "x": 0.57,
+        "y": 0.17,
+        "label": "拱窗 · 阁楼的月光"
+      },
+      {
+        "x": 0.28,
+        "y": 0.7,
+        "label": "木梯 · 通往书阁"
+      },
+      {
+        "x": 0.55,
+        "y": 0.5,
+        "label": "书桌 · 摊开的手稿"
+      }
+    ],
+    "books": [
+      {
+        "title": "最好金龟换酒",
+        "author": "傅真",
+        "episodes": [
+          {
+            "title": "第 1 集 · 试音样片",
+            "audio": "assets/audio/daxia.mp3"
+          },
+          {
+            "title": "第 2 集 · 样片",
+            "audio": "assets/audio/ep2.mp3"
+          },
+          {
+            "title": "第 3 集 · 样片",
+            "audio": "assets/audio/ep3.mp3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "zixin",
+    "reader": "子欣",
+    "title": "子欣的猫咪小屋",
+    "role": "朗读者",
+    "style": "暖色调猫咪小屋",
+    "starColor": "#aee6ff",
+    "quote": "当我们想要安静下来，书房的钥匙就是我们心中的一句「咒语」。",
+    "book": "《梦里花落知多少》· 三毛",
+    "img": "assets/rooms/zixin.jpg",
+    "audio": "assets/audio/zixin.mp3",
+    "hotspots": [
+      {
+        "x": 0.17,
+        "y": 0.3,
+        "label": "白色书架 · 猫的领地"
+      },
+      {
+        "x": 0.38,
+        "y": 0.62,
+        "label": "白猫 · 晒太阳"
+      },
+      {
+        "x": 0.55,
+        "y": 0.27,
+        "label": "落地窗 · 晨光"
+      }
+    ],
+    "books": [
+      {
+        "title": "梦里花落知多少",
+        "author": "三毛",
+        "episodes": [
+          {
+            "title": "第 1 集 · 试音样片",
+            "audio": "assets/audio/zixin.mp3"
+          },
+          {
+            "title": "第 2 集 · 样片",
+            "audio": "assets/audio/ep2.mp3"
+          },
+          {
+            "title": "第 3 集 · 样片",
+            "audio": "assets/audio/ep3.mp3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "andrey",
+    "reader": "安德烈司机",
+    "title": "司机的公路书房",
+    "role": "朗读者",
+    "style": "复古美式房车",
+    "starColor": "#ffb86b",
+    "quote": "书房的那几年，曾经是我的「平行时空」。",
+    "book": "《老人与海》· 欧内斯特·海明威",
+    "img": "assets/rooms/andrey.jpg",
+    "audio": "assets/audio/andrey.mp3",
+    "hotspots": [
+      {
+        "x": 0.22,
+        "y": 0.32,
+        "label": "圆形舷窗 · 老时钟"
+      },
+      {
+        "x": 0.55,
+        "y": 0.3,
+        "label": "中央书架 · 旅途藏书"
+      },
+      {
+        "x": 0.4,
+        "y": 0.55,
+        "label": "绘图桌 · 摊开的书"
+      }
+    ],
+    "books": [
+      {
+        "title": "老人与海",
+        "author": "欧内斯特",
+        "episodes": [
+          {
+            "title": "第 1 集 · 试音样片",
+            "audio": "assets/audio/andrey.mp3"
+          },
+          {
+            "title": "第 2 集 · 样片",
+            "audio": "assets/audio/ep2.mp3"
+          },
+          {
+            "title": "第 3 集 · 样片",
+            "audio": "assets/audio/ep3.mp3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "wenda",
+    "reader": "闻达",
+    "title": "闻达的音乐书房",
+    "role": "朗读者",
+    "style": "吉他唱片小屋",
+    "starColor": "#8fe3c0",
+    "quote": "不管发生什么样的变化，给我安全感的音乐和书籍是不会变的。",
+    "book": "《小王子》· 圣·埃克苏佩里",
+    "img": "assets/rooms/wenda.jpg",
+    "audio": "assets/audio/wenda.mp3",
+    "hotspots": [
+      {
+        "x": 0.28,
+        "y": 0.6,
+        "label": "木吉他 · 安全感来源"
+      },
+      {
+        "x": 0.35,
+        "y": 0.26,
+        "label": "窗 · 夕阳进来"
+      },
+      {
+        "x": 0.82,
+        "y": 0.45,
+        "label": "绿色书架 · 唱片与书"
+      }
+    ],
+    "books": [
+      {
+        "title": "小王子",
+        "author": "圣",
+        "episodes": [
+          {
+            "title": "第 1 集 · 试音样片",
+            "audio": "assets/audio/wenda.mp3"
+          },
+          {
+            "title": "第 2 集 · 样片",
+            "audio": "assets/audio/ep2.mp3"
+          },
+          {
+            "title": "第 3 集 · 样片",
+            "audio": "assets/audio/ep3.mp3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "maizi",
+    "reader": "麦子",
+    "title": "麦子的赛博书房",
+    "role": "朗读者",
+    "style": "赛博霓虹书房",
+    "starColor": "#6be8e0",
+    "quote": "十年间，我的阅读变化史。",
+    "book": "《硅谷钢铁侠》· 阿什利·万斯",
+    "img": "assets/rooms/maizi.jpg",
+    "audio": "assets/audio/maizi.mp3",
+    "hotspots": [
+      {
+        "x": 0.42,
+        "y": 0.4,
+        "label": "主屏 · 闪烁的代码"
+      },
+      {
+        "x": 0.74,
+        "y": 0.3,
+        "label": "舷窗 · 霓虹星球"
+      },
+      {
+        "x": 0.5,
+        "y": 0.56,
+        "label": "操控台 · 机械键盘"
+      }
+    ],
+    "books": [
+      {
+        "title": "硅谷钢铁侠",
+        "author": "阿什利",
+        "episodes": [
+          {
+            "title": "第 1 集 · 试音样片",
+            "audio": "assets/audio/maizi.mp3"
+          },
+          {
+            "title": "第 2 集 · 样片",
+            "audio": "assets/audio/ep2.mp3"
+          },
+          {
+            "title": "第 3 集 · 样片",
+            "audio": "assets/audio/ep3.mp3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "hailu",
+    "reader": "海璐",
+    "title": "海璐的中式书屋",
+    "role": "朗读者",
+    "style": "温暖中式书房",
+    "starColor": "#ff9d7a",
+    "quote": "从「一个人的书房」，到三个人的书房。",
+    "book": "《舌尖上的新年》· 张之常",
+    "img": "assets/rooms/hailu.jpg",
+    "audio": "assets/audio/hailu.mp3",
+    "hotspots": [
+      {
+        "x": 0.74,
+        "y": 0.32,
+        "label": "花窗 · 镂空的光"
+      },
+      {
+        "x": 0.42,
+        "y": 0.45,
+        "label": "中式灯笼 · 除夕的光"
+      },
+      {
+        "x": 0.65,
+        "y": 0.52,
+        "label": "伏案书桌 · 年夜的稿"
+      }
+    ],
+    "books": [
+      {
+        "title": "舌尖上的新年",
+        "author": "张之常",
+        "episodes": [
+          {
+            "title": "第 1 集 · 试音样片",
+            "audio": "assets/audio/hailu.mp3"
+          },
+          {
+            "title": "第 2 集 · 样片",
+            "audio": "assets/audio/ep2.mp3"
+          },
+          {
+            "title": "第 3 集 · 样片",
+            "audio": "assets/audio/ep3.mp3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "misike",
+    "reader": "蜜思珂",
+    "title": "蜜思珂的暖阳书房",
+    "role": "朗读者",
+    "style": "暖阳原木书房",
+    "starColor": "#ffc95e",
+    "quote": "简单的东西往往最考验功夫，比如法棍，比如生活。",
+    "book": "《了不起的面包》· 林江",
+    "img": "assets/rooms/misike.jpg",
+    "audio": "assets/audio/misike.mp3",
+    "hotspots": [
+      {
+        "x": 0.22,
+        "y": 0.26,
+        "label": "窗 · 奶油色的光"
+      },
+      {
+        "x": 0.38,
+        "y": 0.55,
+        "label": "书桌 · 手写稿与绿植"
+      },
+      {
+        "x": 0.72,
+        "y": 0.28,
+        "label": "花架 · 满架盆栽"
+      }
+    ],
+    "books": [
+      {
+        "title": "了不起的面包",
+        "author": "林江",
+        "episodes": [
+          {
+            "title": "第 1 集 · 试音样片",
+            "audio": "assets/audio/misike.mp3"
+          },
+          {
+            "title": "第 2 集 · 样片",
+            "audio": "assets/audio/ep2.mp3"
+          },
+          {
+            "title": "第 3 集 · 样片",
+            "audio": "assets/audio/ep3.mp3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "xiaotang",
+    "reader": "晓棠",
+    "title": "晓棠的绿植书屋",
+    "role": "朗读者",
+    "style": "自然系绿植书屋",
+    "starColor": "#9fe8b7",
+    "quote": "俯下身去观察一草一木，世界忽然变得很大。",
+    "book": "《博物人生》· 刘华杰",
+    "img": "assets/rooms/xiaotang.jpg",
+    "audio": "assets/audio/xiaotang.mp3",
+    "hotspots": [
+      {
+        "x": 0.14,
+        "y": 0.52,
+        "label": "绿植书架 · 垂直花园"
+      },
+      {
+        "x": 0.48,
+        "y": 0.64,
+        "label": "阳光书桌 · 博物笔记"
+      },
+      {
+        "x": 0.79,
+        "y": 0.71,
+        "label": "窗边盆栽 · 小型雨林"
+      }
+    ],
+    "books": [
+      {
+        "title": "博物人生",
+        "author": "刘华杰",
+        "episodes": [
+          {
+            "title": "第 1 集 · 试音样片",
+            "audio": "assets/audio/xiaotang.mp3"
+          },
+          {
+            "title": "第 2 集 · 样片",
+            "audio": "assets/audio/ep2.mp3"
+          },
+          {
+            "title": "第 3 集 · 样片",
+            "audio": "assets/audio/ep3.mp3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "xizi",
+    "reader": "西子",
+    "title": "西子的英伦书房",
+    "role": "朗读者",
+    "style": "英伦复古书房",
+    "starColor": "#e3b8ff",
+    "quote": "我越是孤独，越是没有朋友，我就得越尊重我自己。",
+    "book": "《简·爱》· 夏洛蒂·勃朗特",
+    "img": "assets/rooms/xizi.jpg",
+    "audio": "assets/audio/xizi.mp3",
+    "hotspots": [
+      {
+        "x": 0.25,
+        "y": 0.32,
+        "label": "拱形花窗 · 英伦的雨"
+      },
+      {
+        "x": 0.65,
+        "y": 0.4,
+        "label": "长书架 · 满壁藏书"
+      },
+      {
+        "x": 0.5,
+        "y": 0.62,
+        "label": "烛光长桌 · 鹅毛笔"
+      }
+    ],
+    "books": [
+      {
+        "title": "简",
+        "author": "爱》",
+        "episodes": [
+          {
+            "title": "第 1 集 · 试音样片",
+            "audio": "assets/audio/xizi.mp3"
+          },
+          {
+            "title": "第 2 集 · 样片",
+            "audio": "assets/audio/ep2.mp3"
+          },
+          {
+            "title": "第 3 集 · 样片",
+            "audio": "assets/audio/ep3.mp3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "xiaoguang",
+    "reader": "小光",
+    "title": "小光的田园书房",
+    "role": "朗读者",
+    "style": "复古田园书房",
+    "starColor": "#f0e6a0",
+    "quote": "当你想要某种东西时，整个宇宙会合力助你实现愿望。",
+    "book": "《牧羊少年奇幻之旅》· 保罗·柯艾略",
+    "img": "assets/rooms/xiaoguang.jpg",
+    "audio": "assets/audio/xiaoguang.mp3",
+    "hotspots": [
+      {
+        "x": 0.21,
+        "y": 0.43,
+        "label": "田园拱窗 · 麦浪的风"
+      },
+      {
+        "x": 0.52,
+        "y": 0.72,
+        "label": "阳光长桌 · 牧羊人的地图"
+      },
+      {
+        "x": 0.79,
+        "y": 0.48,
+        "label": "藤蔓书架 · 攀爬的绿"
+      }
+    ],
+    "books": [
+      {
+        "title": "牧羊少年奇幻之旅",
+        "author": "保罗",
+        "episodes": [
+          {
+            "title": "第 1 集 · 试音样片",
+            "audio": "assets/audio/xiaoguang.mp3"
+          },
+          {
+            "title": "第 2 集 · 样片",
+            "audio": "assets/audio/ep2.mp3"
+          },
+          {
+            "title": "第 3 集 · 样片",
+            "audio": "assets/audio/ep3.mp3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "zhanghenxiang",
+    "reader": "张很香",
+    "title": "很香的熊猫书屋",
+    "role": "朗读者",
+    "style": "中式熊猫书屋",
+    "starColor": "#ff8f8f",
+    "quote": "学会面对终点，才懂得珍惜每一次日出。",
+    "book": "《西藏生死书》· 索甲仁波切",
+    "img": "assets/rooms/zhanghenxiang.jpg",
+    "audio": "assets/audio/zhanghenxiang.mp3",
+    "hotspots": [
+      {
+        "x": 0.5,
+        "y": 0.38,
+        "label": "熊猫伴读 · 竹下清坐"
+      },
+      {
+        "x": 0.3,
+        "y": 0.55,
+        "label": "陶罐 · 手作的温度"
+      },
+      {
+        "x": 0.72,
+        "y": 0.45,
+        "label": "灯笼 · 暖黄的光"
+      }
+    ],
+    "books": [
+      {
+        "title": "西藏生死书",
+        "author": "索甲仁波切",
+        "episodes": [
+          {
+            "title": "第 1 集 · 试音样片",
+            "audio": "assets/audio/zhanghenxiang.mp3"
+          },
+          {
+            "title": "第 2 集 · 样片",
+            "audio": "assets/audio/ep2.mp3"
+          },
+          {
+            "title": "第 3 集 · 样片",
+            "audio": "assets/audio/ep3.mp3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "yitiaodahe",
+    "reader": "一条大河",
+    "title": "大河的深海书房",
+    "role": "朗读者",
+    "style": "深海荧光水族馆",
+    "starColor": "#7ab8ff",
+    "quote": "在别人的故事里泅渡太久，要记得游回自己的岸。",
+    "book": "《反好莱坞》· 贾晓伟",
+    "img": "assets/rooms/yitiaodahe.jpg",
+    "audio": "assets/audio/yitiaodahe.mp3",
+    "hotspots": [
+      {
+        "x": 0.3,
+        "y": 0.25,
+        "label": "荧光水母灯 · 深海之光"
+      },
+      {
+        "x": 0.55,
+        "y": 0.55,
+        "label": "木椅 · 静观鱼群"
+      },
+      {
+        "x": 0.75,
+        "y": 0.3,
+        "label": "热带鱼 · 窗外的海"
+      }
+    ],
+    "books": [
+      {
+        "title": "反好莱坞",
+        "author": "贾晓伟",
+        "episodes": [
+          {
+            "title": "第 1 集 · 试音样片",
+            "audio": "assets/audio/yitiaodahe.mp3"
+          },
+          {
+            "title": "第 2 集 · 样片",
+            "audio": "assets/audio/ep2.mp3"
+          },
+          {
+            "title": "第 3 集 · 样片",
+            "audio": "assets/audio/ep3.mp3"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "xiaoyu",
+    "reader": "小雨",
+    "title": "小雨的禅意书房",
+    "role": "朗读者",
+    "style": "通透禅意书房",
+    "starColor": "#f5f0e6",
+    "quote": "亲爱的，外面没有别人，只有你自己。",
+    "book": "《遇见未知的自己》· 张德芬",
+    "img": "assets/rooms/xiaoyu.jpg",
+    "audio": "assets/audio/xiaoyu.mp3",
+    "hotspots": [
+      {
+        "x": 0.45,
+        "y": 0.15,
+        "label": "高窗 · 天光云影"
+      },
+      {
+        "x": 0.58,
+        "y": 0.48,
+        "label": "蓝色台灯 · 案头"
+      },
+      {
+        "x": 0.72,
+        "y": 0.28,
+        "label": "吊兰 · 空中花园"
+      }
+    ],
+    "books": [
+      {
+        "title": "遇见未知的自己",
+        "author": "张德芬",
+        "episodes": [
+          {
+            "title": "第 1 集 · 试音样片",
+            "audio": "assets/audio/xiaoyu.mp3"
+          },
+          {
+            "title": "第 2 集 · 样片",
+            "audio": "assets/audio/ep2.mp3"
+          },
+          {
+            "title": "第 3 集 · 样片",
+            "audio": "assets/audio/ep3.mp3"
+          }
+        ]
+      }
+    ]
+  }
+]

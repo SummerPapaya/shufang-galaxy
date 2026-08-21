@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 64" width="360" height="64">
+  <!-- Bookshelf side boards -->
+  <rect x="7" y="18" width="2" height="28" fill="#f5f0e6" opacity="0.55"/>
+  <rect x="51" y="18" width="2" height="28" fill="#f5f0e6" opacity="0.55"/>
+  <!-- Shelf bottom board -->
+  <rect x="6" y="44" width="48" height="3" rx="1" fill="#f5f0e6"/>
+  <!-- Books: irregular tone pattern -->
+  <rect x="10" y="14" width="6" height="30" rx="1" fill="#f5f0e6"/>
+  <rect x="16" y="20" width="5" height="24" rx="1" fill="#f5f0e6" opacity="0.8"/>
+  <rect x="21" y="10" width="6" height="34" rx="1" fill="#ffd9a0"/>
+  <rect x="27" y="17" width="5" height="27" rx="1" fill="#f5f0e6"/>
+  <rect x="32" y="12" width="6" height="32" rx="1" fill="#f5f0e6" opacity="0.65"/>
+  <!-- Leaning book with gap -->
+  <rect x="42" y="16" width="6" height="28" rx="1" fill="#f5f0e6" opacity="0.8" transform="rotate(-8 45 44)"/>
+  <!-- Text in Traditional Chinese -->
+  <text x="68" y="40" font-family="'Noto Serif SC', 'Source Han Serif SC', 'SimSun', serif" font-weight="700" font-size="32" fill="#f5f0e6" letter-spacing="4">一個人的書房</text>
+  <!-- Brush stroke underline -->
+  <path d="M68 50 Q180 46 348 50" fill="none" stroke="#f5f0e6" stroke-width="1.5" opacity="0.35" stroke-linecap="round"/>
+  <path d="M66 52 Q120 55 140 51" fill="none" stroke="#f5f0e6" stroke-width="2" opacity="0.18" stroke-linecap="round"/>
+</svg>
