@@ -9,6 +9,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: write # 用于重跑时清理同名旧产物
 
 concurrency:
   group: pages
@@ -28,6 +29,16 @@ jobs:
       - run: npm ci
 
       - run: npm run build
+
+      # 重跑（Re-run）时旧的 github-pages 产物不会被自动删除，
+      # 会导致 deploy-pages 发现多个同名产物而报错，这里先清理
+      - name: Clean stale Pages artifacts
+        run: |
+          gh api "repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts" \
+            --jq '.artifacts[] | select(.name == "github-pages") | .id' \
+            | xargs -r -I{} gh api -X DELETE "repos/${{ github.repository }}/actions/artifacts/{}"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/upload-pages-artifact@v3
         with:
