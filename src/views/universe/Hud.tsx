@@ -4,21 +4,31 @@ import type { UniverseControls } from './controls'
 
 /**
  * 星空漫游 HUD（universe.md §2，DOM 覆盖层，pointer-events-none）
- * - Crosshair：望远镜十字分划（外环刻度 + 十字丝 + 中心缺口），
- *   准星附近 60px 内有书房星投影时整组染 starColor 并微放大（rAF 直写 style）
+ * - Crosshair：光学瞄准镜 German #4（淡目镜晕影 + 三向粗柱收细十字丝），
+ *   准星附近 60px 内有书房星投影时分划淡染 starColor（rAF 直写 style）
  * - CompassStrip：右下罗盘刻度带（每 15° 刻线，四象星宿名，金色三角指针随 yaw 滚动）
  * - HintBar：左下操作提示，入场 6s 后降至 40% 透明度
  * 入场：0.5s 起依序淡入（stagger 150ms，y +10→0）。
  */
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
-const RETICLE_IDLE = 'rgba(245, 240, 230, 0.42)'
+const RETICLE_IDLE = 'rgba(245, 240, 230, 0.14)'
 
 const REDUCED_MOTION =
   typeof window !== 'undefined' &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-/* ── 中央准星：天文望远镜十字分划 ───────────────── */
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '')
+  const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h
+  const n = Number.parseInt(full, 16)
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`
+}
+
+/** mil 刻：距中心的距离（viewBox 单位），落在细十字丝上 */
+const MIL = [8, 14, 20] as const
+
+/* ── 中央准星：光学瞄准镜 German #4 ──────────────── */
 
 export function Crosshair({ controls }: { controls: UniverseControls }) {
   const reticleRef = useRef<HTMLDivElement>(null)
@@ -31,9 +41,9 @@ export function Crosshair({ controls }: { controls: UniverseControls }) {
       if (color !== last && reticleRef.current) {
         last = color
         const el = reticleRef.current
-        el.style.color = color ?? RETICLE_IDLE
-        el.style.scale = color ? '1.12' : '1'
-        el.style.filter = color ? `drop-shadow(0 0 8px ${color}99)` : 'none'
+        el.style.color = color ? hexToRgba(color, 0.22) : RETICLE_IDLE
+        el.style.scale = color ? '1.02' : '1'
+        el.style.filter = 'none'
         el.dataset.locked = color ? 'true' : 'false'
       }
       raf = requestAnimationFrame(tick)
@@ -52,50 +62,91 @@ export function Crosshair({ controls }: { controls: UniverseControls }) {
     >
       <div
         ref={reticleRef}
-        className="crosshair-reticle relative h-[72px] w-[72px] text-[rgba(245,240,230,0.42)] transition-[scale,filter,color] duration-200"
+        className="crosshair-reticle relative h-[128px] w-[128px] text-[rgba(245,240,230,0.14)] transition-[scale,color] duration-200"
       >
-        {/* 外环刻度：缓慢旋转，像望远镜调焦环 */}
+        <svg className="absolute inset-0" viewBox="0 0 120 120" fill="none">
+          <defs>
+            <radialGradient id="scope-vignette" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#030510" stop-opacity="0" />
+              <stop offset="72%" stop-color="#030510" stop-opacity="0" />
+              <stop offset="92%" stop-color="#030510" stop-opacity="0.06" />
+              <stop offset="100%" stop-color="#030510" stop-opacity="0.14" />
+            </radialGradient>
+            <clipPath id="scope-fov">
+              <circle cx="60" cy="60" r="56" />
+            </clipPath>
+          </defs>
+
+          {/* 目镜圆视场：中间全透明，只在最外缘收一点暗 */}
+          <circle cx="60" cy="60" r="56" fill="url(#scope-vignette)" />
+          <circle cx="60" cy="60" r="56" stroke="currentColor" strokeWidth="0.7" strokeOpacity="0.22" />
+          <circle cx="60" cy="60" r="54.2" stroke="currentColor" strokeWidth="0.3" strokeOpacity="0.1" />
+          {/* 镜片高光：左上很淡的弧，像镀膜反光 */}
+          <path
+            d="M28 22 A40 40 0 0 1 92 28"
+            stroke="currentColor"
+            strokeWidth="0.35"
+            strokeOpacity="0.1"
+            strokeLinecap="round"
+          />
+        </svg>
+
+        {/* 调焦环刻度：沿目镜外缘慢转 */}
         <svg
           className={REDUCED_MOTION ? 'absolute inset-0' : 'crosshair-reticle-spin absolute inset-0'}
-          viewBox="0 0 72 72"
+          viewBox="0 0 120 120"
           fill="none"
         >
-          <circle cx="36" cy="36" r="33" stroke="currentColor" strokeWidth="0.75" strokeOpacity="0.55" />
-          {Array.from({ length: 24 }, (_, i) => {
-            const a = (i / 24) * Math.PI * 2
-            const major = i % 3 === 0
-            const inner = major ? 28 : 30.5
-            const outer = 33
+          {Array.from({ length: 72 }, (_, i) => {
+            const a = (i / 72) * Math.PI * 2 - Math.PI / 2
+            const major = i % 6 === 0
+            const inner = major ? 56.6 : 57.4
+            const outer = 59.1
             return (
               <line
                 key={i}
-                x1={36 + Math.cos(a) * inner}
-                y1={36 + Math.sin(a) * inner}
-                x2={36 + Math.cos(a) * outer}
-                y2={36 + Math.sin(a) * outer}
+                x1={60 + Math.cos(a) * inner}
+                y1={60 + Math.sin(a) * inner}
+                x2={60 + Math.cos(a) * outer}
+                y2={60 + Math.sin(a) * outer}
                 stroke="currentColor"
-                strokeWidth={major ? 1.1 : 0.7}
-                strokeLinecap="square"
+                strokeOpacity={major ? 0.22 : 0.08}
+                strokeWidth={major ? 0.55 : 0.28}
               />
             )
           })}
         </svg>
 
-        {/* 静止十字丝：中心留空，方便看清被瞄准的星 */}
-        <svg className="absolute inset-0" viewBox="0 0 72 72" fill="none">
-          <circle cx="36" cy="36" r="11" stroke="currentColor" strokeWidth="0.85" strokeOpacity="0.7" />
-          {/* 横丝 */}
-          <line x1="3" y1="36" x2="25" y2="36" stroke="currentColor" strokeWidth="0.9" />
-          <line x1="47" y1="36" x2="69" y2="36" stroke="currentColor" strokeWidth="0.9" />
-          {/* 竖丝 */}
-          <line x1="36" y1="3" x2="36" y2="25" stroke="currentColor" strokeWidth="0.9" />
-          <line x1="36" y1="47" x2="36" y2="69" stroke="currentColor" strokeWidth="0.9" />
-          {/* 四向短刻 */}
-          <line x1="20" y1="36" x2="24" y2="36" stroke="currentColor" strokeWidth="1.4" />
-          <line x1="48" y1="36" x2="52" y2="36" stroke="currentColor" strokeWidth="1.4" />
-          <line x1="36" y1="20" x2="36" y2="24" stroke="currentColor" strokeWidth="1.4" />
-          <line x1="36" y1="48" x2="36" y2="52" stroke="currentColor" strokeWidth="1.4" />
-          <circle cx="36" cy="36" r="1.15" fill="currentColor" />
+        {/* German #4：左/右/下粗柱，上丝只保留细线；中心开口 */}
+        <svg className="absolute inset-0" viewBox="0 0 120 120" fill="none" clipPath="url(#scope-fov)">
+          <line x1="8" y1="60" x2="40" y2="60" stroke="currentColor" strokeWidth="2.05" strokeLinecap="butt" strokeOpacity="0.26" />
+          <line x1="80" y1="60" x2="112" y2="60" stroke="currentColor" strokeWidth="2.05" strokeLinecap="butt" strokeOpacity="0.26" />
+          <line x1="60" y1="80" x2="60" y2="112" stroke="currentColor" strokeWidth="2.05" strokeLinecap="butt" strokeOpacity="0.26" />
+          <line x1="40" y1="60" x2="55.8" y2="60" stroke="currentColor" strokeWidth="0.32" strokeOpacity="0.32" />
+          <line x1="64.2" y1="60" x2="80" y2="60" stroke="currentColor" strokeWidth="0.32" strokeOpacity="0.32" />
+          <line x1="60" y1="8" x2="60" y2="55.8" stroke="currentColor" strokeWidth="0.32" strokeOpacity="0.32" />
+          <line x1="60" y1="64.2" x2="60" y2="80" stroke="currentColor" strokeWidth="0.32" strokeOpacity="0.32" />
+          {MIL.flatMap((d) => {
+            const tick = 1.35
+            return [
+              <line key={`h${d}`} x1={60 + d} y1={60 - tick} x2={60 + d} y2={60 + tick} stroke="currentColor" strokeWidth="0.3" strokeOpacity="0.26" />,
+              <line key={`h-${d}`} x1={60 - d} y1={60 - tick} x2={60 - d} y2={60 + tick} stroke="currentColor" strokeWidth="0.3" strokeOpacity="0.26" />,
+              <line key={`v${d}`} x1={60 - tick} y1={60 + d} x2={60 + tick} y2={60 + d} stroke="currentColor" strokeWidth="0.3" strokeOpacity="0.26" />,
+              <line key={`v-${d}`} x1={60 - tick} y1={60 - d} x2={60 + tick} y2={60 - d} stroke="currentColor" strokeWidth="0.3" strokeOpacity="0.26" />,
+            ]
+          })}
+          {[11, 17, 23].map((d) => (
+            <line
+              key={`bdc${d}`}
+              x1={60 - 2.2}
+              y1={60 + d}
+              x2={60 + 2.2}
+              y2={60 + d}
+              stroke="currentColor"
+              strokeWidth="0.28"
+              strokeOpacity="0.2"
+            />
+          ))}
         </svg>
       </div>
     </motion.div>

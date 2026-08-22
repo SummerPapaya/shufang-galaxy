@@ -140,13 +140,13 @@
     }
   }
 
-  /* 星空准星：外环刻度缓慢旋转；瞄准书房星时轻微呼吸 */
+  /* 光学瞄准镜：仅调焦环慢转；瞄准时分划保持半透明 */
   .crosshair-reticle-spin {
-    animation: reticle-spin 48s linear infinite;
+    animation: reticle-spin 90s linear infinite;
   }
 
   .crosshair-reticle[data-locked='true'] {
-    animation: reticle-lock 1.6s ease-in-out infinite;
+    animation: reticle-lock 2.8s ease-in-out infinite;
   }
 
   @keyframes reticle-spin {
@@ -158,10 +158,10 @@
   @keyframes reticle-lock {
     0%,
     100% {
-      opacity: 0.82;
+      opacity: 0.55;
     }
     50% {
-      opacity: 1;
+      opacity: 0.78;
     }
   }
 
