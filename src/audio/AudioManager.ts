@@ -398,10 +398,15 @@ class AudioManager {
       this.stopSampleImmediate()
       const el = new Audio(url)
       el.volume = 0
+      el.muted = this.state.muted || this.state.ambienceMode === 'muted'
       this.sample = el
       this.wireSampleEvents(roomId, el)
       void el.play().catch(() => {})
-      this.fadeSampleTo(el, this.state.muted ? 0 : 1, FADE_MS)
+      this.fadeSampleTo(
+        el,
+        this.state.muted || this.state.ambienceMode === 'muted' ? 0 : 1,
+        FADE_MS,
+      )
       this.emit({ playingId: roomId, playing: true, progress: 0, duration: 0 })
     }
 
