@@ -40,7 +40,7 @@ npm run build    # 产物输出到 dist/
 
 | 文件 | 说明 |
 | --- | --- |
-| `public/assets/rooms.json` | 15 位朗读者房间：名称、星色、图片、留言、朗读书目与单集 |
+| `public/assets/rooms.json` | 朗读者房间：名称、星色、图片、留言、朗读书目与单集 |
 | `public/assets/books.json` | 星空图书馆书目与单集 |
 | `public/assets/rooms/*.jpg` | 房间图片 |
 | `public/assets/audio/*.mp3` | 朗读样片音频 |
