@@ -139,4 +139,36 @@
       opacity: 0;
     }
   }
+
+  /* 星空准星：外环刻度缓慢旋转；瞄准书房星时轻微呼吸 */
+  .crosshair-reticle-spin {
+    animation: reticle-spin 48s linear infinite;
+  }
+
+  .crosshair-reticle[data-locked='true'] {
+    animation: reticle-lock 1.6s ease-in-out infinite;
+  }
+
+  @keyframes reticle-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes reticle-lock {
+    0%,
+    100% {
+      opacity: 0.82;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .crosshair-reticle-spin,
+    .crosshair-reticle[data-locked='true'] {
+      animation: none;
+    }
+  }
 }
