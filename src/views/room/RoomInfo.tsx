@@ -119,6 +119,7 @@ export function RoomQuote({ room, ds, reduced, className }: TimedProps) {
           ❞
         </motion.span>
       </div>
+      {/* 署名已隐藏
       <motion.figcaption
         className="mt-2 text-right font-hud text-[11px] tracking-[0.2em] text-starlight-dim"
         initial={{ opacity: 0 }}
@@ -127,6 +128,7 @@ export function RoomQuote({ room, ds, reduced, className }: TimedProps) {
       >
         —— {room.reader}
       </motion.figcaption>
+      */}
     </figure>
   )
 }
