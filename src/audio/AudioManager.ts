@@ -147,11 +147,14 @@ class AudioManager {
 
   /* ── 解锁（首次用户手势） ──────────────────────────── */
 
-  /** 在首次用户手势（点击「进入星空」）中调用，解锁自动播放策略并启动 ambience */
+  /**
+   * 在首次用户手势（点击「进入星空」）中调用。
+   * 必须同步发起 play()：若先 await 网络请求再 play，会脱离手势上下文被浏览器静默拦截。
+   */
   unlock() {
     if (this.unlocked) return
     this.unlocked = true
-    this.startAmbience()
+    this.startAmbience('landing')
   }
 
   /* ── ambience / 片花 ──────────────────────────────── */
@@ -168,7 +171,7 @@ class AudioManager {
       this.state.ambienceMode === 'random'
         ? this.state.ambienceTrackId
         : this.state.ambienceMode
-    void this.playAmbienceTrack(trackId, { fadeIn: true })
+    this.playAmbienceTrack(trackId, { fadeIn: true })
   }
 
   /** 切换 ambience 基准音量：landing 0.15 / universe 0.35（500ms 淡入淡出） */
@@ -196,7 +199,8 @@ class AudioManager {
     this.emit({ ambienceMode: mode, muted: false, ambienceTrackId: trackId })
     if (this.sample) this.sample.volume = 1
     if (!this.unlocked) return
-    void this.playAmbienceTrack(trackId, { fadeIn: true })
+    // 菜单点击本身是用户手势，同步 play 即可
+    this.playAmbienceTrack(trackId, { fadeIn: true })
   }
 
   /** 右下角按钮：随机 → 男声 → 女声 → 静音 → 随机 … */
@@ -207,21 +211,29 @@ class AudioManager {
     this.setAmbienceMode(next)
   }
 
-  private async playAmbienceTrack(
-    trackId: AmbienceTrackId,
-    opts: { fadeIn?: boolean } = {},
-  ) {
-    const meta = AMBIENCE_TRACKS[trackId]
-    const src = await this.resolveAmbienceSrc(meta.src)
-
+  private ensureAmbienceEl(): HTMLAudioElement {
     if (!this.ambience) {
       this.ambience = new Audio()
+      this.ambience.preload = 'auto'
       this.ambience.loop = false
       this.ambience.volume = 0
       this.ambience.addEventListener('ended', this.onAmbienceEnded)
+      this.ambience.addEventListener('error', this.onAmbienceError)
     }
+    return this.ambience
+  }
 
-    const el = this.ambience
+  /**
+   * 同步起播片花（不可在 play 前 await，否则脱离用户手势被 autoplay 拦截）。
+   * 资源缺失时由 onAmbienceError 回退到 ambience.mp3。
+   */
+  private playAmbienceTrack(
+    trackId: AmbienceTrackId,
+    opts: { fadeIn?: boolean; srcOverride?: string } = {},
+  ) {
+    const meta = AMBIENCE_TRACKS[trackId]
+    const src = opts.srcOverride ?? meta.src
+    const el = this.ensureAmbienceEl()
     const currentPath = audioPathname(el.src)
     const sameSrc = currentPath === src || currentPath.endsWith(src)
     const switching = el.src !== '' && !sameSrc && !el.paused
@@ -232,15 +244,24 @@ class AudioManager {
       const already = pathNow === src || pathNow.endsWith(src)
       if (!already) {
         el.src = src
-        el.load()
+      } else {
+        try {
+          el.currentTime = 0
+        } catch {
+          /* ignore seek errors while loading */
+        }
       }
-      el.currentTime = 0
-      void el.play().catch(() => {})
       this.emit({
         ambienceStarted: true,
         ambienceTrackId: trackId,
         muted: false,
       })
+      const playPromise = el.play()
+      if (playPromise) {
+        void playPromise.catch(() => {
+          /* 仍可能被策略拦截；下一次菜单手势会再试 */
+        })
+      }
       this.fadeAmbienceTo(
         this.effectiveAmbienceVolume(),
         opts.fadeIn === false ? 0 : FADE_MS,
@@ -258,21 +279,23 @@ class AudioManager {
     if (this.state.ambienceMode === 'muted' || !this.unlocked) return
     if (this.state.ambienceMode === 'random') {
       const next = pickRandomTrack(this.state.ambienceTrackId)
-      void this.playAmbienceTrack(next, { fadeIn: true })
+      this.playAmbienceTrack(next, { fadeIn: true })
       return
     }
     // 锁定某一版：播完再播同一首
-    void this.playAmbienceTrack(this.state.ambienceMode, { fadeIn: true })
+    this.playAmbienceTrack(this.state.ambienceMode, { fadeIn: true })
   }
 
-  private async resolveAmbienceSrc(preferred: string): Promise<string> {
-    try {
-      const res = await fetch(preferred, { method: 'HEAD' })
-      if (res.ok) return preferred
-    } catch {
-      /* fall through */
-    }
-    return AMBIENCE_FALLBACK_SRC
+  /** 片花 404 / 解码失败时回退旧环境音，避免完全静音 */
+  private onAmbienceError = () => {
+    const el = this.ambience
+    if (!el) return
+    const path = audioPathname(el.src)
+    if (path.endsWith(AMBIENCE_FALLBACK_SRC) || path.includes('ambience.mp3')) return
+    this.playAmbienceTrack(this.state.ambienceTrackId, {
+      fadeIn: true,
+      srcOverride: AMBIENCE_FALLBACK_SRC,
+    })
   }
 
   private effectiveAmbienceVolume(): number {
