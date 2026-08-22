@@ -158,10 +158,10 @@
   @keyframes reticle-lock {
     0%,
     100% {
-      opacity: 0.72;
+      opacity: 0.55;
     }
     50% {
-      opacity: 0.92;
+      opacity: 0.78;
     }
   }
 

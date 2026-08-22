@@ -4,7 +4,7 @@ import type { UniverseControls } from './controls'
 
 /**
  * 星空漫游 HUD（universe.md §2，DOM 覆盖层，pointer-events-none）
- * - Crosshair：光学瞄准镜 Duplex 分划（目镜晕影 + 粗外柱收细十字丝 + mil 刻），
+ * - Crosshair：光学瞄准镜 German #4（淡目镜晕影 + 三向粗柱收细十字丝），
  *   准星附近 60px 内有书房星投影时分划淡染 starColor（rAF 直写 style）
  * - CompassStrip：右下罗盘刻度带（每 15° 刻线，四象星宿名，金色三角指针随 yaw 滚动）
  * - HintBar：左下操作提示，入场 6s 后降至 40% 透明度
@@ -12,7 +12,7 @@ import type { UniverseControls } from './controls'
  */
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
-const RETICLE_IDLE = 'rgba(245, 240, 230, 0.2)'
+const RETICLE_IDLE = 'rgba(245, 240, 230, 0.14)'
 
 const REDUCED_MOTION =
   typeof window !== 'undefined' &&
@@ -41,9 +41,9 @@ export function Crosshair({ controls }: { controls: UniverseControls }) {
       if (color !== last && reticleRef.current) {
         last = color
         const el = reticleRef.current
-        el.style.color = color ? hexToRgba(color, 0.32) : RETICLE_IDLE
-        el.style.scale = color ? '1.03' : '1'
-        el.style.filter = color ? `drop-shadow(0 0 4px ${hexToRgba(color, 0.22)})` : 'none'
+        el.style.color = color ? hexToRgba(color, 0.22) : RETICLE_IDLE
+        el.style.scale = color ? '1.02' : '1'
+        el.style.filter = 'none'
         el.dataset.locked = color ? 'true' : 'false'
       }
       raf = requestAnimationFrame(tick)
@@ -62,25 +62,33 @@ export function Crosshair({ controls }: { controls: UniverseControls }) {
     >
       <div
         ref={reticleRef}
-        className="crosshair-reticle relative h-[128px] w-[128px] text-[rgba(245,240,230,0.2)] transition-[scale,filter,color] duration-200"
+        className="crosshair-reticle relative h-[128px] w-[128px] text-[rgba(245,240,230,0.14)] transition-[scale,color] duration-200"
       >
         <svg className="absolute inset-0" viewBox="0 0 120 120" fill="none">
           <defs>
             <radialGradient id="scope-vignette" cx="50%" cy="50%" r="50%">
               <stop offset="0%" stop-color="#030510" stop-opacity="0" />
-              <stop offset="58%" stop-color="#030510" stop-opacity="0" />
-              <stop offset="86%" stop-color="#030510" stop-opacity="0.14" />
-              <stop offset="100%" stop-color="#030510" stop-opacity="0.32" />
+              <stop offset="72%" stop-color="#030510" stop-opacity="0" />
+              <stop offset="92%" stop-color="#030510" stop-opacity="0.06" />
+              <stop offset="100%" stop-color="#030510" stop-opacity="0.14" />
             </radialGradient>
             <clipPath id="scope-fov">
               <circle cx="60" cy="60" r="56" />
             </clipPath>
           </defs>
 
-          {/* 目镜圆视场 + 边缘晕影（中间完全透出星空） */}
+          {/* 目镜圆视场：中间全透明，只在最外缘收一点暗 */}
           <circle cx="60" cy="60" r="56" fill="url(#scope-vignette)" />
-          <circle cx="60" cy="60" r="56" stroke="currentColor" strokeWidth="1.1" strokeOpacity="0.38" />
-          <circle cx="60" cy="60" r="53.5" stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.18" />
+          <circle cx="60" cy="60" r="56" stroke="currentColor" strokeWidth="0.7" strokeOpacity="0.22" />
+          <circle cx="60" cy="60" r="54.2" stroke="currentColor" strokeWidth="0.3" strokeOpacity="0.1" />
+          {/* 镜片高光：左上很淡的弧，像镀膜反光 */}
+          <path
+            d="M28 22 A40 40 0 0 1 92 28"
+            stroke="currentColor"
+            strokeWidth="0.35"
+            strokeOpacity="0.1"
+            strokeLinecap="round"
+          />
         </svg>
 
         {/* 调焦环刻度：沿目镜外缘慢转 */}
@@ -92,8 +100,8 @@ export function Crosshair({ controls }: { controls: UniverseControls }) {
           {Array.from({ length: 72 }, (_, i) => {
             const a = (i / 72) * Math.PI * 2 - Math.PI / 2
             const major = i % 6 === 0
-            const inner = major ? 56.4 : 57.2
-            const outer = 59.2
+            const inner = major ? 56.6 : 57.4
+            const outer = 59.1
             return (
               <line
                 key={i}
@@ -102,46 +110,41 @@ export function Crosshair({ controls }: { controls: UniverseControls }) {
                 x2={60 + Math.cos(a) * outer}
                 y2={60 + Math.sin(a) * outer}
                 stroke="currentColor"
-                strokeOpacity={major ? 0.4 : 0.16}
-                strokeWidth={major ? 0.7 : 0.35}
+                strokeOpacity={major ? 0.22 : 0.08}
+                strokeWidth={major ? 0.55 : 0.28}
               />
             )
           })}
         </svg>
 
-        {/* Duplex 分划：粗外柱 → 细十字丝，中心开口 */}
+        {/* German #4：左/右/下粗柱，上丝只保留细线；中心开口 */}
         <svg className="absolute inset-0" viewBox="0 0 120 120" fill="none" clipPath="url(#scope-fov)">
-          {/* 粗柱（从视场边缘收到约 1/3） */}
-          <line x1="6" y1="60" x2="38" y2="60" stroke="currentColor" strokeWidth="3.2" strokeLinecap="butt" strokeOpacity="0.42" />
-          <line x1="82" y1="60" x2="114" y2="60" stroke="currentColor" strokeWidth="3.2" strokeLinecap="butt" strokeOpacity="0.42" />
-          <line x1="60" y1="6" x2="60" y2="38" stroke="currentColor" strokeWidth="3.2" strokeLinecap="butt" strokeOpacity="0.42" />
-          <line x1="60" y1="82" x2="60" y2="114" stroke="currentColor" strokeWidth="3.2" strokeLinecap="butt" strokeOpacity="0.42" />
-          {/* 细丝（接到开口前） */}
-          <line x1="38" y1="60" x2="55.5" y2="60" stroke="currentColor" strokeWidth="0.45" strokeOpacity="0.5" />
-          <line x1="64.5" y1="60" x2="82" y2="60" stroke="currentColor" strokeWidth="0.45" strokeOpacity="0.5" />
-          <line x1="60" y1="38" x2="60" y2="55.5" stroke="currentColor" strokeWidth="0.45" strokeOpacity="0.5" />
-          <line x1="60" y1="64.5" x2="60" y2="82" stroke="currentColor" strokeWidth="0.45" strokeOpacity="0.5" />
-          {/* mil 横刻 */}
+          <line x1="8" y1="60" x2="40" y2="60" stroke="currentColor" strokeWidth="2.05" strokeLinecap="butt" strokeOpacity="0.26" />
+          <line x1="80" y1="60" x2="112" y2="60" stroke="currentColor" strokeWidth="2.05" strokeLinecap="butt" strokeOpacity="0.26" />
+          <line x1="60" y1="80" x2="60" y2="112" stroke="currentColor" strokeWidth="2.05" strokeLinecap="butt" strokeOpacity="0.26" />
+          <line x1="40" y1="60" x2="55.8" y2="60" stroke="currentColor" strokeWidth="0.32" strokeOpacity="0.32" />
+          <line x1="64.2" y1="60" x2="80" y2="60" stroke="currentColor" strokeWidth="0.32" strokeOpacity="0.32" />
+          <line x1="60" y1="8" x2="60" y2="55.8" stroke="currentColor" strokeWidth="0.32" strokeOpacity="0.32" />
+          <line x1="60" y1="64.2" x2="60" y2="80" stroke="currentColor" strokeWidth="0.32" strokeOpacity="0.32" />
           {MIL.flatMap((d) => {
-            const tick = 1.6
+            const tick = 1.35
             return [
-              <line key={`h${d}`} x1={60 + d} y1={60 - tick} x2={60 + d} y2={60 + tick} stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.4" />,
-              <line key={`h-${d}`} x1={60 - d} y1={60 - tick} x2={60 - d} y2={60 + tick} stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.4" />,
-              <line key={`v${d}`} x1={60 - tick} y1={60 + d} x2={60 + tick} y2={60 + d} stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.4" />,
-              <line key={`v-${d}`} x1={60 - tick} y1={60 - d} x2={60 + tick} y2={60 - d} stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.4" />,
+              <line key={`h${d}`} x1={60 + d} y1={60 - tick} x2={60 + d} y2={60 + tick} stroke="currentColor" strokeWidth="0.3" strokeOpacity="0.26" />,
+              <line key={`h-${d}`} x1={60 - d} y1={60 - tick} x2={60 - d} y2={60 + tick} stroke="currentColor" strokeWidth="0.3" strokeOpacity="0.26" />,
+              <line key={`v${d}`} x1={60 - tick} y1={60 + d} x2={60 + tick} y2={60 + d} stroke="currentColor" strokeWidth="0.3" strokeOpacity="0.26" />,
+              <line key={`v-${d}`} x1={60 - tick} y1={60 - d} x2={60 + tick} y2={60 - d} stroke="currentColor" strokeWidth="0.3" strokeOpacity="0.26" />,
             ]
           })}
-          {/* 下丝额外距离刻（BDC） */}
           {[11, 17, 23].map((d) => (
             <line
               key={`bdc${d}`}
-              x1={60 - 2.6}
+              x1={60 - 2.2}
               y1={60 + d}
-              x2={60 + 2.6}
+              x2={60 + 2.2}
               y2={60 + d}
               stroke="currentColor"
-              strokeWidth="0.35"
-              strokeOpacity="0.32"
+              strokeWidth="0.28"
+              strokeOpacity="0.2"
             />
           ))}
         </svg>
