@@ -1,0 +1,157 @@
+{
+  "width": 1200,
+  "fps": 24,
+  "duration": 8.0,
+  "colors": 192,
+  "dither": "none",
+  "transparent_color": "#ff00ff",
+  "clip_to_base_alpha": false,
+  "max_size_mb": 3.5,
+  "reveals": [
+    {
+      "id": "title-block",
+      "axis": "x",
+      "start": 0.1,
+      "end": 1.0,
+      "exit": {
+        "start": 3.85,
+        "end": 4.55
+      }
+    }
+  ],
+  "layers": [
+    {
+      "id": "constellation",
+      "enter": {
+        "start": 0.35,
+        "end": 1.2,
+        "from": [
+          42,
+          8
+        ]
+      },
+      "exit": {
+        "start": 3.85,
+        "end": 4.55,
+        "to": [
+          18,
+          -6
+        ]
+      }
+    },
+    {
+      "id": "reticle",
+      "enter": {
+        "start": 1.25,
+        "end": 2.05,
+        "from": [
+          0,
+          -34
+        ]
+      },
+      "exit": {
+        "start": 3.85,
+        "end": 4.55,
+        "to": [
+          0,
+          -12
+        ]
+      }
+    },
+    {
+      "id": "study-card",
+      "enter": {
+        "start": 2.15,
+        "end": 2.9,
+        "from": [
+          48,
+          -12
+        ]
+      },
+      "exit": {
+        "start": 3.85,
+        "end": 4.55,
+        "to": [
+          20,
+          -8
+        ]
+      }
+    },
+    {
+      "id": "wormhole-btn",
+      "enter": {
+        "start": 0.55,
+        "end": 1.25,
+        "from": [
+          24,
+          -18
+        ]
+      },
+      "exit": {
+        "start": 3.95,
+        "end": 4.55,
+        "to": [
+          16,
+          -10
+        ]
+      }
+    },
+    {
+      "id": "wormhole-click",
+      "enter": {
+        "start": 3.45,
+        "end": 3.7,
+        "from": [
+          0,
+          0
+        ]
+      },
+      "exit": {
+        "start": 3.85,
+        "end": 4.15,
+        "to": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "id": "warp-flash",
+      "enter": {
+        "start": 4.05,
+        "end": 4.35,
+        "from": [
+          0,
+          0
+        ]
+      },
+      "exit": {
+        "start": 4.45,
+        "end": 4.95,
+        "to": [
+          0,
+          0
+        ]
+      }
+    },
+    {
+      "id": "library-scene",
+      "enter": {
+        "start": 4.55,
+        "end": 5.45,
+        "from": [
+          0,
+          36
+        ]
+      },
+      "exit": {
+        "start": 7.05,
+        "end": 7.9,
+        "to": [
+          0,
+          -20
+        ]
+      }
+    }
+  ]
+}

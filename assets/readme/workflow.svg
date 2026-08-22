@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320" role="img" aria-labelledby="title desc">
+  <title id="title">从着陆页到书房的四步路径</title>
+  <desc id="desc">星河远景、虫洞越迁、360 度星空漫游，然后进入 2.5D 书房或星空图书馆。</desc>
+  <rect width="1200" height="320" rx="26" fill="#030510"/>
+  
+        <g>
+          <rect x="40" y="48" width="272" height="232" rx="16" fill="#070c20" stroke="#f5f0e6" stroke-opacity="0.08"/>
+          
+    <g fill="none" stroke="#ffd9a0" stroke-opacity="0.4" stroke-width="1.2" stroke-linecap="square">
+      <path d="M50 68 V58 H60"/>
+      <path d="M302 68 V58 H292"/>
+      <path d="M50 260 V270 H60"/>
+      <path d="M302 260 V270 H292"/>
+    </g>
+          <text x="64" y="84" fill="#aee6ff" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" letter-spacing="2">01</text>
+          <ellipse cx="170" cy="118" rx="70" ry="18" fill="none" stroke="#aee6ff" stroke-opacity="0.35"/><circle cx="170" cy="118" r="3.5" fill="#ffd9a0"/>
+          <text x="64" y="188" fill="#f5f0e6" font-family="Georgia, 'Songti SC', 'Noto Serif CJK SC', serif" font-size="22">星河远景</text>
+          <text x="64" y="214" fill="#ffd9a0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" letter-spacing="1.4">Landing</text>
+          <text x="64" y="244" fill="#f5f0e6" fill-opacity="0.55" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="16">银河着陆，向下滚动穿越</text>
+        </g><path d="M316 164 L328 164" stroke="#ffd9a0" stroke-opacity="0.45" stroke-width="1.5"/>
+        <g>
+          <rect x="332" y="48" width="272" height="232" rx="16" fill="#070c20" stroke="#f5f0e6" stroke-opacity="0.08"/>
+          
+    <g fill="none" stroke="#ffd9a0" stroke-opacity="0.4" stroke-width="1.2" stroke-linecap="square">
+      <path d="M342 68 V58 H352"/>
+      <path d="M594 68 V58 H584"/>
+      <path d="M342 260 V270 H352"/>
+      <path d="M594 260 V270 H584"/>
+    </g>
+          <text x="356" y="84" fill="#aee6ff" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" letter-spacing="2">02</text>
+          <circle cx="462" cy="118" r="28" fill="none" stroke="#f5f0e6" stroke-opacity="0.25"/><circle cx="462" cy="118" r="14" fill="none" stroke="#ffd9a0" stroke-opacity="0.7"/><circle cx="462" cy="118" r="3" fill="#f5f0e6"/>
+          <text x="356" y="188" fill="#f5f0e6" font-family="Georgia, 'Songti SC', 'Noto Serif CJK SC', serif" font-size="22">虫洞越迁</text>
+          <text x="356" y="214" fill="#ffd9a0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" letter-spacing="1.4">Warp</text>
+          <text x="356" y="244" fill="#f5f0e6" fill-opacity="0.55" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="16">FOV 拉伸，白光隧道</text>
+        </g><path d="M608 164 L620 164" stroke="#ffd9a0" stroke-opacity="0.45" stroke-width="1.5"/>
+        <g>
+          <rect x="624" y="48" width="272" height="232" rx="16" fill="#070c20" stroke="#f5f0e6" stroke-opacity="0.08"/>
+          
+    <g fill="none" stroke="#ffd9a0" stroke-opacity="0.4" stroke-width="1.2" stroke-linecap="square">
+      <path d="M634 68 V58 H644"/>
+      <path d="M886 68 V58 H876"/>
+      <path d="M634 260 V270 H644"/>
+      <path d="M886 260 V270 H876"/>
+    </g>
+          <text x="648" y="84" fill="#aee6ff" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" letter-spacing="2">03</text>
+          <circle cx="742" cy="110" r="4" fill="#ffd9a0"/><circle cx="770" cy="122" r="3" fill="#ffb3c8"/><circle cx="756" cy="132" r="3.4" fill="#aee6ff"/><circle cx="754" cy="118" r="10" fill="none" stroke="#f5f0e6" stroke-opacity="0.45"/>
+          <text x="648" y="188" fill="#f5f0e6" font-family="Georgia, 'Songti SC', 'Noto Serif CJK SC', serif" font-size="22">360° 星空</text>
+          <text x="648" y="214" fill="#ffd9a0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" letter-spacing="1.4">Universe</text>
+          <text x="648" y="244" fill="#f5f0e6" fill-opacity="0.55" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="16">拖动巡游，点亮书房星</text>
+        </g><path d="M900 164 L912 164" stroke="#ffd9a0" stroke-opacity="0.45" stroke-width="1.5"/>
+        <g>
+          <rect x="916" y="48" width="272" height="232" rx="16" fill="#070c20" stroke="#f5f0e6" stroke-opacity="0.08"/>
+          
+    <g fill="none" stroke="#ffd9a0" stroke-opacity="0.4" stroke-width="1.2" stroke-linecap="square">
+      <path d="M926 68 V58 H936"/>
+      <path d="M1178 68 V58 H1168"/>
+      <path d="M926 260 V270 H936"/>
+      <path d="M1178 260 V270 H1168"/>
+    </g>
+          <text x="940" y="84" fill="#aee6ff" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" letter-spacing="2">04</text>
+          <rect x="1024" y="96" width="14" height="36" rx="1.5" fill="#ffd9a0"/><rect x="1040" y="102" width="12" height="30" rx="1.5" fill="#f5f0e6" opacity="0.85"/><rect x="1054" y="98" width="13" height="34" rx="1.5" fill="#b48cff"/>
+          <text x="940" y="188" fill="#f5f0e6" font-family="Georgia, 'Songti SC', 'Noto Serif CJK SC', serif" font-size="22">房间 / 书墙</text>
+          <text x="940" y="214" fill="#ffd9a0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" letter-spacing="1.4">Room · Library</text>
+          <text x="940" y="244" fill="#f5f0e6" fill-opacity="0.55" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="16">2.5D 书房或环形书廊</text>
+        </g>
+</svg>

@@ -1,0 +1,334 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="400" viewBox="0 0 1200 400" role="img" aria-labelledby="title desc">
+  <title id="title">一个人的书房 · 平行宇宙</title>
+  <desc id="desc">播客「一个人的书房」的沉浸式平行宇宙：望远镜锁定书房后，点击右上角「虫洞越迁」进入星空图书馆环形书廊。</desc>
+
+  <defs>
+    <linearGradient id="void-fill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#070c20"/>
+      <stop offset="55%" stop-color="#030510"/>
+      <stop offset="100%" stop-color="#05060f"/>
+    </linearGradient>
+    <radialGradient id="nebula-violet" cx="18%" cy="30%" r="46%">
+      <stop offset="0%" stop-color="#2c2258" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#2c2258" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="nebula-rose" cx="82%" cy="72%" r="42%">
+      <stop offset="0%" stop-color="#4a1f42" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#4a1f42" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="galaxy-band" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#aee6ff" stop-opacity="0.16"/>
+      <stop offset="42%" stop-color="#ffd9a0" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#030510" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Soft white halo (feathered) for every study star -->
+    <radialGradient id="halo-white" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="18%" stop-color="#ffffff" stop-opacity="0.45"/>
+      <stop offset="42%" stop-color="#ffffff" stop-opacity="0.16"/>
+      <stop offset="70%" stop-color="#ffffff" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="halo-focus" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="12%" stop-color="#ffffff" stop-opacity="0.7"/>
+      <stop offset="28%" stop-color="#ffd9a0" stop-opacity="0.45"/>
+      <stop offset="55%" stop-color="#ffd9a0" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#ffd9a0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="core-white" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="1"/>
+      <stop offset="40%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+
+    <clipPath id="frame-clip">
+      <rect width="1200" height="400" rx="26"/>
+    </clipPath>
+  </defs>
+
+  <!-- Static night field + HUD -->
+  <g id="base">
+    <rect width="1200" height="400" fill="#030510"/>
+    <g clip-path="url(#frame-clip)">
+    <rect width="1200" height="400" rx="26" fill="url(#void-fill)"/>
+    <rect width="1200" height="400" fill="url(#nebula-violet)"/>
+    <rect width="1200" height="400" fill="url(#nebula-rose)"/>
+    <ellipse cx="650" cy="208" rx="540" ry="74" fill="url(#galaxy-band)" transform="rotate(-24 650 208)"/>
+
+    <g id="field-stars" fill="#f5f0e6">
+      <circle cx="118" cy="58" r="1.2" opacity="0.28"/>
+      <circle cx="214" cy="96" r="0.7" opacity="0.4"/>
+      <circle cx="286" cy="42" r="0.9" opacity="0.32"/>
+      <circle cx="372" cy="128" r="0.6" opacity="0.45"/>
+      <circle cx="448" cy="64" r="1.1" opacity="0.35"/>
+      <circle cx="522" cy="148" r="0.7" opacity="0.3"/>
+      <circle cx="168" cy="188" r="0.8" opacity="0.26"/>
+      <circle cx="96" cy="248" r="1.0" opacity="0.34"/>
+      <circle cx="248" cy="276" r="0.6" opacity="0.42"/>
+      <circle cx="334" cy="318" r="0.9" opacity="0.28"/>
+      <circle cx="486" cy="302" r="0.7" opacity="0.36"/>
+      <circle cx="760" cy="48" r="0.8" opacity="0.4"/>
+      <circle cx="842" cy="88" r="1.1" opacity="0.3"/>
+      <circle cx="1108" cy="72" r="0.7" opacity="0.38"/>
+      <circle cx="1148" cy="164" r="0.9" opacity="0.26"/>
+      <circle cx="1086" cy="248" r="0.6" opacity="0.44"/>
+      <circle cx="1162" cy="312" r="0.8" opacity="0.32"/>
+      <circle cx="792" cy="324" r="0.7" opacity="0.28"/>
+      <circle cx="688" cy="56" r="0.6" opacity="0.36"/>
+      <circle cx="628" cy="118" r="0.9" opacity="0.22"/>
+    </g>
+
+    <g fill="none" stroke="#ffd9a0" stroke-opacity="0.4" stroke-width="1.2" stroke-linecap="square">
+      <path d="M36 56 V36 H56"/>
+      <path d="M1164 56 V36 H1144"/>
+      <path d="M36 344 V364 H56"/>
+      <path d="M1164 344 V364 H1144"/>
+    </g>
+
+    <g id="hud">
+      <line x1="72" y1="372" x2="1128" y2="372" stroke="#f5f0e6" stroke-opacity="0.1"/>
+      <rect x="390" y="360" width="420" height="24" fill="#030510"/>
+      <text x="600" y="377" text-anchor="middle" fill="#f5f0e6" fill-opacity="0.4" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" letter-spacing="2.4">OBSERVATORY · PARALLEL UNIVERSE</text>
+    </g>
+    </g>
+  </g>
+
+  <!-- Title + bookshelf mark + CTA -->
+  <g id="title-block" clip-path="url(#frame-clip)">
+    <text x="56" y="56" fill="#aee6ff" fill-opacity="0.88" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" letter-spacing="3.6">PODCAST EXPERIENCE · 平行宇宙</text>
+
+    <g transform="translate(56 74)" fill="#f5f0e6">
+      <rect x="1" y="16" width="2" height="26" opacity="0.55"/>
+      <rect x="41" y="16" width="2" height="26" opacity="0.55"/>
+      <rect x="0" y="40" width="44" height="3" rx="1"/>
+      <rect x="4" y="12" width="5" height="28" rx="1"/>
+      <rect x="10" y="18" width="4" height="22" rx="1" opacity="0.8"/>
+      <rect x="15" y="8" width="5" height="32" rx="1" fill="#ffd9a0"/>
+      <rect x="21" y="15" width="4" height="25" rx="1"/>
+      <rect x="26" y="10" width="5" height="30" rx="1" opacity="0.65"/>
+      <rect x="35" y="14" width="5" height="26" rx="1" opacity="0.8" transform="rotate(-8 37.5 40)"/>
+    </g>
+
+    <text x="112" y="116" fill="#f5f0e6" font-family="Georgia, 'Songti SC', 'Noto Serif CJK SC', serif" font-size="48" font-weight="700" letter-spacing="6">一个人的书房</text>
+    <text x="112" y="150" fill="#ffd9a0" font-family="Georgia, 'Songti SC', 'Noto Serif CJK SC', serif" font-size="22" font-weight="600">「你的，我的，我们的房间」</text>
+
+    <text x="56" y="194" fill="#f5f0e6" fill-opacity="0.74" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="20">每一颗星，是一位朗读者的书房。</text>
+    <text x="56" y="222" fill="#f5f0e6" fill-opacity="0.74" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="20">穿越星河，推开房门，试听有声样片。</text>
+
+    <text x="56" y="258" fill="#f5f0e6" fill-opacity="0.42" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="14" letter-spacing="1.6">星球书房  ·  星空图书馆  ·  Three.js</text>
+
+    <g transform="translate(56 282)">
+      <rect width="168" height="42" rx="21" fill="none" stroke="#ffd9a0" stroke-opacity="0.72"/>
+      <circle cx="148" cy="21" r="3" fill="#ffd9a0"/>
+      <text x="78" y="27" text-anchor="middle" fill="#f5f0e6" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="16" font-weight="500" letter-spacing="6">进入星空</text>
+    </g>
+  </g>
+
+  <!-- Study stars only (no name labels on first appear) -->
+  <g id="constellation" clip-path="url(#frame-clip)">
+    <ellipse cx="940" cy="176" rx="176" ry="98" fill="none" stroke="#aee6ff" stroke-opacity="0.14" stroke-dasharray="3 8"/>
+
+    <!-- glowing star: white feathered halo + color body + white core -->
+    <g>
+      <circle cx="1012" cy="118" r="20" fill="url(#halo-white)"/>
+      <circle cx="1012" cy="118" r="5.0" fill="#e3b8ff"/>
+      <circle cx="1012" cy="118" r="2.6" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="1068" cy="168" r="20" fill="url(#halo-white)"/>
+      <circle cx="1068" cy="168" r="5.2" fill="#ffb3c8"/>
+      <circle cx="1068" cy="168" r="2.7" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="1092" cy="132" r="21" fill="url(#halo-white)"/>
+      <circle cx="1092" cy="132" r="5.8" fill="#b48cff"/>
+      <circle cx="1092" cy="132" r="2.8" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="1084" cy="208" r="19" fill="url(#halo-white)"/>
+      <circle cx="1084" cy="208" r="4.8" fill="#f0e6a0"/>
+      <circle cx="1084" cy="208" r="2.5" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="1048" cy="198" r="20" fill="url(#halo-white)"/>
+      <circle cx="1048" cy="198" r="5.4" fill="#aee6ff"/>
+      <circle cx="1048" cy="198" r="2.7" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="1022" cy="148" r="19" fill="url(#halo-white)"/>
+      <circle cx="1022" cy="148" r="4.9" fill="#ff8f8f"/>
+      <circle cx="1022" cy="148" r="2.5" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="990" cy="188" r="20" fill="url(#halo-white)"/>
+      <circle cx="990" cy="188" r="5.0" fill="#ffb86b"/>
+      <circle cx="990" cy="188" r="2.6" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="958" cy="214" r="20" fill="url(#halo-white)"/>
+      <circle cx="958" cy="214" r="5.2" fill="#f5f0e6"/>
+      <circle cx="958" cy="214" r="2.6" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="908" cy="126" r="20" fill="url(#halo-white)"/>
+      <circle cx="908" cy="126" r="5.3" fill="#8fe3c0"/>
+      <circle cx="908" cy="126" r="2.7" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="874" cy="196" r="21" fill="url(#halo-white)"/>
+      <circle cx="874" cy="196" r="5.6" fill="#7ab8ff"/>
+      <circle cx="874" cy="196" r="2.8" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="848" cy="214" r="19" fill="url(#halo-white)"/>
+      <circle cx="848" cy="214" r="4.7" fill="#6be8e0"/>
+      <circle cx="848" cy="214" r="2.5" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="816" cy="164" r="20" fill="url(#halo-white)"/>
+      <circle cx="816" cy="164" r="5.4" fill="#ff9d7a"/>
+      <circle cx="816" cy="164" r="2.7" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="834" cy="132" r="19" fill="url(#halo-white)"/>
+      <circle cx="834" cy="132" r="4.9" fill="#ffc95e"/>
+      <circle cx="834" cy="132" r="2.5" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="876" cy="170" r="21" fill="url(#halo-white)"/>
+      <circle cx="876" cy="170" r="5.8" fill="#9fe8b7"/>
+      <circle cx="876" cy="170" r="2.8" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="1004" cy="174" r="20" fill="url(#halo-white)"/>
+      <circle cx="1004" cy="174" r="5.1" fill="#d9a05b"/>
+      <circle cx="1004" cy="174" r="2.6" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="1060" cy="188" r="19" fill="url(#halo-white)"/>
+      <circle cx="1060" cy="188" r="4.8" fill="#f2a2c0"/>
+      <circle cx="1060" cy="188" r="2.5" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="1100" cy="176" r="20" fill="url(#halo-white)"/>
+      <circle cx="1100" cy="176" r="5.5" fill="#86dcb9"/>
+      <circle cx="1100" cy="176" r="2.7" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="1036" cy="224" r="19" fill="url(#halo-white)"/>
+      <circle cx="1036" cy="224" r="4.9" fill="#7fb8e8"/>
+      <circle cx="1036" cy="224" r="2.5" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="968" cy="136" r="21" fill="url(#halo-white)"/>
+      <circle cx="968" cy="136" r="5.6" fill="#a8b6f0"/>
+      <circle cx="968" cy="136" r="2.8" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="914" cy="178" r="19" fill="url(#halo-white)"/>
+      <circle cx="914" cy="178" r="4.8" fill="#e8987a"/>
+      <circle cx="914" cy="178" r="2.5" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="852" cy="188" r="20" fill="url(#halo-white)"/>
+      <circle cx="852" cy="188" r="5.1" fill="#f5d06a"/>
+      <circle cx="852" cy="188" r="2.6" fill="url(#core-white)"/>
+    </g>
+    <g>
+      <circle cx="820" cy="118" r="20" fill="url(#halo-white)"/>
+      <circle cx="820" cy="118" r="5.2" fill="#c9a2e8"/>
+      <circle cx="820" cy="118" r="2.6" fill="url(#core-white)"/>
+    </g>
+
+    <!-- Focus target star (段静) — stronger halo, no name yet -->
+    <g>
+      <circle cx="940" cy="150" r="34" fill="url(#halo-focus)"/>
+      <circle cx="940" cy="150" r="7.4" fill="#ffd9a0"/>
+      <circle cx="940" cy="150" r="3.6" fill="url(#core-white)"/>
+    </g>
+  </g>
+
+  <!-- Telescope optical reticle locks onto the gold star -->
+  <g id="reticle" clip-path="url(#frame-clip)" fill="none" stroke="#ffd9a0" stroke-linecap="round">
+    <circle cx="940" cy="150" r="54" stroke-opacity="0.28" stroke-width="1.2"/>
+    <circle cx="940" cy="150" r="36" stroke-opacity="0.55" stroke-width="1.4"/>
+    <g stroke-opacity="0.7" stroke-width="1.5">
+      <line x1="940" y1="104" x2="940" y2="118"/>
+      <line x1="940" y1="182" x2="940" y2="196"/>
+      <line x1="894" y1="150" x2="908" y2="150"/>
+      <line x1="972" y1="150" x2="986" y2="150"/>
+    </g>
+    <g stroke-opacity="0.35" stroke-width="1">
+      <line x1="922" y1="132" x2="929" y2="139"/>
+      <line x1="951" y1="161" x2="958" y2="168"/>
+      <line x1="951" y1="139" x2="958" y2="132"/>
+      <line x1="922" y1="168" x2="929" y2="161"/>
+    </g>
+    <circle cx="940" cy="150" r="2.2" fill="#f5f0e6" stroke="none"/>
+  </g>
+
+  <!-- Appears only after reticle locks -->
+  <g id="study-card" clip-path="url(#frame-clip)">
+    <rect x="952" y="248" width="196" height="92" rx="8" fill="#0b1026" fill-opacity="0.9" stroke="#ffd9a0" stroke-opacity="0.4"/>
+    <circle cx="974" cy="274" r="4.5" fill="#ffd9a0"/>
+    <text x="988" y="280" fill="#f5f0e6" font-family="Georgia, 'Songti SC', 'Noto Serif CJK SC', serif" font-size="20">段老板的书房</text>
+    <text x="968" y="306" fill="#ffd9a0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="15">创始人 · 一个人的书房</text>
+    <text x="968" y="328" fill="#f5f0e6" fill-opacity="0.55" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Noto Sans CJK SC', sans-serif" font-size="15">推门进入 · 试听样片</text>
+  </g>
+
+  <!-- Top-right wormhole jump (UniverseView IndexDrawer) -->
+  <g id="wormhole-btn" clip-path="url(#frame-clip)">
+    <rect x="1008" y="34" width="148" height="34" rx="17" fill="#0b1026" fill-opacity="0.72" stroke="#ffd9a0" stroke-opacity="0.65"/>
+    <circle cx="1030" cy="51" r="10" fill="#ffd9a0" fill-opacity="0.12"/>
+    <path d="M1026 48 L1028.5 51 L1034 45" fill="none" stroke="#ffd9a0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="1088" y="55" text-anchor="middle" fill="#ffd9a0" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" letter-spacing="2.2">虫洞越迁</text>
+  </g>
+
+  <!-- Brief press / click highlight on the wormhole button -->
+  <g id="wormhole-click" clip-path="url(#frame-clip)">
+    <rect x="1004" y="30" width="156" height="42" rx="21" fill="#ffd9a0" fill-opacity="0.16" stroke="#ffd9a0" stroke-opacity="0.95" stroke-width="1.8"/>
+    <circle cx="1082" cy="51" r="28" fill="#ffd9a0" fill-opacity="0.18"/>
+  </g>
+
+  <!-- Wormhole white tunnel flash -->
+  <g id="warp-flash">
+    <rect width="1200" height="400" fill="#e8f4ff"/>
+  </g>
+
+  <!-- Simplified starlight library ring (no count, no book titles) -->
+  <g id="library-scene">
+    <rect width="1200" height="400" fill="#030510"/>
+    <g transform="translate(0 28)">
+      <ellipse cx="600" cy="214" rx="460" ry="88" fill="none" stroke="#aee6ff" stroke-opacity="0.18"/>
+      <ellipse cx="600" cy="214" rx="420" ry="70" fill="none" stroke="#ffd9a0" stroke-opacity="0.12"/>
+      <rect x="595.0" y="84.0" width="10.0" height="48.0" rx="2" fill="#ff8f8f" opacity="0.35"/>
+      <rect x="473.8" y="85.7" width="10.2" height="49.4" rx="2" fill="#7ab8ff" opacity="0.36"/>
+      <rect x="716.0" y="85.7" width="10.2" height="49.4" rx="2" fill="#f0e6a0" opacity="0.36"/>
+      <rect x="827.1" y="90.8" width="10.8" height="53.6" rx="2" fill="#e3b8ff" opacity="0.40"/>
+      <rect x="362.1" y="90.8" width="10.8" height="53.6" rx="2" fill="#f5f0e6" opacity="0.40"/>
+      <rect x="269.2" y="98.8" width="11.7" height="60.1" rx="2" fill="#d9a05b" opacity="0.46"/>
+      <rect x="919.1" y="98.8" width="11.7" height="60.1" rx="2" fill="#9fe8b7" opacity="0.46"/>
+      <rect x="202.4" y="109.1" width="12.9" height="68.5" rx="2" fill="#f2a2c0" opacity="0.54"/>
+      <rect x="984.7" y="109.1" width="12.9" height="68.5" rx="2" fill="#ffc95e" opacity="0.54"/>
+      <rect x="167.2" y="120.9" width="14.3" height="78.0" rx="2" fill="#86dcb9" opacity="0.63"/>
+      <rect x="1018.5" y="120.9" width="14.3" height="78.0" rx="2" fill="#ff9d7a" opacity="0.63"/>
+      <rect x="166.5" y="133.1" width="15.7" height="88.0" rx="2" fill="#7fb8e8" opacity="0.72"/>
+      <rect x="1017.8" y="133.1" width="15.7" height="88.0" rx="2" fill="#6be8e0" opacity="0.72"/>
+      <rect x="982.6" y="144.9" width="17.1" height="97.5" rx="2" fill="#8fe3c0" opacity="0.81"/>
+      <rect x="200.3" y="144.9" width="17.1" height="97.5" rx="2" fill="#a8b6f0" opacity="0.81"/>
+      <rect x="915.8" y="155.2" width="18.3" height="105.9" rx="2" fill="#ffb86b" opacity="0.89"/>
+      <rect x="265.9" y="155.2" width="18.3" height="105.9" rx="2" fill="#e8987a" opacity="0.89"/>
+      <rect x="357.9" y="163.2" width="19.2" height="112.4" rx="2" fill="#f5d06a" opacity="0.95"/>
+      <rect x="822.9" y="163.2" width="19.2" height="112.4" rx="2" fill="#aee6ff" opacity="0.95"/>
+      <rect x="711.2" y="168.3" width="19.8" height="116.6" rx="2" fill="#b48cff" opacity="0.99"/>
+      <rect x="469.0" y="168.3" width="19.8" height="116.6" rx="2" fill="#c9a2e8" opacity="0.99"/>
+      <rect x="590.0" y="170.0" width="20.0" height="118.0" rx="2" fill="#ffb3c8" opacity="1.00"/>
+      <text x="600" y="48" text-anchor="middle" fill="#aee6ff" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" letter-spacing="3.2">STARLIGHT LIBRARY</text>
+      <text x="600" y="78" text-anchor="middle" fill="#f5f0e6" font-family="Georgia, 'Songti SC', 'Noto Serif CJK SC', serif" font-size="26">星空图书馆</text>
+    </g>
+    <rect x="390" y="360" width="420" height="24" fill="#030510"/>
+    <text x="600" y="377" text-anchor="middle" fill="#f5f0e6" fill-opacity="0.4" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" letter-spacing="2.4">WORMHOLE · STARLIGHT LIBRARY</text>
+  </g>
+</svg>

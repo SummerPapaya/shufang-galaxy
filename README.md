@@ -1,10 +1,18 @@
 # 一个人的书房 · 平行宇宙
 
+<p align="center">
+  <img src="./assets/readme/hero.gif" width="100%" alt="一个人的书房 · 平行宇宙：书房星、虫洞越迁与星空图书馆">
+</p>
+
 > A Study of One's Own — 一间间书房化作星辰，在银河里漫游。
 
 「一个人的书房」播客的沉浸式展示 demo：从银河着陆页穿越虫洞，进入 360° 星空漫游；每颗星是一位朗读者的书房，点击进入 2.5D 房间详情，查看朗读书目并试读有声样片；「星空图书馆」以 3D 环形书墙陈列全部有声书。
 
 线上预览：<https://shufang-galaxy.summercommences.com>
+
+<p align="center">
+  <img src="./assets/readme/workflow.svg" width="100%" alt="从星河远景到虫洞越迁、星空漫游，再进入书房或星空图书馆">
+</p>
 
 ## 技术栈
 
