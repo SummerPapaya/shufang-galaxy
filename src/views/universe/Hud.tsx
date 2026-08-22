@@ -4,21 +4,30 @@ import type { UniverseControls } from './controls'
 
 /**
  * 星空漫游 HUD（universe.md §2，DOM 覆盖层，pointer-events-none）
- * - Crosshair：望远镜十字分划（外环刻度 + 十字丝 + 中心缺口），
- *   准星附近 60px 内有书房星投影时整组染 starColor 并微放大（rAF 直写 style）
+ * - Crosshair：光学瞄准镜分划（目镜双环 + mil-dot 十字丝，线条半透明），
+ *   准星附近 60px 内有书房星投影时整组淡染 starColor（rAF 直写 style）
  * - CompassStrip：右下罗盘刻度带（每 15° 刻线，四象星宿名，金色三角指针随 yaw 滚动）
  * - HintBar：左下操作提示，入场 6s 后降至 40% 透明度
  * 入场：0.5s 起依序淡入（stagger 150ms，y +10→0）。
  */
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
-const RETICLE_IDLE = 'rgba(245, 240, 230, 0.42)'
+const RETICLE_IDLE = 'rgba(245, 240, 230, 0.22)'
 
 const REDUCED_MOTION =
   typeof window !== 'undefined' &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-/* ── 中央准星：天文望远镜十字分划 ───────────────── */
+function hexToRgba(hex: string, alpha: number): string {
+  const h = hex.replace('#', '')
+  const full = h.length === 3 ? h.split('').map((c) => c + c).join('') : h
+  const n = Number.parseInt(full, 16)
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`
+}
+
+const MIL_DOTS = [18, 26, 34] as const
+
+/* ── 中央准星：光学瞄准镜分划 ───────────────────── */
 
 export function Crosshair({ controls }: { controls: UniverseControls }) {
   const reticleRef = useRef<HTMLDivElement>(null)
@@ -31,9 +40,9 @@ export function Crosshair({ controls }: { controls: UniverseControls }) {
       if (color !== last && reticleRef.current) {
         last = color
         const el = reticleRef.current
-        el.style.color = color ?? RETICLE_IDLE
-        el.style.scale = color ? '1.12' : '1'
-        el.style.filter = color ? `drop-shadow(0 0 8px ${color}99)` : 'none'
+        el.style.color = color ? hexToRgba(color, 0.34) : RETICLE_IDLE
+        el.style.scale = color ? '1.04' : '1'
+        el.style.filter = color ? `drop-shadow(0 0 5px ${hexToRgba(color, 0.28)})` : 'none'
         el.dataset.locked = color ? 'true' : 'false'
       }
       raf = requestAnimationFrame(tick)
@@ -52,50 +61,65 @@ export function Crosshair({ controls }: { controls: UniverseControls }) {
     >
       <div
         ref={reticleRef}
-        className="crosshair-reticle relative h-[72px] w-[72px] text-[rgba(245,240,230,0.42)] transition-[scale,filter,color] duration-200"
+        className="crosshair-reticle relative h-[88px] w-[88px] text-[rgba(245,240,230,0.22)] transition-[scale,filter,color] duration-200"
       >
-        {/* 外环刻度：缓慢旋转，像望远镜调焦环 */}
+        {/* 目镜外环：细刻度缓慢旋转 */}
         <svg
           className={REDUCED_MOTION ? 'absolute inset-0' : 'crosshair-reticle-spin absolute inset-0'}
-          viewBox="0 0 72 72"
+          viewBox="0 0 96 96"
           fill="none"
         >
-          <circle cx="36" cy="36" r="33" stroke="currentColor" strokeWidth="0.75" strokeOpacity="0.55" />
-          {Array.from({ length: 24 }, (_, i) => {
-            const a = (i / 24) * Math.PI * 2
-            const major = i % 3 === 0
-            const inner = major ? 28 : 30.5
-            const outer = 33
+          <circle cx="48" cy="48" r="45.5" stroke="currentColor" strokeWidth="0.55" strokeOpacity="0.45" />
+          <circle cx="48" cy="48" r="42" stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.28" strokeDasharray="1.2 2.4" />
+          {Array.from({ length: 60 }, (_, i) => {
+            const a = (i / 60) * Math.PI * 2 - Math.PI / 2
+            const major = i % 5 === 0
+            const inner = major ? 41.2 : 43.4
+            const outer = 45.5
             return (
               <line
                 key={i}
-                x1={36 + Math.cos(a) * inner}
-                y1={36 + Math.sin(a) * inner}
-                x2={36 + Math.cos(a) * outer}
-                y2={36 + Math.sin(a) * outer}
+                x1={48 + Math.cos(a) * inner}
+                y1={48 + Math.sin(a) * inner}
+                x2={48 + Math.cos(a) * outer}
+                y2={48 + Math.sin(a) * outer}
                 stroke="currentColor"
-                strokeWidth={major ? 1.1 : 0.7}
+                strokeOpacity={major ? 0.55 : 0.28}
+                strokeWidth={major ? 0.7 : 0.4}
                 strokeLinecap="square"
               />
             )
           })}
         </svg>
 
-        {/* 静止十字丝：中心留空，方便看清被瞄准的星 */}
-        <svg className="absolute inset-0" viewBox="0 0 72 72" fill="none">
-          <circle cx="36" cy="36" r="11" stroke="currentColor" strokeWidth="0.85" strokeOpacity="0.7" />
-          {/* 横丝 */}
-          <line x1="3" y1="36" x2="25" y2="36" stroke="currentColor" strokeWidth="0.9" />
-          <line x1="47" y1="36" x2="69" y2="36" stroke="currentColor" strokeWidth="0.9" />
-          {/* 竖丝 */}
-          <line x1="36" y1="3" x2="36" y2="25" stroke="currentColor" strokeWidth="0.9" />
-          <line x1="36" y1="47" x2="36" y2="69" stroke="currentColor" strokeWidth="0.9" />
-          {/* 四向短刻 */}
-          <line x1="20" y1="36" x2="24" y2="36" stroke="currentColor" strokeWidth="1.4" />
-          <line x1="48" y1="36" x2="52" y2="36" stroke="currentColor" strokeWidth="1.4" />
-          <line x1="36" y1="20" x2="36" y2="24" stroke="currentColor" strokeWidth="1.4" />
-          <line x1="36" y1="48" x2="36" y2="52" stroke="currentColor" strokeWidth="1.4" />
-          <circle cx="36" cy="36" r="1.15" fill="currentColor" />
+        {/* 静止分划：浮空十字 + mil-dot，中心全透明 */}
+        <svg className="absolute inset-0" viewBox="0 0 96 96" fill="none">
+          <circle cx="48" cy="48" r="13.5" stroke="currentColor" strokeWidth="0.45" strokeOpacity="0.4" />
+          {/* 十字丝（中心开口） */}
+          <line x1="6" y1="48" x2="34.5" y2="48" stroke="currentColor" strokeWidth="0.45" strokeOpacity="0.55" />
+          <line x1="61.5" y1="48" x2="90" y2="48" stroke="currentColor" strokeWidth="0.45" strokeOpacity="0.55" />
+          <line x1="48" y1="6" x2="48" y2="34.5" stroke="currentColor" strokeWidth="0.45" strokeOpacity="0.55" />
+          <line x1="48" y1="61.5" x2="48" y2="90" stroke="currentColor" strokeWidth="0.45" strokeOpacity="0.55" />
+          {/* mil-dot */}
+          {MIL_DOTS.flatMap((d) => [
+            <circle key={`e${d}`} cx={48 + d} cy="48" r="0.7" stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.45" />,
+            <circle key={`w${d}`} cx={48 - d} cy="48" r="0.7" stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.45" />,
+            <circle key={`s${d}`} cx="48" cy={48 + d} r="0.7" stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.45" />,
+            <circle key={`n${d}`} cx="48" cy={48 - d} r="0.7" stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.45" />,
+          ])}
+          {/* 45° 细标线 */}
+          {[Math.PI / 4, (3 * Math.PI) / 4, (5 * Math.PI) / 4, (7 * Math.PI) / 4].map((a) => (
+            <line
+              key={a}
+              x1={48 + Math.cos(a) * 16}
+              y1={48 + Math.sin(a) * 16}
+              x2={48 + Math.cos(a) * 20}
+              y2={48 + Math.sin(a) * 20}
+              stroke="currentColor"
+              strokeWidth="0.4"
+              strokeOpacity="0.28"
+            />
+          ))}
         </svg>
       </div>
     </motion.div>
