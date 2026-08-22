@@ -20,7 +20,8 @@ import { makeCoreTexture, makeGlowTexture, makeRingTexture } from './textures'
  *         + hover 光晕环（弹簧弹出）+ 隐形 hit 球（Raycaster 目标）。
  *
  * - 呼吸：辉光 scale 1→1.12→1，周期 3–6s（相位随机）；hover 加速到 1.2s 且亮度 +40%
- * - 悬停：hoverRoom(id) + preloadRoomImage + 光晕环 spring 弹出 + 提示卡跟随投影点
+ * - 悬停：指针悬停或准星掠过光点 → hoverRoom(id) + preloadRoomImage + 光晕环 + 提示卡
+ * - 准星瞄准：屏幕正中 72px 内最近星锁定 aimColor，并优先驱动信息卡片（手机可无指针悬停）
  * - 点击 / 索引选择：「飞星」转场（~1600ms；startFly 前保存相机朝向到 store）
  *   0–900ms 相机转向 + FOV 冲刺（CameraRig）；900–1400ms 目标星辉光膨胀铺满屏、
  *   其余星亮度 →0.15；1200–1600ms 柔白闪光（峰值 0.55，120ms 升起 + 1-t^1.6 衰减）；
@@ -62,6 +63,8 @@ const FLASH_START = 1.2
 const FLASH_DURATION = 0.4
 const FLASH_RISE = 0.3 // 峰值窗口占闪光段比例（0.3 × 400ms = 120ms）
 const FLASH_PEAK = 0.34 // R3：闪光再弱化，0.55 → 0.34
+/** 准星瞄准半径（屏幕像素）：略大于准星外环，便于掠过光点出卡 */
+const AIM_RADIUS_PX = 72
 
 export default function RoomStars({ controls, rooms }: RoomStarsProps) {
   const camera = useThree((s) => s.camera)
@@ -70,6 +73,8 @@ export default function RoomStars({ controls, rooms }: RoomStarsProps) {
   const selectRoom = useAppStore((s) => s.selectRoom)
 
   const hoverIndex = useRef(-1)
+  /** 指针悬停的星（与准星瞄准分离；有效悬停 = 瞄准优先，否则指针） */
+  const pointerHoverIndex = useRef(-1)
   const clockNow = useRef(0)
 
   const coreTex = useMemo(() => makeCoreTexture(), [])
@@ -137,6 +142,7 @@ export default function RoomStars({ controls, rooms }: RoomStarsProps) {
       done: false,
     }
     hoverIndex.current = -1
+    pointerHoverIndex.current = -1
     hoverRoom(null)
   }
   const startFlyRef = useRef(startFly)
@@ -203,9 +209,10 @@ export default function RoomStars({ controls, rooms }: RoomStarsProps) {
       }
     }
 
-    /* 准星瞄准检测：距屏幕中心 60px 内的最近书房星 */
+    /* 准星瞄准检测：屏幕正中准星掠过书房星光点时锁定并弹出信息卡 */
     let aimColor: string | null = null
-    let aimDist = 60
+    let aimDist = AIM_RADIUS_PX
+    let aimIdx = -1
 
     nodes.forEach((node, i) => {
       /* 入场绽放（0.8s 起，stagger 70ms） */
@@ -258,7 +265,7 @@ export default function RoomStars({ controls, rooms }: RoomStarsProps) {
         node.ring.visible = node.hover > 0.01
       }
 
-      /* 屏幕投影：悬停提示卡跟随 + 准星瞄准 */
+      /* 屏幕投影：悬停提示卡跟随 + 准星瞄准（默认以画面正中为准） */
       projected.copy(node.pos).project(camera)
       if (projected.z < 1) {
         const sx = (projected.x * 0.5 + 0.5) * size.width
@@ -271,11 +278,18 @@ export default function RoomStars({ controls, rooms }: RoomStarsProps) {
         if (dc < aimDist) {
           aimDist = dc
           aimColor = node.room.starColor
+          aimIdx = i
         }
       }
     })
 
     controls.aimColor = fly.active ? null : aimColor
+
+    /* 有效悬停：准星优先（手机无指针悬停也能出卡片），否则退回指针悬停 */
+    if (!fly.active) {
+      const nextHover = aimIdx >= 0 ? aimIdx : pointerHoverIndex.current
+      setHover(nextHover)
+    }
   })
 
   return (
@@ -331,10 +345,10 @@ export default function RoomStars({ controls, rooms }: RoomStarsProps) {
           <mesh
             onPointerOver={(e: ThreeEvent<PointerEvent>) => {
               e.stopPropagation()
-              setHover(i)
+              pointerHoverIndex.current = i
             }}
             onPointerOut={() => {
-              if (hoverIndex.current === i) setHover(-1)
+              if (pointerHoverIndex.current === i) pointerHoverIndex.current = -1
             }}
             onClick={(e: ThreeEvent<MouseEvent>) => {
               e.stopPropagation()

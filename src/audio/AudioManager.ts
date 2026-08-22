@@ -189,15 +189,21 @@ class AudioManager {
         this.modeBeforeMute = this.state.ambienceMode
       }
       this.emit({ ambienceMode: 'muted', muted: true })
-      this.fadeAmbienceTo(0, 200)
-      if (this.sample) this.sample.volume = 0
+      this.silenceAmbience()
+      this.silenceSample()
       return
     }
 
     this.modeBeforeMute = mode
     const trackId = mode === 'random' ? pickRandomTrack(this.state.ambienceTrackId) : mode
     this.emit({ ambienceMode: mode, muted: false, ambienceTrackId: trackId })
-    if (this.sample) this.sample.volume = 1
+    if (this.sample) {
+      this.sample.muted = false
+      this.sample.volume = 1
+      if (this.state.playing && this.state.playingId) {
+        void this.sample.play().catch(() => {})
+      }
+    }
     if (!this.unlocked) return
     // 菜单点击本身是用户手势，同步 play 即可
     this.playAmbienceTrack(trackId, { fadeIn: true })
@@ -231,6 +237,11 @@ class AudioManager {
     trackId: AmbienceTrackId,
     opts: { fadeIn?: boolean; srcOverride?: string } = {},
   ) {
+    if (this.state.ambienceMode === 'muted' || this.state.muted) {
+      this.silenceAmbience()
+      return
+    }
+
     const meta = AMBIENCE_TRACKS[trackId]
     const src = opts.srcOverride ?? meta.src
     const el = this.ensureAmbienceEl()
@@ -239,7 +250,12 @@ class AudioManager {
     const switching = el.src !== '' && !sameSrc && !el.paused
 
     const start = () => {
+      if (this.state.ambienceMode === 'muted' || this.state.muted) {
+        this.silenceAmbience()
+        return
+      }
       el.loop = false
+      el.muted = false
       const pathNow = audioPathname(el.src)
       const already = pathNow === src || pathNow.endsWith(src)
       if (!already) {
@@ -276,7 +292,7 @@ class AudioManager {
   }
 
   private onAmbienceEnded = () => {
-    if (this.state.ambienceMode === 'muted' || !this.unlocked) return
+    if (this.state.ambienceMode === 'muted' || this.state.muted || !this.unlocked) return
     if (this.state.ambienceMode === 'random') {
       const next = pickRandomTrack(this.state.ambienceTrackId)
       this.playAmbienceTrack(next, { fadeIn: true })
@@ -288,6 +304,7 @@ class AudioManager {
 
   /** 片花 404 / 解码失败时回退旧环境音，避免完全静音 */
   private onAmbienceError = () => {
+    if (this.state.ambienceMode === 'muted' || this.state.muted) return
     const el = this.ambience
     if (!el) return
     const path = audioPathname(el.src)
@@ -296,6 +313,28 @@ class AudioManager {
       fadeIn: true,
       srcOverride: AMBIENCE_FALLBACK_SRC,
     })
+  }
+
+  /**
+   * 真正关掉背景片花。
+   * iOS Safari 忽略 HTMLAudioElement.volume，必须用 muted + pause。
+   */
+  private silenceAmbience() {
+    cancelAnimationFrame(this.fadeRaf)
+    this.fadeRaf = 0
+    const el = this.ambience
+    if (!el) return
+    el.muted = true
+    el.volume = 0
+    el.pause()
+  }
+
+  private silenceSample() {
+    const el = this.sample
+    if (!el) return
+    el.muted = true
+    el.volume = 0
+    el.pause()
   }
 
   private effectiveAmbienceVolume(): number {
@@ -309,19 +348,38 @@ class AudioManager {
       onDone?.()
       return
     }
+    // 静音态不要再把 volume 拉回去（且 iOS 上 volume 本来就无效）
+    if ((this.state.muted || this.state.ambienceMode === 'muted') && target > 0) {
+      this.silenceAmbience()
+      onDone?.()
+      return
+    }
     cancelAnimationFrame(this.fadeRaf)
     const start = el.volume
     const t0 = performance.now()
     if (duration <= 0) {
       el.volume = target
+      if (target <= 0) {
+        el.muted = true
+      } else {
+        el.muted = false
+      }
       onDone?.()
       return
     }
     const step = (now: number) => {
+      if (this.state.muted || this.state.ambienceMode === 'muted') {
+        this.silenceAmbience()
+        onDone?.()
+        return
+      }
       const t = clamp01((now - t0) / duration)
       el.volume = start + (target - start) * t
       if (t < 1) this.fadeRaf = requestAnimationFrame(step)
-      else onDone?.()
+      else {
+        if (target <= 0) el.muted = true
+        onDone?.()
+      }
     }
     this.fadeRaf = requestAnimationFrame(step)
   }
@@ -340,10 +398,15 @@ class AudioManager {
       this.stopSampleImmediate()
       const el = new Audio(url)
       el.volume = 0
+      el.muted = this.state.muted || this.state.ambienceMode === 'muted'
       this.sample = el
       this.wireSampleEvents(roomId, el)
       void el.play().catch(() => {})
-      this.fadeSampleTo(el, this.state.muted ? 0 : 1, FADE_MS)
+      this.fadeSampleTo(
+        el,
+        this.state.muted || this.state.ambienceMode === 'muted' ? 0 : 1,
+        FADE_MS,
+      )
       this.emit({ playingId: roomId, playing: true, progress: 0, duration: 0 })
     }
 

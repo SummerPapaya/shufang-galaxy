@@ -4,8 +4,8 @@ import type { UniverseControls } from './controls'
 
 /**
  * 星空漫游 HUD（universe.md §2，DOM 覆盖层，pointer-events-none）
- * - Crosshair：第一版望远镜十字分划（外环刻度 + 水平十字丝），更高透明；
- *   静止时横丝水平；左右转视角时整组轻微倾转，模拟光学准星惯性
+ * - Crosshair：固定于画面正中的第一版望远镜十字分划（外环刻度 + 水平十字丝）；
+ *   静止时横丝水平；左右转视角时整组轻微倾转；掠过书房星时着色锁定
  * - CompassStrip：右下罗盘刻度带（每 15° 刻线，四象星宿名，金色三角指针随 yaw 滚动）
  * - HintBar：左下操作提示，入场 6s 后降至 40% 透明度
  * 入场：0.5s 起依序淡入（stagger 150ms，y +10→0）。
