@@ -4,15 +4,15 @@ import type { UniverseControls } from './controls'
 
 /**
  * 星空漫游 HUD（universe.md §2，DOM 覆盖层，pointer-events-none）
- * - Crosshair：光学瞄准镜分划（目镜双环 + mil-dot 十字丝，线条半透明），
- *   准星附近 60px 内有书房星投影时整组淡染 starColor（rAF 直写 style）
+ * - Crosshair：光学瞄准镜 Duplex 分划（目镜晕影 + 粗外柱收细十字丝 + mil 刻），
+ *   准星附近 60px 内有书房星投影时分划淡染 starColor（rAF 直写 style）
  * - CompassStrip：右下罗盘刻度带（每 15° 刻线，四象星宿名，金色三角指针随 yaw 滚动）
  * - HintBar：左下操作提示，入场 6s 后降至 40% 透明度
  * 入场：0.5s 起依序淡入（stagger 150ms，y +10→0）。
  */
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
-const RETICLE_IDLE = 'rgba(245, 240, 230, 0.22)'
+const RETICLE_IDLE = 'rgba(245, 240, 230, 0.2)'
 
 const REDUCED_MOTION =
   typeof window !== 'undefined' &&
@@ -25,9 +25,10 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alpha})`
 }
 
-const MIL_DOTS = [18, 26, 34] as const
+/** mil 刻：距中心的距离（viewBox 单位），落在细十字丝上 */
+const MIL = [8, 14, 20] as const
 
-/* ── 中央准星：光学瞄准镜分划 ───────────────────── */
+/* ── 中央准星：光学瞄准镜 Duplex ─────────────────── */
 
 export function Crosshair({ controls }: { controls: UniverseControls }) {
   const reticleRef = useRef<HTMLDivElement>(null)
@@ -40,9 +41,9 @@ export function Crosshair({ controls }: { controls: UniverseControls }) {
       if (color !== last && reticleRef.current) {
         last = color
         const el = reticleRef.current
-        el.style.color = color ? hexToRgba(color, 0.34) : RETICLE_IDLE
-        el.style.scale = color ? '1.04' : '1'
-        el.style.filter = color ? `drop-shadow(0 0 5px ${hexToRgba(color, 0.28)})` : 'none'
+        el.style.color = color ? hexToRgba(color, 0.32) : RETICLE_IDLE
+        el.style.scale = color ? '1.03' : '1'
+        el.style.filter = color ? `drop-shadow(0 0 4px ${hexToRgba(color, 0.22)})` : 'none'
         el.dataset.locked = color ? 'true' : 'false'
       }
       raf = requestAnimationFrame(tick)
@@ -61,63 +62,86 @@ export function Crosshair({ controls }: { controls: UniverseControls }) {
     >
       <div
         ref={reticleRef}
-        className="crosshair-reticle relative h-[88px] w-[88px] text-[rgba(245,240,230,0.22)] transition-[scale,filter,color] duration-200"
+        className="crosshair-reticle relative h-[128px] w-[128px] text-[rgba(245,240,230,0.2)] transition-[scale,filter,color] duration-200"
       >
-        {/* 目镜外环：细刻度缓慢旋转 */}
+        <svg className="absolute inset-0" viewBox="0 0 120 120" fill="none">
+          <defs>
+            <radialGradient id="scope-vignette" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#030510" stop-opacity="0" />
+              <stop offset="58%" stop-color="#030510" stop-opacity="0" />
+              <stop offset="86%" stop-color="#030510" stop-opacity="0.14" />
+              <stop offset="100%" stop-color="#030510" stop-opacity="0.32" />
+            </radialGradient>
+            <clipPath id="scope-fov">
+              <circle cx="60" cy="60" r="56" />
+            </clipPath>
+          </defs>
+
+          {/* 目镜圆视场 + 边缘晕影（中间完全透出星空） */}
+          <circle cx="60" cy="60" r="56" fill="url(#scope-vignette)" />
+          <circle cx="60" cy="60" r="56" stroke="currentColor" strokeWidth="1.1" strokeOpacity="0.38" />
+          <circle cx="60" cy="60" r="53.5" stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.18" />
+        </svg>
+
+        {/* 调焦环刻度：沿目镜外缘慢转 */}
         <svg
           className={REDUCED_MOTION ? 'absolute inset-0' : 'crosshair-reticle-spin absolute inset-0'}
-          viewBox="0 0 96 96"
+          viewBox="0 0 120 120"
           fill="none"
         >
-          <circle cx="48" cy="48" r="45.5" stroke="currentColor" strokeWidth="0.55" strokeOpacity="0.45" />
-          <circle cx="48" cy="48" r="42" stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.28" strokeDasharray="1.2 2.4" />
-          {Array.from({ length: 60 }, (_, i) => {
-            const a = (i / 60) * Math.PI * 2 - Math.PI / 2
-            const major = i % 5 === 0
-            const inner = major ? 41.2 : 43.4
-            const outer = 45.5
+          {Array.from({ length: 72 }, (_, i) => {
+            const a = (i / 72) * Math.PI * 2 - Math.PI / 2
+            const major = i % 6 === 0
+            const inner = major ? 56.4 : 57.2
+            const outer = 59.2
             return (
               <line
                 key={i}
-                x1={48 + Math.cos(a) * inner}
-                y1={48 + Math.sin(a) * inner}
-                x2={48 + Math.cos(a) * outer}
-                y2={48 + Math.sin(a) * outer}
+                x1={60 + Math.cos(a) * inner}
+                y1={60 + Math.sin(a) * inner}
+                x2={60 + Math.cos(a) * outer}
+                y2={60 + Math.sin(a) * outer}
                 stroke="currentColor"
-                strokeOpacity={major ? 0.55 : 0.28}
-                strokeWidth={major ? 0.7 : 0.4}
-                strokeLinecap="square"
+                strokeOpacity={major ? 0.4 : 0.16}
+                strokeWidth={major ? 0.7 : 0.35}
               />
             )
           })}
         </svg>
 
-        {/* 静止分划：浮空十字 + mil-dot，中心全透明 */}
-        <svg className="absolute inset-0" viewBox="0 0 96 96" fill="none">
-          <circle cx="48" cy="48" r="13.5" stroke="currentColor" strokeWidth="0.45" strokeOpacity="0.4" />
-          {/* 十字丝（中心开口） */}
-          <line x1="6" y1="48" x2="34.5" y2="48" stroke="currentColor" strokeWidth="0.45" strokeOpacity="0.55" />
-          <line x1="61.5" y1="48" x2="90" y2="48" stroke="currentColor" strokeWidth="0.45" strokeOpacity="0.55" />
-          <line x1="48" y1="6" x2="48" y2="34.5" stroke="currentColor" strokeWidth="0.45" strokeOpacity="0.55" />
-          <line x1="48" y1="61.5" x2="48" y2="90" stroke="currentColor" strokeWidth="0.45" strokeOpacity="0.55" />
-          {/* mil-dot */}
-          {MIL_DOTS.flatMap((d) => [
-            <circle key={`e${d}`} cx={48 + d} cy="48" r="0.7" stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.45" />,
-            <circle key={`w${d}`} cx={48 - d} cy="48" r="0.7" stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.45" />,
-            <circle key={`s${d}`} cx="48" cy={48 + d} r="0.7" stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.45" />,
-            <circle key={`n${d}`} cx="48" cy={48 - d} r="0.7" stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.45" />,
-          ])}
-          {/* 45° 细标线 */}
-          {[Math.PI / 4, (3 * Math.PI) / 4, (5 * Math.PI) / 4, (7 * Math.PI) / 4].map((a) => (
+        {/* Duplex 分划：粗外柱 → 细十字丝，中心开口 */}
+        <svg className="absolute inset-0" viewBox="0 0 120 120" fill="none" clipPath="url(#scope-fov)">
+          {/* 粗柱（从视场边缘收到约 1/3） */}
+          <line x1="6" y1="60" x2="38" y2="60" stroke="currentColor" strokeWidth="3.2" strokeLinecap="butt" strokeOpacity="0.42" />
+          <line x1="82" y1="60" x2="114" y2="60" stroke="currentColor" strokeWidth="3.2" strokeLinecap="butt" strokeOpacity="0.42" />
+          <line x1="60" y1="6" x2="60" y2="38" stroke="currentColor" strokeWidth="3.2" strokeLinecap="butt" strokeOpacity="0.42" />
+          <line x1="60" y1="82" x2="60" y2="114" stroke="currentColor" strokeWidth="3.2" strokeLinecap="butt" strokeOpacity="0.42" />
+          {/* 细丝（接到开口前） */}
+          <line x1="38" y1="60" x2="55.5" y2="60" stroke="currentColor" strokeWidth="0.45" strokeOpacity="0.5" />
+          <line x1="64.5" y1="60" x2="82" y2="60" stroke="currentColor" strokeWidth="0.45" strokeOpacity="0.5" />
+          <line x1="60" y1="38" x2="60" y2="55.5" stroke="currentColor" strokeWidth="0.45" strokeOpacity="0.5" />
+          <line x1="60" y1="64.5" x2="60" y2="82" stroke="currentColor" strokeWidth="0.45" strokeOpacity="0.5" />
+          {/* mil 横刻 */}
+          {MIL.flatMap((d) => {
+            const tick = 1.6
+            return [
+              <line key={`h${d}`} x1={60 + d} y1={60 - tick} x2={60 + d} y2={60 + tick} stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.4" />,
+              <line key={`h-${d}`} x1={60 - d} y1={60 - tick} x2={60 - d} y2={60 + tick} stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.4" />,
+              <line key={`v${d}`} x1={60 - tick} y1={60 + d} x2={60 + tick} y2={60 + d} stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.4" />,
+              <line key={`v-${d}`} x1={60 - tick} y1={60 - d} x2={60 + tick} y2={60 - d} stroke="currentColor" strokeWidth="0.4" strokeOpacity="0.4" />,
+            ]
+          })}
+          {/* 下丝额外距离刻（BDC） */}
+          {[11, 17, 23].map((d) => (
             <line
-              key={a}
-              x1={48 + Math.cos(a) * 16}
-              y1={48 + Math.sin(a) * 16}
-              x2={48 + Math.cos(a) * 20}
-              y2={48 + Math.sin(a) * 20}
+              key={`bdc${d}`}
+              x1={60 - 2.6}
+              y1={60 + d}
+              x2={60 + 2.6}
+              y2={60 + d}
               stroke="currentColor"
-              strokeWidth="0.4"
-              strokeOpacity="0.28"
+              strokeWidth="0.35"
+              strokeOpacity="0.32"
             />
           ))}
         </svg>
