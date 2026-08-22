@@ -228,7 +228,9 @@ class AudioManager {
 
     const start = () => {
       el.loop = false
-      if (!sameSrc) {
+      const pathNow = audioPathname(el.src)
+      const already = pathNow === src || pathNow.endsWith(src)
+      if (!already) {
         el.src = src
         el.load()
       }
