@@ -1,8 +1,8 @@
-# 一个人的书房 · 平行宇宙
-
 <p align="center">
   <img src="./assets/readme/hero.gif" width="100%" alt="一个人的书房 · 平行宇宙：书房星、虫洞越迁与星空图书馆">
 </p>
+
+# 一个人的书房 · 平行宇宙
 
 > A Study of One's Own — 一间间书房化作星辰，在银河里漫游。
 
