@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Radio } from 'lucide-react'
 import { useAppStore } from '@/store'
@@ -35,55 +36,49 @@ function FlyingEchoStar({
   return (
     <motion.div
       aria-hidden
-      className="pointer-events-none fixed z-[80]"
-      initial={{
-        left: fromX,
-        top: fromY,
-        x: '-50%',
-        y: '-50%',
-        scale: 2.6,
+      className="pointer-events-none"
+      style={{ position: 'fixed', left: 0, top: 0, zIndex: 90, marginLeft: -8, marginTop: -8 }}
+      initial={{ x: fromX, y: fromY, scale: 2.8, opacity: 1 }}
+      animate={{
+        x: [fromX, midX, toX],
+        y: [fromY, midY, toY],
+        scale: [2.8, 1.25, 0.85],
         opacity: 1,
       }}
-      animate={{
-        left: [fromX, midX, toX],
-        top: [fromY, midY, toY],
-        scale: [2.6, 1.2, 0.78],
-        opacity: [1, 1, 1],
-      }}
-      exit={{ opacity: 0, scale: 0.35 }}
+      exit={{ opacity: 0, scale: 0.3 }}
       transition={
         reduced
           ? { duration: 0.05 }
-          : { duration: 1.35, times: [0, 0.36, 1], ease: [0.22, 1, 0.36, 1] }
+          : { duration: 1.55, times: [0, 0.34, 1], ease: [0.22, 1, 0.36, 1] }
       }
     >
       <motion.span
         className="absolute left-1/2 top-1/2 block"
         style={{
           width: trail,
-          height: 10,
+          height: 12,
           marginLeft: -trail,
-          marginTop: -5,
+          marginTop: -6,
           borderRadius: 999,
           transform: `rotate(${angle}deg)`,
           transformOrigin: 'right center',
           background:
-            'linear-gradient(90deg, transparent 0%, rgba(245,240,230,0.15) 40%, rgba(245,240,230,0.85) 100%)',
-          boxShadow: '0 0 16px rgba(255,217,160,0.45)',
+            'linear-gradient(90deg, transparent 0%, rgba(245,240,230,0.2) 35%, rgba(245,240,230,0.95) 100%)',
+          boxShadow: '0 0 18px rgba(255,217,160,0.55)',
         }}
-        initial={{ opacity: 0.95, scaleX: 0.4 }}
-        animate={{ opacity: [0.95, 0.7, 0], scaleX: [0.4, 1, 0.55] }}
-        transition={reduced ? { duration: 0.05 } : { duration: 1.35, times: [0, 0.45, 1] }}
+        initial={{ opacity: 0.95, scaleX: 0.35 }}
+        animate={{ opacity: [0.95, 0.75, 0], scaleX: [0.35, 1, 0.5] }}
+        transition={reduced ? { duration: 0.05 } : { duration: 1.55, times: [0, 0.4, 1] }}
       />
       <span
         className="absolute left-1/2 top-1/2 block rounded-full"
         style={{
-          width: 56,
-          height: 56,
-          marginLeft: -28,
-          marginTop: -28,
+          width: 64,
+          height: 64,
+          marginLeft: -32,
+          marginTop: -32,
           background:
-            'radial-gradient(circle, rgba(245,240,230,0.7) 0%, rgba(255,217,160,0.28) 38%, transparent 72%)',
+            'radial-gradient(circle, rgba(245,240,230,0.8) 0%, rgba(255,217,160,0.32) 40%, transparent 72%)',
         }}
       />
       <span
@@ -95,7 +90,7 @@ function FlyingEchoStar({
           marginTop: -8,
           background: '#f6f2ea',
           boxShadow:
-            '0 0 12px #f6f2ea, 0 0 32px rgba(255,217,160,0.95), 0 0 64px rgba(255,217,160,0.45)',
+            '0 0 14px #f6f2ea, 0 0 36px rgba(255,217,160,1), 0 0 72px rgba(255,217,160,0.5)',
         }}
       />
     </motion.div>
@@ -126,6 +121,7 @@ export default function LibraryView() {
     toX: number
     toY: number
   } | null>(null)
+  const [arrivingId, setArrivingId] = useState<string | null>(null)
   const closeEchoTimer = useRef<number | null>(null)
 
   const handleSelect = useCallback((book: Book) => {
@@ -162,10 +158,19 @@ export default function LibraryView() {
 
   useEffect(() => {
     if (!flyEcho) return
-    const ms = reduced ? 80 : 1550
-    const t = window.setTimeout(() => setFlyEcho(null), ms)
+    const ms = reduced ? 80 : 1650
+    const t = window.setTimeout(() => {
+      setArrivingId(flyEcho.echo.id)
+      setFlyEcho(null)
+    }, ms)
     return () => window.clearTimeout(t)
   }, [flyEcho, reduced])
+
+  useEffect(() => {
+    if (!arrivingId) return
+    const t = window.setTimeout(() => setArrivingId(null), 2400)
+    return () => window.clearTimeout(t)
+  }, [arrivingId])
 
   /* ── ESC：回声墙 → 播放器 → 返回星空 ── */
   useEffect(() => {
@@ -207,7 +212,11 @@ export default function LibraryView() {
           style={{ position: 'absolute', zIndex: 0 }}
         />
       )}
-      <EchoField reduced={reduced} hiddenId={flyEcho?.echo.id ?? null} />
+      <EchoField
+        reduced={reduced}
+        hiddenId={flyEcho?.echo.id ?? null}
+        arrivingId={arrivingId}
+      />
 
       {/* ── 顶部安全区 HUD：标题（不与环形书廊重叠） ── */}
       <motion.header
@@ -323,19 +332,23 @@ export default function LibraryView() {
         )}
       </AnimatePresence>
 
-      {/* ── 留言化作星星飞入星空 ── */}
-      <AnimatePresence>
-        {flyEcho && (
-          <FlyingEchoStar
-            key={flyEcho.echo.id}
-            fromX={flyEcho.fromX}
-            fromY={flyEcho.fromY}
-            toX={flyEcho.toX}
-            toY={flyEcho.toY}
-            reduced={reduced}
-          />
+      {/* ── 留言化作星星飞入星空（portal 到 body，避免被图书馆 overflow 裁切） ── */}
+      {typeof document !== 'undefined' &&
+        createPortal(
+          <AnimatePresence>
+            {flyEcho && (
+              <FlyingEchoStar
+                key={flyEcho.echo.id}
+                fromX={flyEcho.fromX}
+                fromY={flyEcho.fromY}
+                toX={flyEcho.toX}
+                toY={flyEcho.toY}
+                reduced={reduced}
+              />
+            )}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
 
       {/* ── 入场：白色隧道式闪光（峰值 ≤0.55，呼应虫洞越迁） ── */}
       {!reduced && (

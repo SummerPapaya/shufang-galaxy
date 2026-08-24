@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { formatEchoTime, useEchoes } from './echoes'
 import type { Echo } from './echoes'
@@ -41,12 +41,18 @@ interface EchoFieldProps {
   reduced: boolean
   /** 飞星动画进行中：先不渲染这颗，避免和飞行点叠在一起 */
   hiddenId?: string | null
+  /** 刚落地：短暂放大光晕，引导目光 */
+  arrivingId?: string | null
 }
 
-export default function EchoField({ reduced, hiddenId }: EchoFieldProps) {
+export default function EchoField({ reduced, hiddenId, arrivingId }: EchoFieldProps) {
   const { echoes } = useEchoes()
   const [hoverId, setHoverId] = useState<string | null>(null)
   const [pinnedId, setPinnedId] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (arrivingId) setPinnedId(arrivingId)
+  }, [arrivingId])
 
   const placed = useMemo(
     () =>
@@ -62,7 +68,8 @@ export default function EchoField({ reduced, hiddenId }: EchoFieldProps) {
   return (
     <div className="pointer-events-none absolute inset-0 z-[15]" aria-label="宇宙回声星群">
       {placed.map(({ echo, x, y }, i) => {
-        const active = activeId === echo.id
+        const arriving = arrivingId === echo.id
+        const active = activeId === echo.id || arriving
         return (
           <button
             key={echo.id}
