@@ -3,10 +3,10 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Radio } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { audioManager } from '@/audio/AudioManager'
+import GalaxyBackdrop from '@/components/GalaxyBackdrop'
 import TypeGlow from '@/components/TypeGlow'
 import { useBooks } from './library/books'
 import type { Book } from './library/books'
-import LibraryStarfield from './library/Starfield'
 import RingCarousel from './library/RingCarousel'
 import PlayerBar from './library/PlayerBar'
 import EchoWall from './library/EchoWall'
@@ -61,7 +61,7 @@ export default function LibraryView() {
       {/* ── 背景：星云渐变 + 星点 canvas ── */}
       <div
         aria-hidden
-        className="absolute inset-0"
+        className="pointer-events-none absolute inset-0"
         style={{
           background:
             'radial-gradient(ellipse 60% 45% at 22% 28%, rgba(61,43,110,0.38) 0%, transparent 70%),' +
@@ -70,7 +70,17 @@ export default function LibraryView() {
             'linear-gradient(180deg, #05060f 0%, #0b1026 52%, #05060f 100%)',
         }}
       />
-      <LibraryStarfield reduced={reduced} />
+      {!reduced && (
+        <GalaxyBackdrop
+          starCount={1600}
+          dustCount={240}
+          travel={2.4}
+          parallax
+          interactive={false}
+          className="pointer-events-none"
+          style={{ position: 'absolute', zIndex: 0 }}
+        />
+      )}
       <EchoField reduced={reduced} />
 
       {/* ── 顶部安全区 HUD：标题（不与环形书廊重叠） ── */}
