@@ -388,9 +388,9 @@ function GalaxyScene({
     const phase = new Float32Array(count)
     const speed = new Float32Array(count)
     const alpha = new Float32Array(count)
-    const gray = new THREE.Color('#3a4868')
+    const gray = new THREE.Color('#2a3448')
     const palette = ['#2a5f9e', '#3d2b6e', '#6e2b55', '#1d8bb8'].map((hex) =>
-      new THREE.Color(hex).lerp(gray, 0.28),
+      new THREE.Color(hex).lerp(gray, 0.4),
     )
     const perp = new THREE.Vector2(-bandDir.y, bandDir.x)
 
@@ -409,7 +409,7 @@ function GalaxyScene({
       color[i * 3 + 2] = c.b * dim
       phase[i] = rand()
       speed[i] = 0.4 + rand() * 1.2
-      alpha[i] = 0.055 + rand() * 0.1
+      alpha[i] = 0.045 + rand() * 0.08
     }
 
     const geo = new THREE.BufferGeometry()
