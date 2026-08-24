@@ -10,6 +10,7 @@ import LibraryStarfield from './library/Starfield'
 import RingCarousel from './library/RingCarousel'
 import PlayerBar from './library/PlayerBar'
 import EchoWall from './library/EchoWall'
+import EchoField from './library/EchoField'
 
 /**
  * <LibraryView> 星空图书馆（view === 'library'）
@@ -17,7 +18,7 @@ import EchoWall from './library/EchoWall'
  * - 拖拽（惯性）/ ← → 方向键 / 自动旋转由 RingCarousel 接管；点击书脊 → 底部 PlayerBar
  * - 标题「星空图书馆」位于页面顶部安全区（pointer-events-none，绝不压住书廊）
  * - 入场：白色隧道式闪光淡入（峰值透明度 ≤0.55，呼应虫洞越迁）
- * - 「宇宙回声」：右上角入口打开留言板（EchoWall），供访客留下并浏览留言
+ * - 「宇宙回声」：右上角打开写信窗；提交后留言化作背景漂浮星，悬停可见卡片
  * - ESC：先关回声墙 / 播放器，再 closeLibrary()；「返回星空」→ closeLibrary()
  * - reduced-motion：关闭漂浮 / 入场闪光 / 自动旋转，保留全部功能
  */
@@ -70,6 +71,7 @@ export default function LibraryView() {
         }}
       />
       <LibraryStarfield reduced={reduced} />
+      <EchoField reduced={reduced} />
 
       {/* ── 顶部安全区 HUD：标题（不与环形书廊重叠） ── */}
       <motion.header
@@ -156,7 +158,7 @@ export default function LibraryView() {
           transition={{ duration: 0.6, delay: reduced ? 0.15 : 0.7 }}
         >
           <p className="font-hud text-[11px] tracking-[0.22em] text-starlight-faint">
-            拖拽或按 ← → 转动书廊 · 点击书籍开始聆听
+            拖拽或按 ← → 转动书廊 · 悬停星点可读回声 · 点击书籍开始聆听
           </p>
         </motion.footer>
       )}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import type { CSSProperties, RefObject } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import type { ThreeEvent } from '@react-three/fiber'
@@ -11,8 +11,7 @@ import * as THREE from 'three'
  * - 漂浮星尘：近景尘埃粒子，极慢漂移 + 闪烁
  * - 远景书房星：roomStars 传入的彩色亮星，呼吸式明暗，悬停亮度 +50%
  * - 视差：鼠标移动时镜头反向微移
- * - 粒子拨动：鼠标 / 手指滑过时，屏幕空间内按高斯衰减推开粒子并带起切向涟漪，
- *   停手后约 0.5s 回落（近景星尘最灵敏，远景银河最沉稳；reduced-motion 关闭）
+ * - 氛围：远星 / 近尘分层漂移 + 呼吸闪烁 + 对角星云缓流（无指针拨动）
  * - 穿越：外部通过 warpRef（0→1）驱动粒子径向飞散，fovRef 驱动镜头 FOV 拉伸
  *   （landing → universe 的穿越 timeline 直接写这两个 ref，不触发 React 重渲染）
  *
@@ -77,51 +76,30 @@ const REDUCED_MOTION =
 
 /* ── Shaders ──────────────────────────────────────── */
 
-/**
- * 指针「拨动」：在屏幕空间（NDC）按高斯衰减把粒子推开，
- * 并叠加少量切向位移，像手指划过水面带起的涟漪。
- * uPush 由指针速度驱动，停手后迅速衰减回 0。
- */
-const POINTER_NUDGE = /* glsl */ `
-uniform vec2 uPointer;
-uniform float uPush;
-uniform float uAspect;
-uniform float uPushRadius;
-
-vec4 nudgeByPointer(vec4 clip, float weight) {
-  if (uPush <= 0.001 || weight <= 0.0) return clip;
-  vec2 ndc = clip.xy / clip.w;
-  vec2 d = ndc - uPointer;
-  d.x *= uAspect;
-  float dist = length(d);
-  float fall = exp(-(dist * dist) / (uPushRadius * uPushRadius));
-  vec2 dir = dist > 1e-4 ? d / dist : vec2(0.0, 1.0);
-  vec2 tangent = vec2(-dir.y, dir.x);
-  vec2 off = (dir * 0.85 + tangent * 0.5) * fall * uPush * weight;
-  off.x /= uAspect;
-  return vec4((ndc + off) * clip.w, clip.z, clip.w);
-}
-`
-
 const STAR_VERT = /* glsl */ `
 uniform float uTime;
 uniform float uWarp;
 uniform float uPixelRatio;
 uniform float uMotion;
-uniform float uPushWeight;
 attribute float aSize;
 attribute vec3 aColor;
 attribute float aPhase;
 attribute float aTwinkle;
 varying vec3 vColor;
 varying float vAlpha;
-${POINTER_NUDGE}
 
 void main() {
   vec3 p = position;
   #ifdef DRIFT
-    p.x += sin(uTime * 0.15 + aPhase * 6.2831) * 0.9 * uMotion;
-    p.y += cos(uTime * 0.11 + aPhase * 4.0) * 0.7 * uMotion;
+    // 近景星尘：缓慢八字漂移（电影感星空，无指针拨动）
+    p.x += sin(uTime * 0.12 + aPhase * 6.2831) * 1.35 * uMotion;
+    p.y += cos(uTime * 0.09 + aPhase * 4.0) * 1.05 * uMotion;
+    p.z += sin(uTime * 0.07 + aPhase * 3.1) * 0.45 * uMotion;
+  #endif
+  #ifdef FAR_DRIFT
+    // 远景银河：极慢横向蠕动，制造深空呼吸
+    p.x += sin(uTime * 0.035 + aPhase * 6.2831) * 0.55 * uMotion;
+    p.y += cos(uTime * 0.028 + aPhase * 5.2) * 0.35 * uMotion;
   #endif
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   float w = uWarp;
@@ -136,7 +114,7 @@ void main() {
   );
   vColor = aColor;
   vAlpha = tw;
-  gl_Position = nudgeByPointer(projectionMatrix * mv, uPushWeight * (1.0 - w));
+  gl_Position = projectionMatrix * mv;
   gl_PointSize = aSize * uPixelRatio * (130.0 / max(1.0, -mv.z)) * (1.0 + w);
 }
 `
@@ -159,14 +137,12 @@ uniform float uWarp;
 uniform float uPixelRatio;
 uniform float uMotion;
 uniform float uHoverIndex;
-uniform float uPushWeight;
 attribute float aSize;
 attribute vec3 aColor;
 attribute float aPhase;
 attribute float aIndex;
 varying vec3 vColor;
 varying float vAlpha;
-${POINTER_NUDGE}
 
 void main() {
   vec4 mv = modelViewMatrix * vec4(position, 1.0);
@@ -180,7 +156,7 @@ void main() {
   float boost = 1.0 + hovered * 0.5;
   vColor = aColor;
   vAlpha = (0.52 + 0.37 * breathe) * boost;
-  gl_Position = nudgeByPointer(projectionMatrix * mv, uPushWeight * (1.0 - w));
+  gl_Position = projectionMatrix * mv;
   gl_PointSize = aSize * breathe * boost * uPixelRatio * (130.0 / max(1.0, -mv.z)) * (1.0 + w);
 }
 `
@@ -192,7 +168,6 @@ uniform float uWarp;
 uniform float uPixelRatio;
 uniform float uMotion;
 uniform vec2 uBandDir;
-uniform float uPushWeight;
 attribute float aSize;
 attribute vec3 aColor;
 attribute float aPhase;
@@ -200,13 +175,12 @@ attribute float aSpeed;
 attribute float aAlpha;
 varying vec3 vColor;
 varying float vAlpha;
-${POINTER_NUDGE}
 
 void main() {
   vec3 p = position;
-  // 沿对角带缓慢漂移（每粒子随机 phase/speed）
-  p.xy += uBandDir * sin(uTime * aSpeed * 0.08 + aPhase * 6.2831) * 2.4 * uMotion;
-  p.y += cos(uTime * aSpeed * 0.05 + aPhase * 4.0) * 0.8 * uMotion;
+  // 沿对角带缓慢漂移（每粒子随机 phase/speed）——电影感星云流，非交互拨动
+  p.xy += uBandDir * sin(uTime * aSpeed * 0.065 + aPhase * 6.2831) * 3.2 * uMotion;
+  p.y += cos(uTime * aSpeed * 0.04 + aPhase * 4.0) * 1.1 * uMotion;
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   float w = uWarp;
   // 穿越：与其余粒子层一致的径向飞散
@@ -221,7 +195,7 @@ void main() {
   );
   vColor = aColor;
   vAlpha = aAlpha * breathe;
-  gl_Position = nudgeByPointer(projectionMatrix * mv, uPushWeight * (1.0 - w));
+  gl_Position = projectionMatrix * mv;
   gl_PointSize = aSize * uPixelRatio * (130.0 / max(1.0, -mv.z)) * (1.0 + w);
 }
 `
@@ -289,57 +263,11 @@ function GalaxyScene({
     return new THREE.Vector2(Math.cos(a), Math.sin(a))
   }, [])
 
-  /* 指针「拨动」状态：NDC 位置 + 由移动速度驱动的强度（停手后衰减） */
-  const pointerNdc = useRef(new THREE.Vector2(0, 0))
-  const pushPower = useRef(0)
-
-  useEffect(() => {
-    if (REDUCED_MOTION) return
-    let last: { x: number; y: number } | null = null
-
-    const track = (cx: number, cy: number) => {
-      const x = (cx / window.innerWidth) * 2 - 1
-      const y = -((cy / window.innerHeight) * 2 - 1)
-      if (last) {
-        const speed = Math.hypot(x - last.x, y - last.y)
-        pushPower.current = Math.min(1, pushPower.current + speed * 12)
-      }
-      last = { x, y }
-      pointerNdc.current.set(x, y)
-    }
-
-    const onPointer = (e: PointerEvent) => track(e.clientX, e.clientY)
-    const onTouch = (e: TouchEvent) => {
-      const t = e.touches[0]
-      if (t) track(t.clientX, t.clientY)
-    }
-    const onLeave = () => {
-      last = null
-    }
-
-    window.addEventListener('pointermove', onPointer, { passive: true })
-    window.addEventListener('touchmove', onTouch, { passive: true })
-    window.addEventListener('pointerup', onLeave, { passive: true })
-    window.addEventListener('touchend', onLeave, { passive: true })
-    return () => {
-      window.removeEventListener('pointermove', onPointer)
-      window.removeEventListener('touchmove', onTouch)
-      window.removeEventListener('pointerup', onLeave)
-      window.removeEventListener('touchend', onLeave)
-    }
-  }, [])
-
-  /** pushWeight：该层对指针拨动的灵敏度（近景星尘最灵敏，远景银河最沉稳） */
-  const makeUniforms = (pushWeight: number) => ({
+  const makeUniforms = () => ({
     uTime: { value: 0 },
     uWarp: { value: 0 },
     uPixelRatio: { value: gl.getPixelRatio() },
     uMotion: { value: motion },
-    uPointer: { value: new THREE.Vector2(0, 0) },
-    uPush: { value: 0 },
-    uAspect: { value: 1 },
-    uPushRadius: { value: 0.62 },
-    uPushWeight: { value: pushWeight },
   })
 
   /* 远景银河星点 */
@@ -524,10 +452,11 @@ function GalaxyScene({
       new THREE.ShaderMaterial({
         vertexShader: STAR_VERT,
         fragmentShader: STAR_FRAG,
-        uniforms: makeUniforms(0.16),
+        uniforms: makeUniforms(),
         transparent: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
+        defines: { FAR_DRIFT: 1 },
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
@@ -538,7 +467,7 @@ function GalaxyScene({
       new THREE.ShaderMaterial({
         vertexShader: STAR_VERT,
         fragmentShader: STAR_FRAG,
-        uniforms: makeUniforms(0.42),
+        uniforms: makeUniforms(),
         transparent: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
@@ -553,7 +482,7 @@ function GalaxyScene({
       new THREE.ShaderMaterial({
         vertexShader: ROOM_STAR_VERT,
         fragmentShader: STAR_FRAG,
-        uniforms: { ...makeUniforms(0.07), uHoverIndex: { value: -1 } },
+        uniforms: { ...makeUniforms(), uHoverIndex: { value: -1 } },
         transparent: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
@@ -567,7 +496,7 @@ function GalaxyScene({
       new THREE.ShaderMaterial({
         vertexShader: NEBULA_FLOW_VERT,
         fragmentShader: NEBULA_FLOW_FRAG,
-        uniforms: { ...makeUniforms(0.28), uBandDir: { value: bandDir } },
+        uniforms: { ...makeUniforms(), uBandDir: { value: bandDir } },
         transparent: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
@@ -579,21 +508,10 @@ function GalaxyScene({
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime
     const warp = warpRef?.current ?? 0
-
-    // 指针强度衰减（约 0.5s 回落），避免停手后仍持续位移
-    if (pushPower.current > 0) {
-      pushPower.current *= Math.pow(0.07, delta)
-      if (pushPower.current < 0.002) pushPower.current = 0
-    }
-    const aspect = state.size.width / Math.max(1, state.size.height)
-
     for (const mat of [starMat, dustMat, roomStarMat, nebulaFlowMat]) {
       mat.uniforms.uTime.value = t
       mat.uniforms.uWarp.value = warp
       mat.uniforms.uPixelRatio.value = gl.getPixelRatio()
-      mat.uniforms.uPointer.value.copy(pointerNdc.current)
-      mat.uniforms.uPush.value = pushPower.current
-      mat.uniforms.uAspect.value = aspect
     }
     // FOV 覆盖（穿越 timeline 写入 fovRef）
     const targetFov = fovRef?.current ?? baseFov

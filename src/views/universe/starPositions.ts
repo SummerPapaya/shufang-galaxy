@@ -1,11 +1,8 @@
 /**
  * 书房星空间分布（universe.md §1-B）：手工排布的固定坐标表。
- * - 25 颗星分布在半径 14–22 的球壳上，方位角约每 14° 一颗（错落抖动），
- *   高度角 −25°~+40°，保证 360° 任意视角都能看到至少 1–2 颗书房星。
+ * - 25 颗星分布在半径 14–22 的球壳上；方位角错落，高度角 −25°~+40°。
  * - 段静（创始人）在初始视角正前方偏上 15°，穿越落地后第一眼可见。
- * - 最近的 2–3 颗（段静、大夏、子欣）size 更大 → 辉光更大更亮，制造纵深感。
- * - v2：mufeng/xiaoxiong 的坐标槽位由 misike/xiaotang 继承，
- *   并新增 5 组坐标（xizi/xiaoguang/zhanghenxiang/yitiaodahe/xiaoyu）补齐 15 星。
+ * - 蔡杉 / 一苇：避开蜜思珂与段静邻域，分别落在 ~246° 与 ~82° 空隙。
  */
 
 export interface StarPosition {
@@ -46,9 +43,9 @@ export const STAR_POSITIONS: StarPosition[] = [
   { id: 'xiali', az: 194, el: 6, r: 21, size: 0.9 },
   { id: 'xiaoxu', az: 237, el: -6, r: 19, size: 0.95 },
   { id: 'youmai', az: 275, el: 30, r: 18, size: 0.95 },
-  /* ── 新增 2 位朗读者：补 294°–360° 的方位角空隙 ── */
-  { id: 'caishan', az: 312, el: 12, r: 19, size: 0.95 },
-  { id: 'yiwei', az: 348, el: 24, r: 17, size: 1.0 },
+  /* ── 新增 2 位：拉开与蜜思珂 / 段静的距离，填更大空隙 ── */
+  { id: 'caishan', az: 246, el: -20, r: 19, size: 0.95 },
+  { id: 'yiwei', az: 82, el: -16, r: 18, size: 1.0 },
 ]
 
 const DEG = Math.PI / 180

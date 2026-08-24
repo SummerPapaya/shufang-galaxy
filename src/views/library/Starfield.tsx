@@ -2,29 +2,17 @@ import { memo, useEffect, useRef } from 'react'
 import { seededRandoms } from '../room/utils'
 
 /**
- * <LibraryStarfield> 图书馆背景星野（轻量 canvas，非 WebGL）
- * - 稀疏星星 + 少量较大星尘；正弦呼吸明暗；最亮的星带十字光芒
- * - 少量金色 / 青色染色星，呼应设计 token
- * - 粒子拨动：鼠标 / 手指滑过时星点被推开并带起切向涟漪，随后弹簧回位
- * - 指针留下一缕金色星尘尾迹 + 邻近星提亮放大，稀疏星野也能读出"被拨动"
- * - reduced-motion：静态绘制一帧，不闪烁也不响应指针
+ * <LibraryStarfield> 图书馆背景星野（轻量 canvas）
+ *
+ * 自然星空氛围（非指针拨动）：
+ * - 远 / 近两层星点，以不同角速度缓慢漂移，形成轻视差
+ * - 正弦呼吸明暗 + 亮星十字光芒
+ * - 偶尔划过的流星（稀疏、慢、淡金）
+ * - reduced-motion：静态一帧
  */
 
-const STAR_COUNT = 340
-/** 稍大的近景星尘：位移一眼能看出来 */
-const DUST_COUNT = 70
-/** 指针影响半径（px） */
-const PUSH_RADIUS = 220
-/** 推开强度（px） */
-const PUSH_STRENGTH = 120
-/** 回位弹簧（刚度 / 阻尼） */
-const SPRING_K = 16
-const SPRING_D = 5.8
-/** 被拨动的星额外提亮 / 放大 */
-const NEAR_GLOW = 2.1
-const NEAR_GROW = 1.15
-/** 尾迹采样上限 */
-const TRAIL_MAX = 18
+const FAR_COUNT = 140
+const NEAR_COUNT = 70
 
 interface Star {
   x: number
@@ -33,41 +21,41 @@ interface Star {
   base: number
   speed: number
   phase: number
-  /** 0–1：<0.12 金色，<0.2 青色，其余月白 */
   tint: number
-  /** 拨动位移与速度（px，绘制时叠加在基准位置上） */
-  ox: number
-  oy: number
-  vx: number
-  vy: number
-  dust: boolean
+  /** 视差层：远慢近快 */
+  layer: 'far' | 'near'
 }
 
-function makeField(): Star[] {
-  const total = STAR_COUNT + DUST_COUNT
-  const rand = seededRandoms('starlight-library', total * 6)
+interface Meteor {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  life: number
+  maxLife: number
+}
+
+function makeStars(): Star[] {
+  const total = FAR_COUNT + NEAR_COUNT
+  const rand = seededRandoms('starlight-library-v2', total * 6)
   const stars: Star[] = []
   for (let i = 0; i < total; i++) {
-    const dust = i >= STAR_COUNT
+    const near = i >= FAR_COUNT
     stars.push({
       x: rand[i * 6] ?? 0,
       y: rand[i * 6 + 1] ?? 0,
-      r: dust ? 1.6 + (rand[i * 6 + 2] ?? 0) * 2.4 : 0.55 + (rand[i * 6 + 2] ?? 0) * 1.5,
-      base: dust ? 0.22 + (rand[i * 6 + 3] ?? 0) * 0.28 : 0.28 + (rand[i * 6 + 3] ?? 0) * 0.62,
-      speed: 0.4 + (rand[i * 6 + 4] ?? 0) * 1.2,
+      r: near ? 0.7 + (rand[i * 6 + 2] ?? 0) * 1.6 : 0.35 + (rand[i * 6 + 2] ?? 0) * 1.1,
+      base: near ? 0.35 + (rand[i * 6 + 3] ?? 0) * 0.55 : 0.2 + (rand[i * 6 + 3] ?? 0) * 0.5,
+      speed: 0.35 + (rand[i * 6 + 4] ?? 0) * 1.1,
       phase: (rand[i * 6 + 5] ?? 0) * Math.PI * 2,
       tint: rand[i * 6 + 2] ?? 0,
-      ox: 0,
-      oy: 0,
-      vx: 0,
-      vy: 0,
-      dust,
+      layer: near ? 'near' : 'far',
     })
   }
   return stars
 }
 
-const STARS = makeField()
+const STARS = makeStars()
 
 function starColor(tint: number): string {
   if (tint < 0.12) return '#ffd9a0'
@@ -75,71 +63,8 @@ function starColor(tint: number): string {
   return '#f5f0e6'
 }
 
-function hexAlpha(hex: string, a: number): string {
-  const n = Number.parseInt(hex.slice(1), 16)
-  const r = (n >> 16) & 255
-  const g = (n >> 8) & 255
-  const b = n & 255
-  return `rgba(${r},${g},${b},${a})`
-}
-
 export default memo(function LibraryStarfield({ reduced }: { reduced: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  /** 指针位置（px，画布坐标）与由移动速度驱动的强度 */
-  const pointer = useRef({ x: -9999, y: -9999, power: 0, inside: false })
-  const trail = useRef<{ x: number; y: number; life: number }[]>([])
-
-  /* 指针 / 触摸跟踪：速度越快，拨动越强 */
-  useEffect(() => {
-    if (reduced) return
-    let last: { x: number; y: number } | null = null
-
-    const track = (cx: number, cy: number) => {
-      const rect = canvasRef.current?.getBoundingClientRect()
-      const x = cx - (rect?.left ?? 0)
-      const y = cy - (rect?.top ?? 0)
-      const w = rect?.width ?? 0
-      const h = rect?.height ?? 0
-      const inside = x >= 0 && y >= 0 && x <= w && y <= h
-      if (last) {
-        const speed = Math.hypot(x - last.x, y - last.y)
-        pointer.current.power = Math.min(1, pointer.current.power + speed / 55)
-      }
-      last = { x, y }
-      pointer.current.x = x
-      pointer.current.y = y
-      pointer.current.inside = inside
-      if (inside) {
-        const t = trail.current
-        const prev = t[t.length - 1]
-        if (!prev || Math.hypot(prev.x - x, prev.y - y) > 10) {
-          t.push({ x, y, life: 1 })
-          if (t.length > TRAIL_MAX) t.shift()
-        }
-      }
-    }
-
-    const onPointer = (e: PointerEvent) => track(e.clientX, e.clientY)
-    const onTouch = (e: TouchEvent) => {
-      const t = e.touches[0]
-      if (t) track(t.clientX, t.clientY)
-    }
-    const onLeave = () => {
-      last = null
-      pointer.current.inside = false
-    }
-
-    window.addEventListener('pointermove', onPointer, { passive: true })
-    window.addEventListener('touchmove', onTouch, { passive: true })
-    window.addEventListener('pointerleave', onLeave, { passive: true })
-    window.addEventListener('touchend', onLeave, { passive: true })
-    return () => {
-      window.removeEventListener('pointermove', onPointer)
-      window.removeEventListener('touchmove', onTouch)
-      window.removeEventListener('pointerleave', onLeave)
-      window.removeEventListener('touchend', onLeave)
-    }
-  }, [reduced])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -148,7 +73,20 @@ export default memo(function LibraryStarfield({ reduced }: { reduced: boolean })
     if (!ctx) return
 
     let raf = 0
-    let prev = performance.now()
+    let meteor: Meteor | null = null
+    let nextMeteorAt = performance.now() + 4200
+
+    const spawnMeteor = (w: number, h: number) => {
+      const fromLeft = Math.random() > 0.45
+      meteor = {
+        x: fromLeft ? -20 : w * (0.2 + Math.random() * 0.5),
+        y: h * (0.05 + Math.random() * 0.35),
+        vx: fromLeft ? 180 + Math.random() * 120 : 140 + Math.random() * 100,
+        vy: 70 + Math.random() * 50,
+        life: 0,
+        maxLife: 0.9 + Math.random() * 0.5,
+      }
+    }
 
     const draw = (now: number) => {
       const dpr = Math.min(window.devicePixelRatio || 1, 2)
@@ -165,116 +103,30 @@ export default memo(function LibraryStarfield({ reduced }: { reduced: boolean })
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
       ctx.clearRect(0, 0, w, h)
       const t = now / 1000
-      // 帧间隔上限 1/30s，避免切后台回来时一次性弹飞
-      const dt = Math.min(0.033, Math.max(0.001, (now - prev) / 1000))
-      prev = now
-
-      const p = pointer.current
-      if (!reduced && p.power > 0) {
-        p.power *= Math.pow(0.14, dt)
-        if (p.power < 0.002) p.power = 0
-      }
-
-      if (!reduced) {
-        for (const node of trail.current) node.life *= Math.pow(0.08, dt)
-        trail.current = trail.current.filter((node) => node.life > 0.03)
-      }
-
-      /* ── 指针尾迹：金色星尘带，稀疏星野上也能读出划过的路径 ── */
-      if (!reduced && trail.current.length > 0) {
-        ctx.save()
-        ctx.globalCompositeOperation = 'lighter'
-        for (const node of trail.current) {
-          const rad = 28 + 36 * node.life
-          const g = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, rad)
-          g.addColorStop(0, `rgba(255,217,160,${0.22 * node.life})`)
-          g.addColorStop(0.45, `rgba(174,230,255,${0.08 * node.life})`)
-          g.addColorStop(1, 'rgba(0,0,0,0)')
-          ctx.fillStyle = g
-          ctx.beginPath()
-          ctx.arc(node.x, node.y, rad, 0, Math.PI * 2)
-          ctx.fill()
-        }
-        ctx.restore()
-      }
-
-      /* ── 指针所在处一汪柔光（停手也在，让"手在拨星"持续可读） ── */
-      if (!reduced && p.inside) {
-        ctx.save()
-        ctx.globalCompositeOperation = 'lighter'
-        const glowR = 70 + p.power * 50
-        const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, glowR)
-        g.addColorStop(0, `rgba(255,217,160,${0.16 + p.power * 0.18})`)
-        g.addColorStop(0.4, `rgba(174,230,255,${0.07 + p.power * 0.08})`)
-        g.addColorStop(1, 'rgba(0,0,0,0)')
-        ctx.fillStyle = g
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, glowR, 0, Math.PI * 2)
-        ctx.fill()
-        ctx.restore()
-      }
 
       for (const s of STARS) {
         const alpha = reduced
           ? s.base * 0.8
           : s.base * (0.55 + 0.45 * Math.sin(t * s.speed + s.phase))
-        const bx = s.x * w
-        const by = s.y * h
+        // 缓慢漂移：远层慢、近层稍快，形成轻视差（不做指针交互）
+        const driftAmp = s.layer === 'near' ? 10 : 4
+        const driftSpeed = s.layer === 'near' ? 0.045 : 0.02
+        const dx = reduced ? 0 : Math.sin(t * driftSpeed + s.phase) * driftAmp
+        const dy = reduced ? 0 : Math.cos(t * driftSpeed * 0.85 + s.phase * 1.3) * driftAmp * 0.55
+        const x = ((s.x * w + dx) % w + w) % w
+        const y = ((s.y * h + dy) % h + h) % h
 
-        // 指针邻近度 0–1：同时驱动位移与提亮
-        let near = 0
-
-        if (!reduced) {
-          const dx = bx + s.ox - p.x
-          const dy = by + s.oy - p.y
-          const dist = Math.hypot(dx, dy)
-          if (dist < PUSH_RADIUS && (p.inside || p.power > 0)) {
-            const fall = Math.exp(-(dist * dist) / (PUSH_RADIUS * PUSH_RADIUS * 0.36))
-            const presence = p.inside ? 0.35 : 0
-            near = fall * Math.min(1, presence + p.power)
-            if (p.power > 0) {
-              const ux = dist > 0.01 ? dx / dist : 0
-              const uy = dist > 0.01 ? dy / dist : -1
-              const push = near * PUSH_STRENGTH * (s.dust ? 1.35 : 0.7 + s.r * 0.45)
-              s.vx += (ux * 0.85 - uy * 0.45) * push * dt * 14
-              s.vy += (uy * 0.85 + ux * 0.45) * push * dt * 14
-            }
-          }
-          // 弹簧回位
-          s.vx += (-s.ox * SPRING_K - s.vx * SPRING_D) * dt
-          s.vy += (-s.oy * SPRING_K - s.vy * SPRING_D) * dt
-          s.ox += s.vx * dt
-          s.oy += s.vy * dt
-        }
-
-        const x = bx + s.ox
-        const y = by + s.oy
-        const radius = s.r * (1 + NEAR_GROW * near)
-
-        ctx.globalAlpha = Math.max(0.05, Math.min(1, alpha * (1 + NEAR_GLOW * near)))
+        ctx.globalAlpha = Math.max(0.05, Math.min(1, alpha))
         ctx.fillStyle = starColor(s.tint)
         ctx.beginPath()
-        ctx.arc(x, y, radius, 0, Math.PI * 2)
+        ctx.arc(x, y, s.r, 0, Math.PI * 2)
         ctx.fill()
 
-        // 被拨动 / 邻近的星带一圈柔光
-        if (near > 0.08) {
-          const glow = ctx.createRadialGradient(x, y, 0, x, y, radius * (s.dust ? 8 : 7))
-          const c = starColor(s.tint)
-          glow.addColorStop(0, hexAlpha(c, 0.85))
-          glow.addColorStop(1, 'rgba(0,0,0,0)')
-          ctx.globalAlpha = Math.min(0.7, near * 0.72)
-          ctx.fillStyle = glow
-          ctx.beginPath()
-          ctx.arc(x, y, radius * (s.dust ? 8 : 7), 0, Math.PI * 2)
-          ctx.fill()
-        }
-        // 亮星十字光芒
-        if (!s.dust && s.base > 0.78) {
-          ctx.globalAlpha = Math.max(0.03, alpha * 0.35)
-          ctx.lineWidth = 0.6
+        if (s.base > 0.78) {
+          ctx.globalAlpha = Math.max(0.03, alpha * 0.32)
+          ctx.lineWidth = 0.55
           ctx.strokeStyle = starColor(s.tint)
-          const len = s.r * 4.5
+          const len = s.r * 4.2
           ctx.beginPath()
           ctx.moveTo(x - len, y)
           ctx.lineTo(x + len, y)
@@ -283,6 +135,41 @@ export default memo(function LibraryStarfield({ reduced }: { reduced: boolean })
           ctx.stroke()
         }
       }
+
+      if (!reduced) {
+        if (!meteor && now >= nextMeteorAt) {
+          spawnMeteor(w, h)
+          nextMeteorAt = now + 5500 + Math.random() * 7000
+        }
+        if (meteor) {
+          const dt = 1 / 60
+          meteor.life += dt
+          meteor.x += meteor.vx * dt
+          meteor.y += meteor.vy * dt
+          const fade = 1 - meteor.life / meteor.maxLife
+          if (fade <= 0 || meteor.x > w + 40 || meteor.y > h + 40) {
+            meteor = null
+          } else {
+            const len = 36 + 28 * fade
+            const ang = Math.atan2(meteor.vy, meteor.vx)
+            ctx.save()
+            ctx.globalCompositeOperation = 'lighter'
+            ctx.strokeStyle = `rgba(255,217,160,${0.45 * fade})`
+            ctx.lineWidth = 1.2
+            ctx.lineCap = 'round'
+            ctx.beginPath()
+            ctx.moveTo(meteor.x, meteor.y)
+            ctx.lineTo(meteor.x - Math.cos(ang) * len, meteor.y - Math.sin(ang) * len)
+            ctx.stroke()
+            ctx.fillStyle = `rgba(245,240,230,${0.7 * fade})`
+            ctx.beginPath()
+            ctx.arc(meteor.x, meteor.y, 1.4, 0, Math.PI * 2)
+            ctx.fill()
+            ctx.restore()
+          }
+        }
+      }
+
       ctx.globalAlpha = 1
       if (!reduced) raf = requestAnimationFrame(draw)
     }
