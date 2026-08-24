@@ -141,8 +141,11 @@ varying float vAlpha;
 void main() {
   vec2 c = gl_PointCoord - 0.5;
   float d = length(c);
-  float a = smoothstep(0.5, 0.05, d);
-  gl_FragColor = vec4(vColor, a * vAlpha);
+  // 乳白核 + 柔光晕：背景星接近散发着光晕的乳白色，而不是彩色火花
+  float core = smoothstep(0.14, 0.0, d);
+  float halo = smoothstep(0.5, 0.06, d) * 0.48;
+  vec3 milk = mix(vColor, vec3(0.96, 0.94, 0.90), 0.35);
+  gl_FragColor = vec4(milk, (core + halo) * vAlpha);
 }
 `
 
@@ -305,10 +308,9 @@ function GalaxyScene({
     const color = new Float32Array(starCount * 3)
     const phase = new Float32Array(starCount)
     const twinkle = new Float32Array(starCount)
-    const cWarm = new THREE.Color('#f5f0e6')
-    const cGold = new THREE.Color('#ffd9a0')
-    const cCyan = new THREE.Color('#aee6ff')
-    const cViolet = new THREE.Color('#b48cff')
+    const cMilk = new THREE.Color('#f6f2ea')
+    const cWarm = new THREE.Color('#f3efe4')
+    const cSoft = new THREE.Color('#ece8dc')
     const perp = new THREE.Vector2(-bandDir.y, bandDir.x)
 
     for (let i = 0; i < starCount; i++) {
@@ -328,10 +330,9 @@ function GalaxyScene({
       pos[i * 3 + 1] = y
       pos[i * 3 + 2] = -25 - rand() * 65
 
-      size[i] = 0.6 + rand() * rand() * 2.2
+      size[i] = 0.85 + rand() * rand() * 2.6
       const pick = rand()
-      const c =
-        pick < 0.55 ? cWarm : pick < 0.72 ? cGold : pick < 0.88 ? cCyan : cViolet
+      const c = pick < 0.72 ? cMilk : pick < 0.92 ? cWarm : cSoft
       color[i * 3] = c.r
       color[i * 3 + 1] = c.g
       color[i * 3 + 2] = c.b
@@ -387,9 +388,9 @@ function GalaxyScene({
     const phase = new Float32Array(count)
     const speed = new Float32Array(count)
     const alpha = new Float32Array(count)
-    const gray = new THREE.Color('#6a7898')
-    const palette = ['#2a5f9e', '#3d2b6e', '#6e2b55', '#1d8bb8'].map((hex) =>
-      new THREE.Color(hex).lerp(gray, 0.18),
+    const gray = new THREE.Color('#1c2233')
+    const palette = ['#243044', '#1e2438', '#2a2438'].map((hex) =>
+      new THREE.Color(hex).lerp(gray, 0.45),
     )
     const perp = new THREE.Vector2(-bandDir.y, bandDir.x)
 
@@ -408,7 +409,7 @@ function GalaxyScene({
       color[i * 3 + 2] = c.b * dim
       phase[i] = rand()
       speed[i] = 0.4 + rand() * 1.2
-      alpha[i] = 0.07 + rand() * 0.14
+      alpha[i] = 0.035 + rand() * 0.07
     }
 
     const geo = new THREE.BufferGeometry()
@@ -459,18 +460,18 @@ function GalaxyScene({
     return geo
   }, [roomStars, bandDir])
 
-  /* 体积累星云色斑：多层、更亮，青蓝 + 玫瑰（参考视频的气体云，仍守品牌色） */
+  /* 体积累星云色斑：压暗，只留很浅的青蓝 / 玫瑰呼吸 */
   const nebulae = useMemo(() => {
-    const voidTint = new THREE.Color(0.02, 0.04, 0.1)
+    const voidTint = new THREE.Color(0.008, 0.01, 0.028)
     const defs = [
-      { color: '#1a6aa8', scale: [88, 52, 1] as const, pos: [-6, 4, -72] as const, opacity: 0.42, spin: 0.018 },
-      { color: '#3a1f4e', scale: [56, 38, 1] as const, pos: [18, -10, -60] as const, opacity: 0.28, spin: -0.012 },
-      { color: '#0d3a6e', scale: [96, 58, 1] as const, pos: [4, 2, -84] as const, opacity: 0.5, spin: 0.008 },
-      { color: '#6e2b55', scale: [44, 30, 1] as const, pos: [-22, -6, -54] as const, opacity: 0.22, spin: -0.02 },
-      { color: '#1488aa', scale: [38, 26, 1] as const, pos: [12, 10, -48] as const, opacity: 0.26, spin: 0.025 },
+      { color: '#1a3a62', scale: [88, 52, 1] as const, pos: [-6, 4, -72] as const, opacity: 0.14, spin: 0.018 },
+      { color: '#2a1838', scale: [56, 38, 1] as const, pos: [18, -10, -60] as const, opacity: 0.09, spin: -0.012 },
+      { color: '#0c2848', scale: [96, 58, 1] as const, pos: [4, 2, -84] as const, opacity: 0.18, spin: 0.008 },
+      { color: '#3a1c32', scale: [44, 30, 1] as const, pos: [-22, -6, -54] as const, opacity: 0.08, spin: -0.02 },
+      { color: '#0e4a5c', scale: [38, 26, 1] as const, pos: [12, 10, -48] as const, opacity: 0.1, spin: 0.025 },
     ]
     return defs.map((d) => {
-      const darkened = `#${new THREE.Color(d.color).lerp(voidTint, 0.32).getHexString()}`
+      const darkened = `#${new THREE.Color(d.color).lerp(voidTint, 0.68).getHexString()}`
       return { ...d, tex: makeNebulaTexture(darkened) }
     })
   }, [])
@@ -640,19 +641,20 @@ export default function GalaxyBackdrop({
         zIndex: 0,
         /* WebGL 不可用时的 CSS 径向渐变 fallback（design.md §2 性能护栏） */
         background:
-          'radial-gradient(ellipse 120% 80% at 30% 20%, var(--nebula-violet) 0%, transparent 55%),' +
-          'radial-gradient(ellipse 90% 70% at 75% 70%, var(--nebula-rose) 0%, transparent 50%),' +
-          'radial-gradient(ellipse 140% 100% at 50% 50%, var(--nebula-mid) 0%, var(--nebula-deep) 45%, var(--void) 100%)',
+          'radial-gradient(ellipse 120% 80% at 30% 20%, rgba(28,22,52,0.12) 0%, transparent 55%),' +
+          'radial-gradient(ellipse 90% 70% at 75% 70%, rgba(42,18,36,0.08) 0%, transparent 50%),' +
+          'radial-gradient(ellipse 140% 100% at 50% 50%, #03050c 0%, #010208 45%, #000105 100%)',
         ...style,
       }}
     >
       <Canvas
         camera={{ fov: baseFov, position: [0, 0, 10], near: 0.1, far: 220 }}
         dpr={[1, 2]}
-        gl={{ antialias: false, alpha: true, powerPreference: 'high-performance' }}
+        gl={{ antialias: false, alpha: false, powerPreference: 'high-performance' }}
         raycaster={{ params: { Points: { threshold: 2.2 } } as unknown as THREE.RaycasterParameters }}
         style={{ position: 'absolute', inset: 0, pointerEvents: interactive ? 'auto' : 'none' }}
       >
+        <color attach="background" args={['#010208']} />
         <GalaxyScene
           starCount={starCount}
           dustCount={dustCount}

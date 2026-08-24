@@ -5,8 +5,8 @@
 @layer base {
   :root {
     /* ── 「一个人的书房 · 平行宇宙」设计 token（design.md §3） ── */
-    --void: #030510;
-    --nebula-deep: #070c20;
+    --void: #010208;
+    --nebula-deep: #040814;
     --nebula-mid: #131a42;
     --nebula-violet: #2c2258;
     --nebula-rose: #4a1f42;
@@ -122,6 +122,33 @@
 
   .scrollbar-starfield::-webkit-scrollbar-corner {
     background: transparent;
+  }
+
+  /* 宇宙回声星：外圈引导光晕 */
+  .echo-star-ring {
+    animation: echo-star-ring 2.4s ease-out infinite;
+  }
+
+  @keyframes echo-star-ring {
+    0% {
+      transform: scale(0.5);
+      opacity: 0.85;
+    }
+    70% {
+      transform: scale(1.55);
+      opacity: 0;
+    }
+    100% {
+      transform: scale(1.55);
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .echo-star-ring {
+      animation: none;
+      opacity: 0.4;
+    }
   }
 
   /* Landing 整页 SLOGAN（伍尔夫引言打字机）：月白 + 柔和星光/暖金辉光 */

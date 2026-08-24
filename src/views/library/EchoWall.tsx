@@ -8,13 +8,12 @@ import {
   useEchoes,
   validateEcho,
 } from './echoes'
-import type { EchoFieldError } from './echoes'
+import type { Echo, EchoFieldError } from './echoes'
 
 /**
  * <EchoWall> 「宇宙回声」留言表单
- * - 提交后回声化为星空中的漂浮星（见 EchoField），此处只负责写信
- * - 配色：浅月白面板 + 深墨字，保证可读；去掉过重的深空玻璃感
- * - ESC / 遮罩 / 关闭按钮退出
+ * - 深空玻璃面板 + 月白文字，保证可读
+ * - 提交后把回声交给父级做「化作星星飞入星空」动效
  */
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
@@ -22,8 +21,7 @@ const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 interface EchoWallProps {
   reduced: boolean
   onClose: () => void
-  /** 提交成功后回调（父级可关窗，让新星出现在背景） */
-  onSubmitted?: () => void
+  onSubmitted?: (echo: Echo, origin: { x: number; y: number }) => void
 }
 
 export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProps) {
@@ -34,6 +32,7 @@ export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProp
   const [errors, setErrors] = useState<EchoFieldError>({})
   const [sent, setSent] = useState(false)
   const nameRef = useRef<HTMLInputElement>(null)
+  const submitRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     nameRef.current?.focus()
@@ -53,19 +52,20 @@ export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProp
     const found = validateEcho(draft)
     setErrors(found)
     if (Object.keys(found).length > 0) return
-    submit(draft)
-    setMessage('')
+    const echo = submit(draft)
+    const rect = submitRef.current?.getBoundingClientRect()
+    const origin = {
+      x: (rect?.left ?? window.innerWidth / 2) + (rect?.width ?? 0) / 2,
+      y: (rect?.top ?? window.innerHeight / 2) + (rect?.height ?? 0) / 2,
+    }
     setSent(true)
-    window.setTimeout(() => {
-      onSubmitted?.()
-      onClose()
-    }, 900)
+    onSubmitted?.(echo, origin)
   }
 
   const fieldBase =
-    'w-full rounded border bg-[#f7f3ea] px-3 py-2.5 font-sans text-[14px] text-[#1a1f33] ' +
-    'outline-none transition-colors placeholder:text-[#1a1f33]/35 ' +
-    'focus:border-[#c9a56a] focus:bg-white'
+    'w-full rounded-md border bg-[rgba(6,10,24,0.88)] px-3 py-2.5 font-sans text-[15px] text-[#f6f2ea] ' +
+    'outline-none transition-colors placeholder:text-[rgba(245,240,230,0.42)] ' +
+    'focus:border-[rgba(255,217,160,0.65)] focus:bg-[rgba(10,14,32,0.95)]'
 
   return (
     <motion.div
@@ -78,7 +78,10 @@ export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProp
       <div
         aria-hidden
         className="absolute inset-0"
-        style={{ background: 'rgba(8,10,22,0.55)' }}
+        style={{
+          background: 'rgba(3,5,14,0.72)',
+          backdropFilter: 'blur(10px)',
+        }}
         onClick={onClose}
       />
 
@@ -86,17 +89,20 @@ export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProp
         role="dialog"
         aria-modal="true"
         aria-label="宇宙回声留言"
-        className="relative w-full max-w-[440px] overflow-hidden rounded-xl border border-[#d8c9a8]/55 shadow-[0_20px_60px_rgba(0,0,0,0.4)]"
-        style={{ background: 'linear-gradient(180deg, #f3eee3 0%, #e8e0d0 100%)' }}
+        className="relative w-full max-w-[440px] overflow-hidden rounded-xl border border-gold/30 shadow-[0_24px_80px_rgba(0,0,0,0.55)]"
+        style={{
+          background:
+            'linear-gradient(180deg, rgba(18,24,48,0.96) 0%, rgba(8,12,28,0.96) 100%)',
+        }}
         initial={{ opacity: 0, y: reduced ? 0 : 14 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: reduced ? 0 : 8 }}
         transition={{ duration: 0.28, ease: EASE }}
       >
-        <header className="flex items-start justify-between gap-3 border-b border-[#1a1f33]/10 px-5 py-4">
+        <header className="flex items-start justify-between gap-3 border-b border-white/10 px-5 py-4">
           <div>
-            <h2 className="font-serif text-[20px] tracking-[0.04em] text-[#1a1f33]">宇宙回声</h2>
-            <p className="mt-1 font-sans text-[12.5px] leading-relaxed text-[#1a1f33]/55">
+            <h2 className="font-serif text-[21px] tracking-[0.04em] text-[#f6f2ea]">宇宙回声</h2>
+            <p className="mt-1 font-sans text-[13px] leading-relaxed text-[rgba(245,240,230,0.82)]">
               写下一句，它会化作星空里的一颗星
             </p>
           </div>
@@ -105,7 +111,7 @@ export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProp
             data-cursor="interactive"
             aria-label="关闭"
             onClick={onClose}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#1a1f33]/2 text-[#1a1f33]/55 transition-colors hover:border-[#1a1f33]/45 hover:text-[#1a1f33]"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[rgba(245,240,230,0.28)] text-[rgba(245,240,230,0.75)] transition-colors hover:border-gold/50 hover:text-starlight"
           >
             <X className="h-3.5 w-3.5" aria-hidden />
           </button>
@@ -115,9 +121,9 @@ export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProp
           <div>
             <label
               htmlFor="echo-name"
-              className="mb-1.5 block font-hud text-[10px] uppercase tracking-[0.22em] text-[#1a1f33]/5"
+              className="mb-1.5 block font-hud text-[10px] uppercase tracking-[0.22em] text-[rgba(245,240,230,0.78)]"
             >
-              昵称 <span className="text-[#9a6b2f]">*</span>
+              昵称 <span className="text-gold">*</span>
             </label>
             <input
               id="echo-name"
@@ -127,19 +133,19 @@ export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProp
               onChange={(e) => setName(e.target.value)}
               placeholder="星海里怎么称呼你"
               aria-invalid={!!errors.name}
-              className={cn(fieldBase, errors.name ? 'border-[#c45c5c]' : 'border-[#1a1f33]/15')}
+              className={cn(fieldBase, errors.name ? 'border-[#ff8f8f]/70' : 'border-white/15')}
             />
             {errors.name && (
-              <p className="mt-1.5 font-sans text-[12px] text-[#a33a3a]">{errors.name}</p>
+              <p className="mt-1.5 font-sans text-[12px] text-[#ffb4b4]">{errors.name}</p>
             )}
           </div>
 
           <div>
             <label
               htmlFor="echo-email"
-              className="mb-1.5 block font-hud text-[10px] uppercase tracking-[0.22em] text-[#1a1f33]/5"
+              className="mb-1.5 block font-hud text-[10px] uppercase tracking-[0.22em] text-[rgba(245,240,230,0.78)]"
             >
-              邮箱 <span className="normal-case tracking-normal">（可选，不公开）</span>
+              邮箱 <span className="normal-case tracking-normal text-[rgba(245,240,230,0.62)]">（可选，不公开）</span>
             </label>
             <input
               id="echo-email"
@@ -148,19 +154,19 @@ export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProp
               onChange={(e) => setEmail(e.target.value)}
               placeholder="想收到回信就留一个"
               aria-invalid={!!errors.email}
-              className={cn(fieldBase, errors.email ? 'border-[#c45c5c]' : 'border-[#1a1f33]/15')}
+              className={cn(fieldBase, errors.email ? 'border-[#ff8f8f]/70' : 'border-white/15')}
             />
             {errors.email && (
-              <p className="mt-1.5 font-sans text-[12px] text-[#a33a3a]">{errors.email}</p>
+              <p className="mt-1.5 font-sans text-[12px] text-[#ffb4b4]">{errors.email}</p>
             )}
           </div>
 
           <div>
             <label
               htmlFor="echo-message"
-              className="mb-1.5 block font-hud text-[10px] uppercase tracking-[0.22em] text-[#1a1f33]/5"
+              className="mb-1.5 block font-hud text-[10px] uppercase tracking-[0.22em] text-[rgba(245,240,230,0.78)]"
             >
-              留言 <span className="text-[#9a6b2f]">*</span>
+              留言 <span className="text-gold">*</span>
             </label>
             <textarea
               id="echo-message"
@@ -173,27 +179,29 @@ export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProp
               className={cn(
                 fieldBase,
                 'resize-none leading-relaxed',
-                errors.message ? 'border-[#c45c5c]' : 'border-[#1a1f33]/15',
+                errors.message ? 'border-[#ff8f8f]/70' : 'border-white/15',
               )}
             />
             <div className="mt-1.5 flex items-center justify-between gap-3">
               {errors.message ? (
-                <p className="font-sans text-[12px] text-[#a33a3a]">{errors.message}</p>
+                <p className="font-sans text-[12px] text-[#ffb4b4]">{errors.message}</p>
               ) : (
-                <span className="font-sans text-[11px] text-[#1a1f33]/4">
+                <span className="font-sans text-[12px] text-[rgba(245,240,230,0.58)]">
                   星空中已有 {echoes.length} 颗回声
                 </span>
               )}
-              <span className="shrink-0 font-hud text-[10px] tracking-[0.12em] text-[#1a1f33]/4">
+              <span className="shrink-0 font-hud text-[10px] tracking-[0.12em] text-[rgba(245,240,230,0.58)]">
                 {message.length} / {MESSAGE_MAX}
               </span>
             </div>
           </div>
 
           <button
+            ref={submitRef}
             type="submit"
             data-cursor="interactive"
-            className="mt-1 flex items-center justify-center gap-2 rounded border border-[#1a1f33]/25 bg-[#1a1f33] px-4 py-2.5 font-hud text-[11px] uppercase tracking-[0.2em] text-[#f5f0e6] transition-colors hover:bg-[#2a3148]"
+            disabled={sent}
+            className="mt-1 flex items-center justify-center gap-2 rounded-full border border-gold/55 px-4 py-2.5 font-hud text-[11px] uppercase tracking-[0.2em] text-gold transition-colors hover:border-gold hover:bg-gold/10 hover:text-starlight disabled:opacity-60"
           >
             <Send className="h-3.5 w-3.5" aria-hidden />
             送入星海
@@ -203,12 +211,12 @@ export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProp
             {sent && (
               <motion.p
                 role="status"
-                className="text-center font-sans text-[13px] text-[#6b542e]"
+                className="text-center font-sans text-[13px] text-gold"
                 initial={{ opacity: 0, y: reduced ? 0 : -4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
               >
-                已化作一颗星，去星空里找它吧
+                正在化作一颗星…
               </motion.p>
             )}
           </AnimatePresence>

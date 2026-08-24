@@ -10,7 +10,78 @@ import type { Book } from './library/books'
 import RingCarousel from './library/RingCarousel'
 import PlayerBar from './library/PlayerBar'
 import EchoWall from './library/EchoWall'
-import EchoField from './library/EchoField'
+import EchoField, { placeEcho } from './library/EchoField'
+import type { Echo } from './library/echoes'
+
+/** 提交后：留言化作一颗带尾迹的星，沿弧线飞入星空落点 */
+function FlyingEchoStar({
+  fromX,
+  fromY,
+  toX,
+  toY,
+  reduced,
+}: {
+  fromX: number
+  fromY: number
+  toX: number
+  toY: number
+  reduced: boolean
+}) {
+  const midX = fromX + (toX - fromX) * 0.42
+  const midY = Math.min(fromY, toY) - Math.min(160, Math.abs(toY - fromY) * 0.38 + 56)
+
+  return (
+    <motion.div
+      aria-hidden
+      className="pointer-events-none fixed z-[80]"
+      initial={{
+        left: fromX,
+        top: fromY,
+        x: '-50%',
+        y: '-50%',
+        scale: 2.35,
+        opacity: 1,
+      }}
+      animate={{
+        left: [fromX, midX, toX],
+        top: [fromY, midY, toY],
+        scale: [2.35, 1.15, 0.72],
+        opacity: [1, 1, 1],
+      }}
+      exit={{ opacity: 0, scale: 0.35 }}
+      transition={
+        reduced
+          ? { duration: 0.05 }
+          : { duration: 1.05, times: [0, 0.38, 1], ease: [0.22, 1, 0.36, 1] }
+      }
+    >
+      <span
+        className="absolute left-1/2 top-1/2 block rounded-full"
+        style={{
+          width: 42,
+          height: 42,
+          marginLeft: -21,
+          marginTop: -21,
+          background:
+            'radial-gradient(circle, rgba(245,240,230,0.55) 0%, rgba(255,217,160,0.22) 38%, transparent 70%)',
+          filter: 'blur(1px)',
+        }}
+      />
+      <span
+        className="absolute left-1/2 top-1/2 block rounded-full"
+        style={{
+          width: 14,
+          height: 14,
+          marginLeft: -7,
+          marginTop: -7,
+          background: '#f6f2ea',
+          boxShadow:
+            '0 0 10px #f6f2ea, 0 0 26px rgba(255,217,160,0.85), 0 0 52px rgba(255,217,160,0.4)',
+        }}
+      />
+    </motion.div>
+  )
+}
 
 /**
  * <LibraryView> 星空图书馆（view === 'library'）
@@ -29,6 +100,13 @@ export default function LibraryView() {
 
   const [activeBook, setActiveBook] = useState<Book | null>(null)
   const [echoOpen, setEchoOpen] = useState(false)
+  const [flyEcho, setFlyEcho] = useState<{
+    echo: Echo
+    fromX: number
+    fromY: number
+    toX: number
+    toY: number
+  } | null>(null)
 
   const handleSelect = useCallback((book: Book) => {
     setActiveBook(book)
@@ -40,6 +118,25 @@ export default function LibraryView() {
   }, [])
 
   const closeEcho = useCallback(() => setEchoOpen(false), [])
+
+  const handleEchoSubmitted = useCallback((echo: Echo, origin: { x: number; y: number }) => {
+    const slot = placeEcho(echo, 0)
+    setFlyEcho({
+      echo,
+      fromX: origin.x,
+      fromY: origin.y,
+      toX: slot.x * window.innerWidth,
+      toY: slot.y * window.innerHeight,
+    })
+    setEchoOpen(false)
+  }, [])
+
+  useEffect(() => {
+    if (!flyEcho) return
+    const ms = reduced ? 80 : 1100
+    const t = window.setTimeout(() => setFlyEcho(null), ms)
+    return () => window.clearTimeout(t)
+  }, [flyEcho, reduced])
 
   /* ── ESC：回声墙 → 播放器 → 返回星空 ── */
   useEffect(() => {
@@ -64,10 +161,10 @@ export default function LibraryView() {
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse 60% 45% at 22% 28%, rgba(61,43,110,0.38) 0%, transparent 70%),' +
-            'radial-gradient(ellipse 55% 42% at 78% 64%, rgba(110,43,85,0.30) 0%, transparent 70%),' +
-            'radial-gradient(ellipse 75% 60% at 50% 50%, rgba(27,35,80,0.55) 0%, transparent 78%),' +
-            'linear-gradient(180deg, #05060f 0%, #0b1026 52%, #05060f 100%)',
+            'radial-gradient(ellipse 60% 45% at 22% 28%, rgba(22,18,40,0.14) 0%, transparent 70%),' +
+            'radial-gradient(ellipse 55% 42% at 78% 64%, rgba(40,16,32,0.1) 0%, transparent 70%),' +
+            'radial-gradient(ellipse 75% 60% at 50% 50%, rgba(6,10,22,0.62) 0%, transparent 78%),' +
+            'linear-gradient(180deg, #010105 0%, #02040a 52%, #010105 100%)',
         }}
       />
       {!reduced && (
@@ -81,7 +178,7 @@ export default function LibraryView() {
           style={{ position: 'absolute', zIndex: 0 }}
         />
       )}
-      <EchoField reduced={reduced} />
+      <EchoField reduced={reduced} hiddenId={flyEcho?.echo.id ?? null} />
 
       {/* ── 顶部安全区 HUD：标题（不与环形书廊重叠） ── */}
       <motion.header
@@ -168,7 +265,7 @@ export default function LibraryView() {
           transition={{ duration: 0.6, delay: reduced ? 0.15 : 0.7 }}
         >
           <p className="font-hud text-[11px] tracking-[0.22em] text-starlight-faint">
-            拖拽或按 ← → 转动书廊 · 悬停星点可读回声 · 点击书籍开始聆听
+            拖拽或按 ← → 转动书廊 · 点击带光晕的星点可读回声 · 点击书籍开始聆听
           </p>
         </motion.footer>
       )}
@@ -187,7 +284,28 @@ export default function LibraryView() {
 
       {/* ── 宇宙回声留言板 ── */}
       <AnimatePresence>
-        {echoOpen && <EchoWall key="echo-wall" reduced={reduced} onClose={closeEcho} />}
+        {echoOpen && (
+          <EchoWall
+            key="echo-wall"
+            reduced={reduced}
+            onClose={closeEcho}
+            onSubmitted={handleEchoSubmitted}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── 留言化作星星飞入星空 ── */}
+      <AnimatePresence>
+        {flyEcho && (
+          <FlyingEchoStar
+            key={flyEcho.echo.id}
+            fromX={flyEcho.fromX}
+            fromY={flyEcho.fromY}
+            toX={flyEcho.toX}
+            toY={flyEcho.toY}
+            reduced={reduced}
+          />
+        )}
       </AnimatePresence>
 
       {/* ── 入场：白色隧道式闪光（峰值 ≤0.55，呼应虫洞越迁） ── */}
