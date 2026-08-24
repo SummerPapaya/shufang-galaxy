@@ -201,7 +201,7 @@ export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProp
             type="submit"
             data-cursor="interactive"
             disabled={sent}
-            className="mt-1 flex items-center justify-center gap-2 rounded-full border border-gold/55 px-4 py-2.5 font-hud text-[11px] uppercase tracking-[0.2em] text-gold transition-colors hover:border-gold hover:bg-gold/10 hover:text-starlight disabled:opacity-60"
+            className="mt-1 flex items-center justify-center gap-2 rounded-full border border-gold bg-gold/10 px-4 py-2.5 font-hud text-[11px] uppercase tracking-[0.2em] text-gold transition-colors hover:bg-gold/20 hover:text-starlight disabled:opacity-60"
           >
             <Send className="h-3.5 w-3.5" aria-hidden />
             送入星海

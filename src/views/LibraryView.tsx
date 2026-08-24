@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
 import { Radio } from 'lucide-react'
 import { useAppStore } from '@/store'
@@ -29,6 +29,8 @@ function FlyingEchoStar({
 }) {
   const midX = fromX + (toX - fromX) * 0.42
   const midY = Math.min(fromY, toY) - Math.min(160, Math.abs(toY - fromY) * 0.38 + 56)
+  const angle = (Math.atan2(toY - fromY, toX - fromX) * 180) / Math.PI
+  const trail = Math.min(88, Math.hypot(toX - fromX, toY - fromY) * 0.18)
 
   return (
     <motion.div
@@ -39,44 +41,61 @@ function FlyingEchoStar({
         top: fromY,
         x: '-50%',
         y: '-50%',
-        scale: 2.35,
+        scale: 2.6,
         opacity: 1,
       }}
       animate={{
         left: [fromX, midX, toX],
         top: [fromY, midY, toY],
-        scale: [2.35, 1.15, 0.72],
+        scale: [2.6, 1.2, 0.78],
         opacity: [1, 1, 1],
       }}
       exit={{ opacity: 0, scale: 0.35 }}
       transition={
         reduced
           ? { duration: 0.05 }
-          : { duration: 1.05, times: [0, 0.38, 1], ease: [0.22, 1, 0.36, 1] }
+          : { duration: 1.35, times: [0, 0.36, 1], ease: [0.22, 1, 0.36, 1] }
       }
     >
+      <motion.span
+        className="absolute left-1/2 top-1/2 block"
+        style={{
+          width: trail,
+          height: 10,
+          marginLeft: -trail,
+          marginTop: -5,
+          borderRadius: 999,
+          transform: `rotate(${angle}deg)`,
+          transformOrigin: 'right center',
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(245,240,230,0.15) 40%, rgba(245,240,230,0.85) 100%)',
+          boxShadow: '0 0 16px rgba(255,217,160,0.45)',
+        }}
+        initial={{ opacity: 0.95, scaleX: 0.4 }}
+        animate={{ opacity: [0.95, 0.7, 0], scaleX: [0.4, 1, 0.55] }}
+        transition={reduced ? { duration: 0.05 } : { duration: 1.35, times: [0, 0.45, 1] }}
+      />
       <span
         className="absolute left-1/2 top-1/2 block rounded-full"
         style={{
-          width: 42,
-          height: 42,
-          marginLeft: -21,
-          marginTop: -21,
+          width: 56,
+          height: 56,
+          marginLeft: -28,
+          marginTop: -28,
           background:
-            'radial-gradient(circle, rgba(245,240,230,0.55) 0%, rgba(255,217,160,0.22) 38%, transparent 70%)',
-          filter: 'blur(1px)',
+            'radial-gradient(circle, rgba(245,240,230,0.7) 0%, rgba(255,217,160,0.28) 38%, transparent 72%)',
         }}
       />
       <span
         className="absolute left-1/2 top-1/2 block rounded-full"
         style={{
-          width: 14,
-          height: 14,
-          marginLeft: -7,
-          marginTop: -7,
+          width: 16,
+          height: 16,
+          marginLeft: -8,
+          marginTop: -8,
           background: '#f6f2ea',
           boxShadow:
-            '0 0 10px #f6f2ea, 0 0 26px rgba(255,217,160,0.85), 0 0 52px rgba(255,217,160,0.4)',
+            '0 0 12px #f6f2ea, 0 0 32px rgba(255,217,160,0.95), 0 0 64px rgba(255,217,160,0.45)',
         }}
       />
     </motion.div>
@@ -107,6 +126,7 @@ export default function LibraryView() {
     toX: number
     toY: number
   } | null>(null)
+  const closeEchoTimer = useRef<number | null>(null)
 
   const handleSelect = useCallback((book: Book) => {
     setActiveBook(book)
@@ -128,12 +148,21 @@ export default function LibraryView() {
       toX: slot.x * window.innerWidth,
       toY: slot.y * window.innerHeight,
     })
-    setEchoOpen(false)
+    // 先让飞星从按钮上亮起，再收起写信窗，避免动效被面板挡住
+    if (closeEchoTimer.current) window.clearTimeout(closeEchoTimer.current)
+    closeEchoTimer.current = window.setTimeout(() => setEchoOpen(false), 180)
   }, [])
+
+  useEffect(
+    () => () => {
+      if (closeEchoTimer.current) window.clearTimeout(closeEchoTimer.current)
+    },
+    [],
+  )
 
   useEffect(() => {
     if (!flyEcho) return
-    const ms = reduced ? 80 : 1100
+    const ms = reduced ? 80 : 1550
     const t = window.setTimeout(() => setFlyEcho(null), ms)
     return () => window.clearTimeout(t)
   }, [flyEcho, reduced])
