@@ -159,8 +159,10 @@ export default function AudioToggle() {
               <span
                 key={i}
                 className={cn(
-                  'w-[2px] rounded-full origin-bottom',
-                  active ? 'animate-audio-bar bg-[var(--gold)]' : 'bg-[var(--starlight-dim)]',
+                  'block w-[2.5px] origin-bottom rounded-full',
+                  active
+                    ? 'animate-audio-bar bg-[var(--gold)] shadow-[0_0_6px_rgba(255,217,160,0.65)]'
+                    : 'bg-[var(--starlight-dim)]',
                 )}
                 style={{
                   height: active ? bar.h : 5,

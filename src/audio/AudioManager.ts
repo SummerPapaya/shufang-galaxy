@@ -204,8 +204,9 @@ class AudioManager {
         void this.sample.play().catch(() => {})
       }
     }
-    if (!this.unlocked) return
-    // 菜单点击本身是用户手势，同步 play 即可
+    // 菜单点击是用户手势：即使还没点「进入星空」，也应立刻起播，
+    // 这样右下角声波才能在片花真正响起时动起来。
+    this.unlocked = true
     this.playAmbienceTrack(trackId, { fadeIn: true })
   }
 

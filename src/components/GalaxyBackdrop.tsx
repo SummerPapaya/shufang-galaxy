@@ -302,7 +302,7 @@ function GalaxyScene({
       const y = -((cy / window.innerHeight) * 2 - 1)
       if (last) {
         const speed = Math.hypot(x - last.x, y - last.y)
-        pushPower.current = Math.min(1, pushPower.current + speed * 9)
+        pushPower.current = Math.min(1, pushPower.current + speed * 12)
       }
       last = { x, y }
       pointerNdc.current.set(x, y)
@@ -338,7 +338,7 @@ function GalaxyScene({
     uPointer: { value: new THREE.Vector2(0, 0) },
     uPush: { value: 0 },
     uAspect: { value: 1 },
-    uPushRadius: { value: 0.52 },
+    uPushRadius: { value: 0.62 },
     uPushWeight: { value: pushWeight },
   })
 
@@ -524,7 +524,7 @@ function GalaxyScene({
       new THREE.ShaderMaterial({
         vertexShader: STAR_VERT,
         fragmentShader: STAR_FRAG,
-        uniforms: makeUniforms(0.11),
+        uniforms: makeUniforms(0.16),
         transparent: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
@@ -538,7 +538,7 @@ function GalaxyScene({
       new THREE.ShaderMaterial({
         vertexShader: STAR_VERT,
         fragmentShader: STAR_FRAG,
-        uniforms: makeUniforms(0.3),
+        uniforms: makeUniforms(0.42),
         transparent: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
@@ -553,7 +553,7 @@ function GalaxyScene({
       new THREE.ShaderMaterial({
         vertexShader: ROOM_STAR_VERT,
         fragmentShader: STAR_FRAG,
-        uniforms: { ...makeUniforms(0.05), uHoverIndex: { value: -1 } },
+        uniforms: { ...makeUniforms(0.07), uHoverIndex: { value: -1 } },
         transparent: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
@@ -567,7 +567,7 @@ function GalaxyScene({
       new THREE.ShaderMaterial({
         vertexShader: NEBULA_FLOW_VERT,
         fragmentShader: NEBULA_FLOW_FRAG,
-        uniforms: { ...makeUniforms(0.2), uBandDir: { value: bandDir } },
+        uniforms: { ...makeUniforms(0.28), uBandDir: { value: bandDir } },
         transparent: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
