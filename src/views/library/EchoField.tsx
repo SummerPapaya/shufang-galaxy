@@ -1,17 +1,19 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { formatEchoTime, useEchoes } from './echoes'
 import type { Echo } from './echoes'
 
 /**
  * <EchoField> 宇宙回声 · 漂浮在星空图书馆背景里的留言星
- * - 乳白核 + 暖金光晕 + 闪烁，和背景星明显区分，引导悬停 / 点击
+ * - 小核 + 羽化光晕 + 缓慢呼吸，和背景星区分，引导悬停 / 点击
  * - 位置由 id 稳定散列，避开中央书廊
+ * - 留言卡根据视口夹紧，避免贴边溢出
  */
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
 const MILK = '#f5f0e6'
-const HALO = 'rgba(255,217,160,0.55)'
+const HALO = 'rgba(255,217,160,0.4)'
+const CARD_PAD = 14
 
 function hash(s: string): number {
   let h = 2166136261
@@ -70,6 +72,7 @@ export default function EchoField({ reduced, hiddenId, arrivingId }: EchoFieldPr
       {placed.map(({ echo, x, y }, i) => {
         const arriving = arrivingId === echo.id
         const active = activeId === echo.id || arriving
+        const core = active ? 6 : 5
         return (
           <button
             key={echo.id}
@@ -78,37 +81,24 @@ export default function EchoField({ reduced, hiddenId, arrivingId }: EchoFieldPr
             title="点击查看这条回声"
             data-cursor="interactive"
             className="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-0 bg-transparent p-0"
-            style={{ left: `${x * 100}%`, top: `${y * 100}%`, width: 48, height: 48 }}
+            style={{ left: `${x * 100}%`, top: `${y * 100}%`, width: 28, height: 28 }}
             onMouseEnter={() => setHoverId(echo.id)}
             onMouseLeave={() => setHoverId((id) => (id === echo.id ? null : id))}
             onFocus={() => setHoverId(echo.id)}
             onBlur={() => setHoverId((id) => (id === echo.id ? null : id))}
             onClick={() => setPinnedId((id) => (id === echo.id ? null : echo.id))}
           >
-            {/* 常驻柔光盘：和其他背景星区分 */}
             <span
               aria-hidden
-              className="absolute left-1/2 top-1/2 block rounded-full"
+              className="echo-star-halo absolute left-1/2 top-1/2 block rounded-full"
               style={{
-                width: active ? 36 : 30,
-                height: active ? 36 : 30,
-                marginLeft: active ? -18 : -15,
-                marginTop: active ? -18 : -15,
+                width: 18,
+                height: 18,
+                marginLeft: -9,
+                marginTop: -9,
                 background:
-                  'radial-gradient(circle, rgba(245,240,230,0.42) 0%, rgba(255,217,160,0.22) 36%, transparent 72%)',
-              }}
-            />
-            {/* 外圈引导光晕：缓慢放大淡出，提示可点 */}
-            <span
-              aria-hidden
-              className="echo-star-ring absolute left-1/2 top-1/2 block rounded-full"
-              style={{
-                width: 34,
-                height: 34,
-                marginLeft: -17,
-                marginTop: -17,
-                border: '1px solid rgba(255,217,160,0.55)',
-                animationDelay: `${(i % 5) * 0.35}s`,
+                  'radial-gradient(circle, rgba(245,240,230,0.34) 0%, rgba(255,217,160,0.16) 42%, transparent 78%)',
+                animationDelay: `${(i % 5) * 0.4}s`,
                 animationPlayState: reduced ? 'paused' : 'running',
               }}
             />
@@ -116,28 +106,28 @@ export default function EchoField({ reduced, hiddenId, arrivingId }: EchoFieldPr
               aria-hidden
               className="absolute left-1/2 top-1/2 block rounded-full"
               style={{
-                width: active ? 12 : 9,
-                height: active ? 12 : 9,
-                marginLeft: active ? -6 : -4.5,
-                marginTop: active ? -6 : -4.5,
+                width: core,
+                height: core,
+                marginLeft: -core / 2,
+                marginTop: -core / 2,
                 background: MILK,
                 boxShadow: active
-                  ? `0 0 12px ${MILK}, 0 0 32px ${HALO}, 0 0 56px rgba(255,217,160,0.4)`
-                  : `0 0 10px ${MILK}, 0 0 24px ${HALO}, 0 0 40px rgba(255,217,160,0.28)`,
+                  ? `0 0 6px ${MILK}, 0 0 14px ${HALO}`
+                  : `0 0 5px ${MILK}, 0 0 10px ${HALO}`,
               }}
               animate={
                 reduced
-                  ? { opacity: 0.95 }
+                  ? { opacity: 0.9 }
                   : {
-                      opacity: [0.5, 1, 0.62, 1, 0.5],
-                      scale: active ? 1.28 : [1, 1.28, 0.88, 1.2, 1],
+                      opacity: [0.45, 0.95, 0.55, 0.95, 0.45],
+                      scale: active ? 1.12 : [1, 1.1, 0.94, 1.08, 1],
                     }
               }
               transition={
                 reduced
                   ? { duration: 0.2 }
                   : {
-                      duration: 1.85 + (i % 4) * 0.28,
+                      duration: 3.2 + (i % 4) * 0.35,
                       repeat: Infinity,
                       ease: 'easeInOut',
                     }
@@ -149,39 +139,85 @@ export default function EchoField({ reduced, hiddenId, arrivingId }: EchoFieldPr
 
       <AnimatePresence>
         {hovered && (
-          <motion.div
-            key={hovered.echo.id}
-            role="tooltip"
-            className="pointer-events-none absolute z-20 w-[min(260px,70vw)] -translate-x-1/2"
-            style={{
-              left: `${hovered.x * 100}%`,
-              top: `calc(${hovered.y * 100}% + 22px)`,
-            }}
-            initial={{ opacity: 0, y: reduced ? 0 : 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: reduced ? 0 : 4 }}
-            transition={{ duration: 0.22, ease: EASE }}
-          >
-            <div
-              className="rounded-lg border px-3.5 py-3 shadow-[0_16px_48px_rgba(0,0,0,0.55)]"
-              style={{
-                borderColor: 'rgba(255,217,160,0.35)',
-                background: 'rgba(12,16,36,0.92)',
-              }}
-            >
-              <div className="flex items-baseline justify-between gap-2">
-                <span className="font-serif text-[14px] text-starlight">{hovered.echo.name}</span>
-                <span className="shrink-0 font-hud text-[10px] tracking-[0.14em] text-[rgba(245,240,230,0.7)]">
-                  {formatEchoTime(hovered.echo.at)}
-                </span>
-              </div>
-              <p className="mt-1.5 whitespace-pre-wrap break-words font-sans text-[13.5px] leading-relaxed text-[rgba(245,240,230,0.88)]">
-                {hovered.echo.message}
-              </p>
-            </div>
-          </motion.div>
+          <EchoCard key={hovered.echo.id} echo={hovered.echo} x={hovered.x} y={hovered.y} reduced={reduced} />
         )}
       </AnimatePresence>
     </div>
+  )
+}
+
+function EchoCard({
+  echo,
+  x,
+  y,
+  reduced,
+}: {
+  echo: Echo
+  x: number
+  y: number
+  reduced: boolean
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [box, setBox] = useState(() => {
+    const vw = window.innerWidth
+    const vh = window.innerHeight
+    const w = Math.min(260, vw * 0.7)
+    const h = 120
+    const starX = x * vw
+    const starY = y * vh
+    let left = starX - w / 2
+    left = Math.min(Math.max(left, CARD_PAD), Math.max(CARD_PAD, vw - w - CARD_PAD))
+    let top = starY + 16
+    if (top + h > vh - CARD_PAD) top = starY - 16 - h
+    if (top < CARD_PAD) top = CARD_PAD
+    return { left, top }
+  })
+
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const vw = window.innerWidth
+    const vh = window.innerHeight
+    const w = el.offsetWidth
+    const h = el.offsetHeight
+    const starX = x * vw
+    const starY = y * vh
+    let left = starX - w / 2
+    left = Math.min(Math.max(left, CARD_PAD), Math.max(CARD_PAD, vw - w - CARD_PAD))
+    let top = starY + 16
+    if (top + h > vh - CARD_PAD) top = starY - 16 - h
+    if (top < CARD_PAD) top = CARD_PAD
+    setBox({ left, top })
+  }, [x, y, echo.id, echo.message])
+
+  return (
+    <motion.div
+      ref={ref}
+      role="tooltip"
+      className="pointer-events-none absolute z-20 w-[min(260px,70vw)]"
+      style={{ left: box.left, top: box.top }}
+      initial={{ opacity: 0, y: reduced ? 0 : 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: reduced ? 0 : 4 }}
+      transition={{ duration: 0.22, ease: EASE }}
+    >
+      <div
+        className="rounded-lg border px-3.5 py-3 shadow-[0_16px_48px_rgba(0,0,0,0.55)]"
+        style={{
+          borderColor: 'rgba(255,217,160,0.35)',
+          background: 'rgba(12,16,36,0.92)',
+        }}
+      >
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="font-serif text-[14px] text-starlight">{echo.name}</span>
+          <span className="shrink-0 font-hud text-[10px] tracking-[0.14em] text-[rgba(245,240,230,0.7)]">
+            {formatEchoTime(echo.at)}
+          </span>
+        </div>
+        <p className="mt-1.5 whitespace-pre-wrap break-words font-sans text-[13.5px] leading-relaxed text-[rgba(245,240,230,0.88)]">
+          {echo.message}
+        </p>
+      </div>
+    </motion.div>
   )
 }

@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { List, Sparkles, X } from 'lucide-react'
 import type { Room } from '@/data/rooms'
+import { sortRoomsForIndex } from '@/data/readerOrder'
 import { useAppStore } from '@/store'
 import type { UniverseControls } from './controls'
 import { REDUCED_MOTION } from './controls'
@@ -9,6 +10,7 @@ import { REDUCED_MOTION } from './controls'
 /**
  * 「书房索引」全屏抽屉（universe.md §2-C / §3 键盘可达性）
  * - 顶栏右侧胶囊按钮展开；半透明深空遮罩 + 抽屉从右向左滑入（spring 200/26）
+ * - 列表顺序：段静置顶，其余按读音（拼音 + 声调）排序
  * - 列表项（stagger 50ms）：starColor 呼吸圆点 + 朗读者名 + 房间风格
  * - 点击 = 选中该星（触发飞星转场）；ESC / 点击遮罩 / 再点按钮关闭
  * - 无障碍：role="dialog"，打开时焦点移入列表，关闭后焦点回到按钮，键盘可 Tab 到达
@@ -71,6 +73,7 @@ export default function IndexDrawer({ rooms, controls, onSelect }: IndexDrawerPr
   const [open, setOpen] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const firstItemRef = useRef<HTMLButtonElement>(null)
+  const ordered = useMemo(() => sortRoomsForIndex(rooms), [rooms])
 
   /* ESC 关闭 + 打开时焦点移入 / 关闭后归还焦点 */
   useEffect(() => {
@@ -162,7 +165,7 @@ export default function IndexDrawer({ rooms, controls, onSelect }: IndexDrawerPr
                 animate="show"
                 variants={{ show: { transition: { staggerChildren: 0.05 } } }}
               >
-                {rooms.map((room, i) => (
+                {ordered.map((room, i) => (
                   <motion.li
                     key={room.id}
                     variants={{

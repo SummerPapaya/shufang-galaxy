@@ -79,8 +79,9 @@ export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProp
         aria-hidden
         className="absolute inset-0"
         style={{
-          background: 'rgba(3,5,14,0.72)',
-          backdropFilter: 'blur(10px)',
+          background: 'rgba(8,14,36,0.34)',
+          backdropFilter: 'blur(7px)',
+          WebkitBackdropFilter: 'blur(7px)',
         }}
         onClick={onClose}
       />

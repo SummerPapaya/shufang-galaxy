@@ -388,9 +388,9 @@ function GalaxyScene({
     const phase = new Float32Array(count)
     const speed = new Float32Array(count)
     const alpha = new Float32Array(count)
-    const gray = new THREE.Color('#1c2233')
-    const palette = ['#243044', '#1e2438', '#2a2438'].map((hex) =>
-      new THREE.Color(hex).lerp(gray, 0.45),
+    const gray = new THREE.Color('#3a4868')
+    const palette = ['#2a5f9e', '#3d2b6e', '#6e2b55', '#1d8bb8'].map((hex) =>
+      new THREE.Color(hex).lerp(gray, 0.28),
     )
     const perp = new THREE.Vector2(-bandDir.y, bandDir.x)
 
@@ -409,7 +409,7 @@ function GalaxyScene({
       color[i * 3 + 2] = c.b * dim
       phase[i] = rand()
       speed[i] = 0.4 + rand() * 1.2
-      alpha[i] = 0.035 + rand() * 0.07
+      alpha[i] = 0.055 + rand() * 0.1
     }
 
     const geo = new THREE.BufferGeometry()
@@ -460,18 +460,18 @@ function GalaxyScene({
     return geo
   }, [roomStars, bandDir])
 
-  /* 体积累星云色斑：压暗，只留很浅的青蓝 / 玫瑰呼吸 */
+  /* 体积累星云色斑：深蓝 / 蓝紫 / 玫瑰，模仿深空星云，避免纯黑底 */
   const nebulae = useMemo(() => {
-    const voidTint = new THREE.Color(0.008, 0.01, 0.028)
+    const voidTint = new THREE.Color(0.02, 0.04, 0.1)
     const defs = [
-      { color: '#1a3a62', scale: [88, 52, 1] as const, pos: [-6, 4, -72] as const, opacity: 0.14, spin: 0.018 },
-      { color: '#2a1838', scale: [56, 38, 1] as const, pos: [18, -10, -60] as const, opacity: 0.09, spin: -0.012 },
-      { color: '#0c2848', scale: [96, 58, 1] as const, pos: [4, 2, -84] as const, opacity: 0.18, spin: 0.008 },
-      { color: '#3a1c32', scale: [44, 30, 1] as const, pos: [-22, -6, -54] as const, opacity: 0.08, spin: -0.02 },
-      { color: '#0e4a5c', scale: [38, 26, 1] as const, pos: [12, 10, -48] as const, opacity: 0.1, spin: 0.025 },
+      { color: '#1a6aa8', scale: [88, 52, 1] as const, pos: [-6, 4, -72] as const, opacity: 0.34, spin: 0.018 },
+      { color: '#3a1f4e', scale: [56, 38, 1] as const, pos: [18, -10, -60] as const, opacity: 0.22, spin: -0.012 },
+      { color: '#0d3a6e', scale: [96, 58, 1] as const, pos: [4, 2, -84] as const, opacity: 0.4, spin: 0.008 },
+      { color: '#6e2b55', scale: [44, 30, 1] as const, pos: [-22, -6, -54] as const, opacity: 0.18, spin: -0.02 },
+      { color: '#1488aa', scale: [38, 26, 1] as const, pos: [12, 10, -48] as const, opacity: 0.22, spin: 0.025 },
     ]
     return defs.map((d) => {
-      const darkened = `#${new THREE.Color(d.color).lerp(voidTint, 0.68).getHexString()}`
+      const darkened = `#${new THREE.Color(d.color).lerp(voidTint, 0.22).getHexString()}`
       return { ...d, tex: makeNebulaTexture(darkened) }
     })
   }, [])
@@ -641,9 +641,9 @@ export default function GalaxyBackdrop({
         zIndex: 0,
         /* WebGL 不可用时的 CSS 径向渐变 fallback（design.md §2 性能护栏） */
         background:
-          'radial-gradient(ellipse 120% 80% at 30% 20%, rgba(28,22,52,0.12) 0%, transparent 55%),' +
-          'radial-gradient(ellipse 90% 70% at 75% 70%, rgba(42,18,36,0.08) 0%, transparent 50%),' +
-          'radial-gradient(ellipse 140% 100% at 50% 50%, #03050c 0%, #010208 45%, #000105 100%)',
+          'radial-gradient(ellipse 120% 80% at 30% 20%, var(--nebula-violet) 0%, transparent 55%),' +
+          'radial-gradient(ellipse 90% 70% at 75% 70%, var(--nebula-rose) 0%, transparent 50%),' +
+          'radial-gradient(ellipse 140% 100% at 50% 50%, var(--nebula-mid) 0%, var(--nebula-deep) 45%, var(--void) 100%)',
         ...style,
       }}
     >
@@ -654,7 +654,7 @@ export default function GalaxyBackdrop({
         raycaster={{ params: { Points: { threshold: 2.2 } } as unknown as THREE.RaycasterParameters }}
         style={{ position: 'absolute', inset: 0, pointerEvents: interactive ? 'auto' : 'none' }}
       >
-        <color attach="background" args={['#010208']} />
+        <color attach="background" args={['#060a16']} />
         <GalaxyScene
           starCount={starCount}
           dustCount={dustCount}

@@ -189,16 +189,15 @@ export default function LibraryView() {
 
   return (
     <div className="absolute inset-0 z-[30] overflow-hidden bg-void">
-      {/* ── 背景：星云渐变 + 星点 canvas ── */}
+      {/* ── 背景：深蓝 / 蓝紫星云（无 WebGL 或 reduced-motion 时仍可见） ── */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse 60% 45% at 22% 28%, rgba(22,18,40,0.14) 0%, transparent 70%),' +
-            'radial-gradient(ellipse 55% 42% at 78% 64%, rgba(40,16,32,0.1) 0%, transparent 70%),' +
-            'radial-gradient(ellipse 75% 60% at 50% 50%, rgba(6,10,22,0.62) 0%, transparent 78%),' +
-            'linear-gradient(180deg, #010105 0%, #02040a 52%, #010105 100%)',
+            'radial-gradient(ellipse 120% 80% at 30% 20%, var(--nebula-violet) 0%, transparent 55%),' +
+            'radial-gradient(ellipse 90% 70% at 75% 70%, var(--nebula-rose) 0%, transparent 50%),' +
+            'radial-gradient(ellipse 140% 100% at 50% 50%, var(--nebula-mid) 0%, var(--nebula-deep) 45%, var(--void) 100%)',
         }}
       />
       {!reduced && (
