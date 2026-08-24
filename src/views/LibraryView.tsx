@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { Radio } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { audioManager } from '@/audio/AudioManager'
 import TypeGlow from '@/components/TypeGlow'
@@ -8,14 +9,16 @@ import type { Book } from './library/books'
 import LibraryStarfield from './library/Starfield'
 import RingCarousel from './library/RingCarousel'
 import PlayerBar from './library/PlayerBar'
+import EchoWall from './library/EchoWall'
 
 /**
  * <LibraryView> 星空图书馆（view === 'library'）
- * - 深邃星空中悬浮单层 3D 环形书廊（15 册，数据 /assets/books.json，中心约 top-[46%]）
+ * - 深邃星空中悬浮单层 3D 环形书廊（数据 /assets/books.json，中心约 top-[46%]）
  * - 拖拽（惯性）/ ← → 方向键 / 自动旋转由 RingCarousel 接管；点击书脊 → 底部 PlayerBar
  * - 标题「星空图书馆」位于页面顶部安全区（pointer-events-none，绝不压住书廊）
  * - 入场：白色隧道式闪光淡入（峰值透明度 ≤0.55，呼应虫洞越迁）
- * - ESC：先关播放器，再 closeLibrary()；「返回星空」→ closeLibrary()
+ * - 「宇宙回声」：右上角入口打开留言板（EchoWall），供访客留下并浏览留言
+ * - ESC：先关回声墙 / 播放器，再 closeLibrary()；「返回星空」→ closeLibrary()
  * - reduced-motion：关闭漂浮 / 入场闪光 / 自动旋转，保留全部功能
  */
 export default function LibraryView() {
@@ -24,6 +27,7 @@ export default function LibraryView() {
   const reduced = useReducedMotion() ?? false
 
   const [activeBook, setActiveBook] = useState<Book | null>(null)
+  const [echoOpen, setEchoOpen] = useState(false)
 
   const handleSelect = useCallback((book: Book) => {
     setActiveBook(book)
@@ -34,16 +38,19 @@ export default function LibraryView() {
     setActiveBook(null)
   }, [])
 
-  /* ── ESC：先关播放器，再返回星空 ── */
+  const closeEcho = useCallback(() => setEchoOpen(false), [])
+
+  /* ── ESC：回声墙 → 播放器 → 返回星空 ── */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
+      if (echoOpen) return // EchoWall 自己处理 ESC
       if (activeBook) closePlayer()
       else closeLibrary()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [activeBook, closeLibrary, closePlayer])
+  }, [activeBook, echoOpen, closeLibrary, closePlayer])
 
   /* ── 离开视图：停声 ── */
   useEffect(() => () => audioManager.stop(), [])
@@ -83,11 +90,24 @@ export default function LibraryView() {
       </motion.header>
 
       <motion.div
-        className="absolute right-5 top-5 z-20 md:right-8 md:top-7"
+        className="absolute right-5 top-5 z-20 flex items-center gap-2 md:right-8 md:top-7"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: reduced ? 0.1 : 0.5 }}
       >
+        <button
+          type="button"
+          aria-label="打开宇宙回声留言板"
+          data-cursor="interactive"
+          onClick={() => setEchoOpen(true)}
+          className="flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 font-hud text-[11px] tracking-[0.18em] text-gold transition-colors duration-200 hover:bg-gold/10 hover:text-starlight"
+          style={{ borderColor: 'rgba(255,217,160,0.4)' }}
+          onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(255,217,160,0.85)')}
+          onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'rgba(255,217,160,0.4)')}
+        >
+          <Radio className="h-3 w-3" aria-hidden />
+          宇宙回声
+        </button>
         <button
           type="button"
           aria-label="返回星空"
@@ -151,6 +171,11 @@ export default function LibraryView() {
             onClose={closePlayer}
           />
         )}
+      </AnimatePresence>
+
+      {/* ── 宇宙回声留言板 ── */}
+      <AnimatePresence>
+        {echoOpen && <EchoWall key="echo-wall" reduced={reduced} onClose={closeEcho} />}
       </AnimatePresence>
 
       {/* ── 入场：白色隧道式闪光（峰值 ≤0.55，呼应虫洞越迁） ── */}

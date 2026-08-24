@@ -9,7 +9,7 @@ import { REDUCED_MOTION } from './controls'
 /**
  * 「书房索引」全屏抽屉（universe.md §2-C / §3 键盘可达性）
  * - 顶栏右侧胶囊按钮展开；半透明深空遮罩 + 抽屉从右向左滑入（spring 200/26）
- * - 15 个列表项（stagger 50ms）：starColor 呼吸圆点 + 朗读者名 + 房间风格
+ * - 列表项（stagger 50ms）：starColor 呼吸圆点 + 朗读者名 + 房间风格
  * - 点击 = 选中该星（触发飞星转场）；ESC / 点击遮罩 / 再点按钮关闭
  * - 无障碍：role="dialog"，打开时焦点移入列表，关闭后焦点回到按钮，键盘可 Tab 到达
  * - 旁边的「虫洞越迁」按钮：呼吸式金辉脉冲（2s 周期），点击保存相机角后进图书馆
@@ -157,7 +157,7 @@ export default function IndexDrawer({ rooms, controls, onSelect }: IndexDrawerPr
               </div>
 
               <motion.ul
-                className="flex flex-1 flex-col gap-1 overflow-y-auto"
+                className="scrollbar-starfield flex flex-1 flex-col gap-1 overflow-y-auto pr-1"
                 initial="hidden"
                 animate="show"
                 variants={{ show: { transition: { staggerChildren: 0.05 } } }}

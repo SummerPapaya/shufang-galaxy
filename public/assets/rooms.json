@@ -1136,5 +1136,103 @@
     ]
    }
   ]
+ },
+ {
+  "id": "caishan",
+  "reader": "蔡杉",
+  "title": "蔡杉的书房",
+  "role": "朗读者",
+  "style": "湘南手作书房",
+  "starColor": "#c9d98f",
+  "quote": "把日子过成一门手艺，慢一点，就有了味道。",
+  "book": "《有味》· 汪涵",
+  "img": "assets/rooms/caishan.jpg",
+  "audio": "assets/audio/ep2.mp3",
+  "hotspots": [
+   {
+    "x": 0.27,
+    "y": 0.42,
+    "label": "木作台 · 刨花与旧手艺"
+   },
+   {
+    "x": 0.17,
+    "y": 0.66,
+    "label": "油纸伞 · 一场湘南的雨"
+   },
+   {
+    "x": 0.72,
+    "y": 0.34,
+    "label": "陶罐坛子 · 慢慢腌的时间"
+   }
+  ],
+  "books": [
+   {
+    "title": "有味",
+    "author": "汪涵",
+    "episodes": [
+     {
+      "title": "第 1 集 · 试音样片",
+      "audio": "assets/audio/ep2.mp3"
+     },
+     {
+      "title": "第 2 集 · 样片",
+      "audio": "assets/audio/ep3.mp3"
+     },
+     {
+      "title": "第 3 集 · 样片",
+      "audio": "assets/audio/ep2.mp3"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "yiwei",
+  "reader": "一苇",
+  "title": "一苇的书房",
+  "role": "朗读者",
+  "style": "竹影禅意书房",
+  "starColor": "#cfe3d8",
+  "quote": "过去已经过去，未来尚未到来；能安住的，只有此刻。",
+  "book": "《故道白云》· 一行禅师",
+  "img": "assets/rooms/yiwei.jpg",
+  "audio": "assets/audio/ep3.mp3",
+  "hotspots": [
+   {
+    "x": 0.62,
+    "y": 0.52,
+    "label": "矮案 · 摊开的经卷"
+   },
+   {
+    "x": 0.5,
+    "y": 0.24,
+    "label": "竹影 · 风过时的呼吸"
+   },
+   {
+    "x": 0.5,
+    "y": 0.72,
+    "label": "蒲团 · 坐下来的此刻"
+   }
+  ],
+  "books": [
+   {
+    "title": "故道白云",
+    "author": "一行禅师",
+    "episodes": [
+     {
+      "title": "第 1 集 · 试音样片",
+      "audio": "assets/audio/ep3.mp3"
+     },
+     {
+      "title": "第 2 集 · 样片",
+      "audio": "assets/audio/ep2.mp3"
+     },
+     {
+      "title": "第 3 集 · 样片",
+      "audio": "assets/audio/ep3.mp3"
+     }
+    ]
+   }
+  ]
  }
 ]

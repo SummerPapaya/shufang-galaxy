@@ -92,8 +92,12 @@ module.exports = {
           "20%,50%": { opacity: "0" },
         },
         "audio-bar": {
-          "0%, 100%": { transform: "scaleY(0.35)" },
+          "0%, 100%": { transform: "scaleY(0.26)" },
           "50%": { transform: "scaleY(1)" },
+        },
+        "audio-pulse": {
+          "0%": { transform: "scale(0.9)", opacity: "0.55" },
+          "70%, 100%": { transform: "scale(1.55)", opacity: "0" },
         },
         "cta-breathe": {
           "0%, 100%": { opacity: "0.45", transform: "scale(0.8)" },
@@ -108,6 +112,8 @@ module.exports = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "caret-blink": "caret-blink 1.25s ease-out infinite",
+        "audio-bar": "audio-bar 1.1s ease-in-out infinite",
+        "audio-pulse": "audio-pulse 2.4s ease-out infinite",
         "cta-breathe": "cta-breathe 4s ease-in-out infinite",
         "hint-float": "hint-float 1.5s ease-in-out infinite",
       },
