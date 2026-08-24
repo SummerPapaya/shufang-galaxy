@@ -11,6 +11,7 @@ import * as THREE from 'three'
  * - 漂浮星尘：近景尘埃粒子，极慢漂移 + 闪烁
  * - 远景书房星：roomStars 传入的彩色亮星，呼吸式明暗，悬停亮度 +50%
  * - 视差：鼠标移动时镜头反向微移
+ * - 氛围：体积累星云 + 缓慢自转 + 向镜头的轻穿梭（参考 星空穿梭 视频素材，无指针拨动）
  * - 穿越：外部通过 warpRef（0→1）驱动粒子径向飞散，fovRef 驱动镜头 FOV 拉伸
  *   （landing → universe 的穿越 timeline 直接写这两个 ref，不触发 React 重渲染）
  *
@@ -44,6 +45,13 @@ export interface GalaxyBackdropProps {
   baseFov?: number
   /** 悬停书房星回调（悬停时星体自动提亮 +50%） */
   onRoomStarHover?: (id: string | null) => void
+  /**
+   * cinematic：向镜头缓慢穿梭 + 银河自转（landing / 图书馆）
+   * 强度 0 关闭穿梭，只保留闪烁与视差
+   */
+  travel?: number
+  /** false 时不拦截指针（图书馆书廊需要把拖拽留给书） */
+  interactive?: boolean
   className?: string
   style?: CSSProperties
 }
@@ -80,6 +88,7 @@ uniform float uTime;
 uniform float uWarp;
 uniform float uPixelRatio;
 uniform float uMotion;
+uniform float uTravel;
 attribute float aSize;
 attribute vec3 aColor;
 attribute float aPhase;
@@ -90,8 +99,22 @@ varying float vAlpha;
 void main() {
   vec3 p = position;
   #ifdef DRIFT
-    p.x += sin(uTime * 0.15 + aPhase * 6.2831) * 0.9 * uMotion;
-    p.y += cos(uTime * 0.11 + aPhase * 4.0) * 0.7 * uMotion;
+    // 近景星尘：缓慢八字漂移（电影感星空，无指针拨动）
+    p.x += sin(uTime * 0.12 + aPhase * 6.2831) * 1.35 * uMotion;
+    p.y += cos(uTime * 0.09 + aPhase * 4.0) * 1.05 * uMotion;
+    p.z += sin(uTime * 0.07 + aPhase * 3.1) * 0.45 * uMotion;
+  #endif
+  #ifdef FAR_DRIFT
+    // 远景银河：极慢横向蠕动，制造深空呼吸
+    p.x += sin(uTime * 0.035 + aPhase * 6.2831) * 0.55 * uMotion;
+    p.y += cos(uTime * 0.028 + aPhase * 5.2) * 0.35 * uMotion;
+  #endif
+  #ifdef TRAVEL
+    // 星空穿梭：粒子从远景向镜头漂来，越过近处后循环回远处
+    float zNear = -6.0;
+    float zFar = -98.0;
+    float span = zNear - zFar;
+    p.z = zFar + mod(position.z - zFar + uTime * uTravel * uMotion, span);
   #endif
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   float w = uWarp;
@@ -118,8 +141,11 @@ varying float vAlpha;
 void main() {
   vec2 c = gl_PointCoord - 0.5;
   float d = length(c);
-  float a = smoothstep(0.5, 0.05, d);
-  gl_FragColor = vec4(vColor, a * vAlpha);
+  // 乳白核 + 柔光晕：背景星接近散发着光晕的乳白色，而不是彩色火花
+  float core = smoothstep(0.14, 0.0, d);
+  float halo = smoothstep(0.5, 0.06, d) * 0.48;
+  vec3 milk = mix(vColor, vec3(0.96, 0.94, 0.90), 0.35);
+  gl_FragColor = vec4(milk, (core + halo) * vAlpha);
 }
 `
 
@@ -160,6 +186,7 @@ uniform float uWarp;
 uniform float uPixelRatio;
 uniform float uMotion;
 uniform vec2 uBandDir;
+uniform float uTravel;
 attribute float aSize;
 attribute vec3 aColor;
 attribute float aPhase;
@@ -170,9 +197,15 @@ varying float vAlpha;
 
 void main() {
   vec3 p = position;
-  // 沿对角带缓慢漂移（每粒子随机 phase/speed）
-  p.xy += uBandDir * sin(uTime * aSpeed * 0.08 + aPhase * 6.2831) * 2.4 * uMotion;
-  p.y += cos(uTime * aSpeed * 0.05 + aPhase * 4.0) * 0.8 * uMotion;
+  // 沿对角带缓慢漂移（每粒子随机 phase/speed）——电影感星云流，非交互拨动
+  p.xy += uBandDir * sin(uTime * aSpeed * 0.065 + aPhase * 6.2831) * 3.2 * uMotion;
+  p.y += cos(uTime * aSpeed * 0.04 + aPhase * 4.0) * 1.1 * uMotion;
+  if (uTravel > 0.001) {
+    float zNear = -8.0;
+    float zFar = -90.0;
+    float span = zNear - zFar;
+    p.z = zFar + mod(position.z - zFar + uTime * uTravel * 0.65 * uMotion, span);
+  }
   vec4 mv = modelViewMatrix * vec4(p, 1.0);
   float w = uWarp;
   // 穿越：与其余粒子层一致的径向飞散
@@ -226,7 +259,7 @@ function makeNebulaTexture(color: string): THREE.Texture {
 
 /* ── 场景 ─────────────────────────────────────────── */
 
-interface SceneProps extends Required<Omit<GalaxyBackdropProps, 'warpRef' | 'fovRef' | 'onRoomStarHover' | 'className' | 'style'>> {
+interface SceneProps extends Required<Omit<GalaxyBackdropProps, 'warpRef' | 'fovRef' | 'onRoomStarHover' | 'className' | 'style' | 'interactive'>> {
   warpRef?: AnimatedNumberRef
   fovRef?: AnimatedNumberRef
   onRoomStarHover?: (id: string | null) => void
@@ -240,14 +273,18 @@ function GalaxyScene({
   warpRef,
   fovRef,
   baseFov,
+  travel,
   onRoomStarHover,
 }: SceneProps) {
   const groupRef = useRef<THREE.Group>(null)
+  const spinRef = useRef<THREE.Group>(null)
+  const nebulaMeshRefs = useRef<(THREE.Mesh | null)[]>([])
   const camera = useThree((s) => s.camera) as THREE.PerspectiveCamera
   const gl = useThree((s) => s.gl)
   const pointer = useThree((s) => s.pointer)
 
   const motion = REDUCED_MOTION ? 0 : 1
+  const travelSpeed = REDUCED_MOTION ? 0 : travel
 
   /* 银河带方向：倾角 −25° */
   const bandDir = useMemo(() => {
@@ -260,6 +297,7 @@ function GalaxyScene({
     uWarp: { value: 0 },
     uPixelRatio: { value: gl.getPixelRatio() },
     uMotion: { value: motion },
+    uTravel: { value: travelSpeed },
   })
 
   /* 远景银河星点 */
@@ -270,10 +308,9 @@ function GalaxyScene({
     const color = new Float32Array(starCount * 3)
     const phase = new Float32Array(starCount)
     const twinkle = new Float32Array(starCount)
-    const cWarm = new THREE.Color('#f5f0e6')
-    const cGold = new THREE.Color('#ffd9a0')
-    const cCyan = new THREE.Color('#aee6ff')
-    const cViolet = new THREE.Color('#b48cff')
+    const cMilk = new THREE.Color('#f6f2ea')
+    const cWarm = new THREE.Color('#f3efe4')
+    const cSoft = new THREE.Color('#ece8dc')
     const perp = new THREE.Vector2(-bandDir.y, bandDir.x)
 
     for (let i = 0; i < starCount; i++) {
@@ -293,10 +330,9 @@ function GalaxyScene({
       pos[i * 3 + 1] = y
       pos[i * 3 + 2] = -25 - rand() * 65
 
-      size[i] = 0.6 + rand() * rand() * 2.2
+      size[i] = 0.85 + rand() * rand() * 2.6
       const pick = rand()
-      const c =
-        pick < 0.55 ? cWarm : pick < 0.72 ? cGold : pick < 0.88 ? cCyan : cViolet
+      const c = pick < 0.72 ? cMilk : pick < 0.92 ? cWarm : cSoft
       color[i * 3] = c.r
       color[i * 3 + 1] = c.g
       color[i * 3 + 2] = c.b
@@ -342,39 +378,38 @@ function GalaxyScene({
     return geo
   }, [dustCount])
 
-  /* 流动星云粒子：沿 −25° 对角带分布，低饱和 violet/rose/cyan 混合 */
+  /* 流动星云粒子：体积感更强，偏青蓝 / 玫瑰，像参考视频里的气体云 */
   const nebulaFlow = useMemo(() => {
     const rand = mulberry32(20231117)
-    const count = 600
+    const count = 900
     const pos = new Float32Array(count * 3)
     const size = new Float32Array(count)
     const color = new Float32Array(count * 3)
     const phase = new Float32Array(count)
     const speed = new Float32Array(count)
     const alpha = new Float32Array(count)
-    const gray = new THREE.Color('#8a90a6')
-    const palette = ['#3d2b6e', '#6e2b55', '#aee6ff'].map((hex) =>
-      new THREE.Color(hex).lerp(gray, 0.35),
+    const gray = new THREE.Color('#2a3448')
+    const palette = ['#2a5f9e', '#3d2b6e', '#6e2b55', '#1d8bb8'].map((hex) =>
+      new THREE.Color(hex).lerp(gray, 0.4),
     )
     const perp = new THREE.Vector2(-bandDir.y, bandDir.x)
 
     for (let i = 0; i < count; i++) {
-      // 沿对角带分布（横向散布比星点更宽，形成朦胧粒子带）
       const t = (rand() * 2 - 1) * 58
-      const spread = gaussian(rand) * 10
+      const spread = gaussian(rand) * 14
       pos[i * 3] = bandDir.x * t + perp.x * spread
       pos[i * 3 + 1] = bandDir.y * t + perp.y * spread
-      pos[i * 3 + 2] = -28 - rand() * 45
+      pos[i * 3 + 2] = -22 - rand() * 55
 
-      size[i] = 2.2 + rand() * rand() * 5.5
+      size[i] = 3.4 + rand() * rand() * 8.5
       const c = palette[Math.floor(rand() * palette.length)]
-      const dim = 0.55 + rand() * 0.45
+      const dim = 0.65 + rand() * 0.45
       color[i * 3] = c.r * dim
       color[i * 3 + 1] = c.g * dim
       color[i * 3 + 2] = c.b * dim
       phase[i] = rand()
       speed[i] = 0.4 + rand() * 1.2
-      alpha[i] = 0.04 + rand() * 0.1
+      alpha[i] = 0.045 + rand() * 0.08
     }
 
     const geo = new THREE.BufferGeometry()
@@ -425,16 +460,18 @@ function GalaxyScene({
     return geo
   }, [roomStars, bandDir])
 
-  /* 星云色斑（R3：蓝色再加深——色相偏蓝、向深空蓝 void 混合 0.8、强度再降） */
+  /* 体积累星云色斑：深蓝 / 蓝紫 / 玫瑰，模仿深空星云，避免纯黑底 */
   const nebulae = useMemo(() => {
-    const voidTint = new THREE.Color(0.012, 0.016, 0.05)
+    const voidTint = new THREE.Color(0.02, 0.04, 0.1)
     const defs = [
-      { color: '#26306b', scale: [70, 42, 1] as const, pos: [-14, 8, -70] as const, opacity: 0.32 },
-      { color: '#3a1f4e', scale: [46, 30, 1] as const, pos: [20, -9, -64] as const, opacity: 0.18 },
-      { color: '#141c44', scale: [80, 48, 1] as const, pos: [4, 0, -80] as const, opacity: 0.38 },
+      { color: '#1a6aa8', scale: [88, 52, 1] as const, pos: [-6, 4, -72] as const, opacity: 0.24, spin: 0.018 },
+      { color: '#3a1f4e', scale: [56, 38, 1] as const, pos: [18, -10, -60] as const, opacity: 0.28, spin: -0.012 },
+      { color: '#0d3a6e', scale: [96, 58, 1] as const, pos: [4, 2, -84] as const, opacity: 0.26, spin: 0.008 },
+      { color: '#6e2b55', scale: [44, 30, 1] as const, pos: [-22, -6, -54] as const, opacity: 0.22, spin: -0.02 },
+      { color: '#1488aa', scale: [38, 26, 1] as const, pos: [12, 10, -48] as const, opacity: 0.12, spin: 0.025 },
     ]
     return defs.map((d) => {
-      const darkened = `#${new THREE.Color(d.color).lerp(voidTint, 0.8).getHexString()}`
+      const darkened = `#${new THREE.Color(d.color).lerp(voidTint, 0.32).getHexString()}`
       return { ...d, tex: makeNebulaTexture(darkened) }
     })
   }, [])
@@ -448,6 +485,7 @@ function GalaxyScene({
         transparent: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
+        defines: { FAR_DRIFT: 1, TRAVEL: 1 },
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
@@ -462,7 +500,7 @@ function GalaxyScene({
         transparent: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
-        defines: { DRIFT: 1 },
+        defines: { DRIFT: 1, TRAVEL: 1 },
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],
@@ -503,6 +541,7 @@ function GalaxyScene({
       mat.uniforms.uTime.value = t
       mat.uniforms.uWarp.value = warp
       mat.uniforms.uPixelRatio.value = gl.getPixelRatio()
+      if (mat.uniforms.uTravel) mat.uniforms.uTravel.value = travelSpeed
     }
     // FOV 覆盖（穿越 timeline 写入 fovRef）
     const targetFov = fovRef?.current ?? baseFov
@@ -517,13 +556,28 @@ function GalaxyScene({
       g.position.x += (-pointer.x * 0.9 - g.position.x) * k
       g.position.y += (-pointer.y * 0.6 - g.position.y) * k
     }
+    // 银河缓慢自转 + 星云层反向蠕动（参考视频的体积云旋转）
+    if (!REDUCED_MOTION && spinRef.current) {
+      spinRef.current.rotation.z += delta * 0.016
+    }
+    nebulae.forEach((n, i) => {
+      const mesh = nebulaMeshRefs.current[i]
+      if (mesh && !REDUCED_MOTION) mesh.rotation.z += delta * n.spin
+    })
   })
 
   return (
     <group ref={groupRef}>
+      <group ref={spinRef}>
       {/* 星云色斑 */}
       {nebulae.map((n, i) => (
-        <mesh key={i} position={n.pos as unknown as [number, number, number]}>
+        <mesh
+          key={i}
+          ref={(el) => {
+            nebulaMeshRefs.current[i] = el
+          }}
+          position={n.pos as unknown as [number, number, number]}
+        >
           <planeGeometry args={[n.scale[0], n.scale[1]]} />
           <meshBasicMaterial
             map={n.tex}
@@ -557,6 +611,7 @@ function GalaxyScene({
           }}
         />
       )}
+      </group>
     </group>
   )
 }
@@ -564,13 +619,15 @@ function GalaxyScene({
 /* ── 外层组件 ─────────────────────────────────────── */
 
 export default function GalaxyBackdrop({
-  starCount = 1200,
-  dustCount = 200,
+  starCount = 1800,
+  dustCount = 280,
   roomStars = [],
   parallax = true,
   warpRef,
   fovRef,
   baseFov = 60,
+  travel = 3.6,
+  interactive = true,
   onRoomStarHover,
   className,
   style,
@@ -593,10 +650,11 @@ export default function GalaxyBackdrop({
       <Canvas
         camera={{ fov: baseFov, position: [0, 0, 10], near: 0.1, far: 220 }}
         dpr={[1, 2]}
-        gl={{ antialias: false, alpha: true, powerPreference: 'high-performance' }}
+        gl={{ antialias: false, alpha: false, powerPreference: 'high-performance' }}
         raycaster={{ params: { Points: { threshold: 2.2 } } as unknown as THREE.RaycasterParameters }}
-        style={{ position: 'absolute', inset: 0 }}
+        style={{ position: 'absolute', inset: 0, pointerEvents: interactive ? 'auto' : 'none' }}
       >
+        <color attach="background" args={['#080e1c']} />
         <GalaxyScene
           starCount={starCount}
           dustCount={dustCount}
@@ -605,9 +663,23 @@ export default function GalaxyBackdrop({
           warpRef={warpRef}
           fovRef={fovRef}
           baseFov={baseFov}
+          travel={travel}
           onRoomStarHover={onRoomStarHover}
         />
       </Canvas>
+      <div
+        aria-hidden
+        style={{
+          position: 'absolute',
+          inset: 0,
+          pointerEvents: 'none',
+          mixBlendMode: 'screen',
+          background:
+            'radial-gradient(ellipse 75% 55% at 24% 26%, rgba(88,62,168,0.34) 0%, transparent 64%),' +
+            'radial-gradient(ellipse 60% 48% at 78% 66%, rgba(120,42,96,0.32) 0%, transparent 60%),' +
+            'radial-gradient(ellipse 90% 70% at 50% 48%, rgba(18,52,96,0.1) 0%, transparent 72%)',
+        }}
+      />
     </div>
   )
 }

@@ -1,21 +1,110 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { Radio } from 'lucide-react'
 import { useAppStore } from '@/store'
 import { audioManager } from '@/audio/AudioManager'
+import GalaxyBackdrop from '@/components/GalaxyBackdrop'
 import TypeGlow from '@/components/TypeGlow'
 import { useBooks } from './library/books'
 import type { Book } from './library/books'
-import LibraryStarfield from './library/Starfield'
 import RingCarousel from './library/RingCarousel'
 import PlayerBar from './library/PlayerBar'
+import EchoWall from './library/EchoWall'
+import EchoField, { placeEcho } from './library/EchoField'
+import type { Echo } from './library/echoes'
+
+/** 提交后：留言化作一颗带尾迹的星，沿弧线飞入星空落点 */
+function FlyingEchoStar({
+  fromX,
+  fromY,
+  toX,
+  toY,
+  reduced,
+}: {
+  fromX: number
+  fromY: number
+  toX: number
+  toY: number
+  reduced: boolean
+}) {
+  const midX = fromX + (toX - fromX) * 0.42
+  const midY = Math.min(fromY, toY) - Math.min(160, Math.abs(toY - fromY) * 0.38 + 56)
+  const angle = (Math.atan2(toY - fromY, toX - fromX) * 180) / Math.PI
+  const trail = Math.min(88, Math.hypot(toX - fromX, toY - fromY) * 0.18)
+
+  return (
+    <motion.div
+      aria-hidden
+      className="pointer-events-none"
+      style={{ position: 'fixed', left: 0, top: 0, zIndex: 90, marginLeft: -8, marginTop: -8 }}
+      initial={{ x: fromX, y: fromY, scale: 2.8, opacity: 1 }}
+      animate={{
+        x: [fromX, midX, toX],
+        y: [fromY, midY, toY],
+        scale: [2.8, 1.25, 0.85],
+        opacity: 1,
+      }}
+      exit={{ opacity: 0, scale: 0.3 }}
+      transition={
+        reduced
+          ? { duration: 0.05 }
+          : { duration: 1.55, times: [0, 0.34, 1], ease: [0.22, 1, 0.36, 1] }
+      }
+    >
+      <motion.span
+        className="absolute left-1/2 top-1/2 block"
+        style={{
+          width: trail,
+          height: 12,
+          marginLeft: -trail,
+          marginTop: -6,
+          borderRadius: 999,
+          transform: `rotate(${angle}deg)`,
+          transformOrigin: 'right center',
+          background:
+            'linear-gradient(90deg, transparent 0%, rgba(245,240,230,0.2) 35%, rgba(245,240,230,0.95) 100%)',
+          boxShadow: '0 0 18px rgba(255,217,160,0.55)',
+        }}
+        initial={{ opacity: 0.95, scaleX: 0.35 }}
+        animate={{ opacity: [0.95, 0.75, 0], scaleX: [0.35, 1, 0.5] }}
+        transition={reduced ? { duration: 0.05 } : { duration: 1.55, times: [0, 0.4, 1] }}
+      />
+      <span
+        className="absolute left-1/2 top-1/2 block rounded-full"
+        style={{
+          width: 64,
+          height: 64,
+          marginLeft: -32,
+          marginTop: -32,
+          background:
+            'radial-gradient(circle, rgba(245,240,230,0.8) 0%, rgba(255,217,160,0.32) 40%, transparent 72%)',
+        }}
+      />
+      <span
+        className="absolute left-1/2 top-1/2 block rounded-full"
+        style={{
+          width: 16,
+          height: 16,
+          marginLeft: -8,
+          marginTop: -8,
+          background: '#f6f2ea',
+          boxShadow:
+            '0 0 14px #f6f2ea, 0 0 36px rgba(255,217,160,1), 0 0 72px rgba(255,217,160,0.5)',
+        }}
+      />
+    </motion.div>
+  )
+}
 
 /**
  * <LibraryView> 星空图书馆（view === 'library'）
- * - 深邃星空中悬浮单层 3D 环形书廊（15 册，数据 /assets/books.json，中心约 top-[46%]）
+ * - 深邃星空中悬浮单层 3D 环形书廊（数据 /assets/books.json，中心约 top-[46%]）
  * - 拖拽（惯性）/ ← → 方向键 / 自动旋转由 RingCarousel 接管；点击书脊 → 底部 PlayerBar
  * - 标题「星空图书馆」位于页面顶部安全区（pointer-events-none，绝不压住书廊）
  * - 入场：白色隧道式闪光淡入（峰值透明度 ≤0.55，呼应虫洞越迁）
- * - ESC：先关播放器，再 closeLibrary()；「返回星空」→ closeLibrary()
+ * - 「宇宙回声」：右上角打开写信窗；提交后留言化作背景漂浮星，悬停可见卡片
+ * - ESC：先关回声墙 / 播放器，再 closeLibrary()；「返回星空」→ closeLibrary()
  * - reduced-motion：关闭漂浮 / 入场闪光 / 自动旋转，保留全部功能
  */
 export default function LibraryView() {
@@ -24,6 +113,16 @@ export default function LibraryView() {
   const reduced = useReducedMotion() ?? false
 
   const [activeBook, setActiveBook] = useState<Book | null>(null)
+  const [echoOpen, setEchoOpen] = useState(false)
+  const [flyEcho, setFlyEcho] = useState<{
+    echo: Echo
+    fromX: number
+    fromY: number
+    toX: number
+    toY: number
+  } | null>(null)
+  const [arrivingId, setArrivingId] = useState<string | null>(null)
+  const closeEchoTimer = useRef<number | null>(null)
 
   const handleSelect = useCallback((book: Book) => {
     setActiveBook(book)
@@ -34,35 +133,89 @@ export default function LibraryView() {
     setActiveBook(null)
   }, [])
 
-  /* ── ESC：先关播放器，再返回星空 ── */
+  const closeEcho = useCallback(() => setEchoOpen(false), [])
+
+  const handleEchoSubmitted = useCallback((echo: Echo, origin: { x: number; y: number }) => {
+    const slot = placeEcho(echo, 0)
+    setFlyEcho({
+      echo,
+      fromX: origin.x,
+      fromY: origin.y,
+      toX: slot.x * window.innerWidth,
+      toY: slot.y * window.innerHeight,
+    })
+    // 先让飞星从按钮上亮起，再收起写信窗，避免动效被面板挡住
+    if (closeEchoTimer.current) window.clearTimeout(closeEchoTimer.current)
+    closeEchoTimer.current = window.setTimeout(() => setEchoOpen(false), 180)
+  }, [])
+
+  useEffect(
+    () => () => {
+      if (closeEchoTimer.current) window.clearTimeout(closeEchoTimer.current)
+    },
+    [],
+  )
+
+  useEffect(() => {
+    if (!flyEcho) return
+    const ms = reduced ? 80 : 1650
+    const t = window.setTimeout(() => {
+      setArrivingId(flyEcho.echo.id)
+      setFlyEcho(null)
+    }, ms)
+    return () => window.clearTimeout(t)
+  }, [flyEcho, reduced])
+
+  useEffect(() => {
+    if (!arrivingId) return
+    const t = window.setTimeout(() => setArrivingId(null), 2400)
+    return () => window.clearTimeout(t)
+  }, [arrivingId])
+
+  /* ── ESC：回声墙 → 播放器 → 返回星空 ── */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'Escape') return
+      if (echoOpen) return // EchoWall 自己处理 ESC
       if (activeBook) closePlayer()
       else closeLibrary()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [activeBook, closeLibrary, closePlayer])
+  }, [activeBook, echoOpen, closeLibrary, closePlayer])
 
   /* ── 离开视图：停声 ── */
   useEffect(() => () => audioManager.stop(), [])
 
   return (
     <div className="absolute inset-0 z-[30] overflow-hidden bg-void">
-      {/* ── 背景：星云渐变 + 星点 canvas ── */}
+      {/* ── 背景：深蓝 / 蓝紫星云（无 WebGL 或 reduced-motion 时仍可见） ── */}
       <div
         aria-hidden
-        className="absolute inset-0"
+        className="pointer-events-none absolute inset-0"
         style={{
           background:
-            'radial-gradient(ellipse 60% 45% at 22% 28%, rgba(61,43,110,0.38) 0%, transparent 70%),' +
-            'radial-gradient(ellipse 55% 42% at 78% 64%, rgba(110,43,85,0.30) 0%, transparent 70%),' +
-            'radial-gradient(ellipse 75% 60% at 50% 50%, rgba(27,35,80,0.55) 0%, transparent 78%),' +
-            'linear-gradient(180deg, #05060f 0%, #0b1026 52%, #05060f 100%)',
+            'radial-gradient(ellipse 120% 80% at 30% 20%, var(--nebula-violet) 0%, transparent 55%),' +
+            'radial-gradient(ellipse 90% 70% at 75% 70%, var(--nebula-rose) 0%, transparent 50%),' +
+            'radial-gradient(ellipse 140% 100% at 50% 50%, var(--nebula-mid) 0%, var(--nebula-deep) 45%, var(--void) 100%)',
         }}
       />
-      <LibraryStarfield reduced={reduced} />
+      {!reduced && (
+        <GalaxyBackdrop
+          starCount={1600}
+          dustCount={240}
+          travel={2.4}
+          parallax
+          interactive={false}
+          className="pointer-events-none"
+          style={{ position: 'absolute', zIndex: 0 }}
+        />
+      )}
+      <EchoField
+        reduced={reduced}
+        hiddenId={flyEcho?.echo.id ?? null}
+        arrivingId={arrivingId}
+      />
 
       {/* ── 顶部安全区 HUD：标题（不与环形书廊重叠） ── */}
       <motion.header
@@ -83,11 +236,24 @@ export default function LibraryView() {
       </motion.header>
 
       <motion.div
-        className="absolute right-5 top-5 z-20 md:right-8 md:top-7"
+        className="absolute right-5 top-5 z-20 flex items-center gap-2 md:right-8 md:top-7"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: reduced ? 0.1 : 0.5 }}
       >
+        <button
+          type="button"
+          aria-label="打开宇宙回声留言板"
+          data-cursor="interactive"
+          onClick={() => setEchoOpen(true)}
+          className="flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 font-hud text-[11px] tracking-[0.18em] text-gold transition-colors duration-200 hover:bg-gold/10 hover:text-starlight"
+          style={{ borderColor: 'rgba(255,217,160,0.4)' }}
+          onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(255,217,160,0.85)')}
+          onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'rgba(255,217,160,0.4)')}
+        >
+          <Radio className="h-3 w-3" aria-hidden />
+          宇宙回声
+        </button>
         <button
           type="button"
           aria-label="返回星空"
@@ -136,7 +302,7 @@ export default function LibraryView() {
           transition={{ duration: 0.6, delay: reduced ? 0.15 : 0.7 }}
         >
           <p className="font-hud text-[11px] tracking-[0.22em] text-starlight-faint">
-            拖拽或按 ← → 转动书廊 · 点击书籍开始聆听
+            拖拽或按 ← → 转动书廊 · 点击带光晕的星点可读回声 · 点击书籍开始聆听
           </p>
         </motion.footer>
       )}
@@ -152,6 +318,36 @@ export default function LibraryView() {
           />
         )}
       </AnimatePresence>
+
+      {/* ── 宇宙回声留言板 ── */}
+      <AnimatePresence>
+        {echoOpen && (
+          <EchoWall
+            key="echo-wall"
+            reduced={reduced}
+            onClose={closeEcho}
+            onSubmitted={handleEchoSubmitted}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── 留言化作星星飞入星空（portal 到 body，避免被图书馆 overflow 裁切） ── */}
+      {typeof document !== 'undefined' &&
+        createPortal(
+          <AnimatePresence>
+            {flyEcho && (
+              <FlyingEchoStar
+                key={flyEcho.echo.id}
+                fromX={flyEcho.fromX}
+                fromY={flyEcho.fromY}
+                toX={flyEcho.toX}
+                toY={flyEcho.toY}
+                reduced={reduced}
+              />
+            )}
+          </AnimatePresence>,
+          document.body,
+        )}
 
       {/* ── 入场：白色隧道式闪光（峰值 ≤0.55，呼应虫洞越迁） ── */}
       {!reduced && (

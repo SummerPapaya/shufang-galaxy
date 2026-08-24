@@ -18,7 +18,7 @@ import { STAR_POSITIONS } from './universe/starPositions'
 /**
  * Universe · 星空漫游（universe.md）
  * 第一人称 360° 星野：~3700 背景星（单次 draw call，双层球壳 + 闪烁）+ 近景星尘 +
- * 漂移呼吸星云 + 23 颗书房星（悬停提示 / 点击飞星转场）。
+ * 漂移呼吸星云 + 25 颗书房星（悬停提示 / 点击飞星转场）。
  * 相机角度记忆：离开前保存 yaw/pitch，返回时恢复。
  * 拖动 / 方向键 / 滚轮 / 自动巡游。星尘光标跟随鼠标轨迹。
  *

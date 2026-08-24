@@ -482,5 +482,49 @@
     "audio": "assets/audio/ep2.mp3"
    }
   ]
+ },
+ {
+  "id": "caishan",
+  "title": "有味",
+  "author": "汪涵",
+  "reader": "蔡杉",
+  "starColor": "#c9d98f",
+  "audio": "assets/audio/ep2.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   }
+  ]
+ },
+ {
+  "id": "yiwei",
+  "title": "故道白云",
+  "author": "一行禅师",
+  "reader": "一苇",
+  "starColor": "#cfe3d8",
+  "audio": "assets/audio/ep3.mp3",
+  "episodes": [
+   {
+    "title": "第 1 集 · 试音样片",
+    "audio": "assets/audio/ep3.mp3"
+   },
+   {
+    "title": "第 2 集 · 样片",
+    "audio": "assets/audio/ep2.mp3"
+   },
+   {
+    "title": "第 3 集 · 样片",
+    "audio": "assets/audio/ep3.mp3"
+   }
+  ]
  }
 ]

@@ -5,8 +5,8 @@
 @layer base {
   :root {
     /* ── 「一个人的书房 · 平行宇宙」设计 token（design.md §3） ── */
-    --void: #030510;
-    --nebula-deep: #070c20;
+    --void: #070c1c;
+    --nebula-deep: #080e22;
     --nebula-mid: #131a42;
     --nebula-violet: #2c2258;
     --nebula-rose: #4a1f42;
@@ -93,6 +93,60 @@
 
   .text-glow-gold {
     text-shadow: 0 0 24px var(--gold-glow);
+  }
+
+  /* 深空滚动条：轨道近乎透明，滑块为半透明月白，hover 转暖金 */
+  .scrollbar-starfield {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(245, 240, 230, 0.18) transparent;
+  }
+
+  .scrollbar-starfield::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .scrollbar-starfield::-webkit-scrollbar-track {
+    background: rgba(5, 6, 15, 0.5);
+    border-radius: 999px;
+  }
+
+  .scrollbar-starfield::-webkit-scrollbar-thumb {
+    background: rgba(245, 240, 230, 0.16);
+    border-radius: 999px;
+  }
+
+  .scrollbar-starfield::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 217, 160, 0.42);
+  }
+
+  .scrollbar-starfield::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  /* 宇宙回声星：柔和羽化光晕，缓慢呼吸 */
+  .echo-star-halo {
+    animation: echo-star-breathe 2.8s ease-in-out infinite;
+  }
+
+  @keyframes echo-star-breathe {
+    0%,
+    100% {
+      transform: scale(0.82);
+      opacity: 0.35;
+    }
+    50% {
+      transform: scale(1.18);
+      opacity: 0.72;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .echo-star-halo {
+      animation: none;
+      opacity: 0.5;
+      transform: scale(1);
+    }
   }
 
   /* Landing 整页 SLOGAN（伍尔夫引言打字机）：月白 + 柔和星光/暖金辉光 */

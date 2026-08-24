@@ -9,9 +9,19 @@ import { cn } from '@/lib/utils'
 
 /**
  * <AudioToggle> 右下角片花 / 静音选择（design.md §7.3）
- * - 主按钮展示当前状态（声波 / 静音斜杠）
+ * - 播放中：5 柱声波实时起伏 + 金色呼吸光环，让"正在放片花"一眼可辨
+ * - 静音：柱状压平为静止短线 + 斜杠
  * - 点击展开菜单：随机片花、男声、女声、静音
  */
+
+/** 声波柱：高度 / 动画时长 / 相位错开，模拟真实电平起伏 */
+const WAVE_BARS = [
+  { h: 8, dur: 1.05, delay: 0 },
+  { h: 14, dur: 0.85, delay: 0.18 },
+  { h: 18, dur: 1.25, delay: 0.06 },
+  { h: 12, dur: 0.95, delay: 0.3 },
+  { h: 7, dur: 1.15, delay: 0.14 },
+]
 
 const MODE_OPTIONS: { mode: AmbienceMode; label: string; hint: string }[] = [
   { mode: 'random', label: '随机片花', hint: '男声 / 女声随机续播' },
@@ -59,6 +69,7 @@ export default function AudioToggle() {
   }, [open])
 
   const muted = state.muted || state.ambienceMode === 'muted'
+  /** 片花（或朗读样片）确实在响 → 播放声波动画 */
   const active = !muted && (state.ambienceStarted || state.playing)
 
   return (
@@ -110,52 +121,78 @@ export default function AudioToggle() {
         </div>
       )}
 
-      <button
-        type="button"
-        aria-label={modeAria(state.ambienceMode)}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        data-cursor="interactive"
-        onClick={() => setOpen((v) => !v)}
-        className={cn(
-          'flex h-11 w-11 items-center justify-center rounded-full',
-          'border border-[rgba(255,217,160,0.3)] bg-[rgba(11,16,38,0.5)] backdrop-blur-sm',
-          'transition-colors duration-200 hover:border-[rgba(255,217,160,0.7)]',
-          open && 'border-[rgba(255,217,160,0.7)]',
-        )}
-      >
-        {muted ? (
-          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden>
-            <line
-              x1="2"
-              y1="14"
-              x2="14"
-              y2="2"
-              stroke="var(--starlight-dim)"
-              strokeWidth="1.5"
-              strokeLinecap="round"
+      <div className="relative">
+        {/* 播放中：金色呼吸光环从按钮向外扩散 */}
+        {active && (
+          <>
+            <span
+              aria-hidden
+              className="animate-audio-pulse pointer-events-none absolute inset-0 rounded-full border border-[rgba(255,217,160,0.55)]"
             />
-          </svg>
-        ) : (
-          <span className="flex h-4 items-center gap-[3px]" aria-hidden>
-            {[0, 1, 2].map((i) => (
+            <span
+              aria-hidden
+              className="animate-audio-pulse pointer-events-none absolute inset-0 rounded-full border border-[rgba(255,217,160,0.35)]"
+              style={{ animationDelay: '1.2s' }}
+            />
+          </>
+        )}
+
+        <button
+          type="button"
+          aria-label={modeAria(state.ambienceMode)}
+          aria-haspopup="menu"
+          aria-expanded={open}
+          data-cursor="interactive"
+          onClick={() => setOpen((v) => !v)}
+          className={cn(
+            'relative flex h-11 w-11 items-center justify-center rounded-full',
+            'border bg-[rgba(11,16,38,0.5)] backdrop-blur-sm transition-colors duration-200',
+            active
+              ? 'border-[rgba(255,217,160,0.6)] shadow-[0_0_18px_rgba(255,217,160,0.28)]'
+              : 'border-[rgba(255,217,160,0.3)]',
+            'hover:border-[rgba(255,217,160,0.8)]',
+            open && 'border-[rgba(255,217,160,0.8)]',
+          )}
+        >
+          <span className="flex h-[18px] items-end gap-[2.5px]" aria-hidden>
+            {WAVE_BARS.map((bar, i) => (
               <span
                 key={i}
                 className={cn(
-                  'w-[2px] rounded-full bg-[var(--gold)]',
-                  active && 'animate-audio-bar',
+                  'block w-[2.5px] origin-bottom rounded-full',
+                  active
+                    ? 'animate-audio-bar bg-[var(--gold)] shadow-[0_0_6px_rgba(255,217,160,0.65)]'
+                    : 'bg-[var(--starlight-dim)]',
                 )}
                 style={{
-                  height: 14,
-                  transform: active ? undefined : 'scaleY(0.3)',
-                  animationDelay: `${i * 0.3}s`,
-                  animationDuration: `${1.6 + i * 0.35}s`,
+                  height: active ? bar.h : 5,
+                  animationDelay: `${bar.delay}s`,
+                  animationDuration: `${bar.dur}s`,
                 }}
               />
             ))}
           </span>
-        )}
-      </button>
+
+          {/* 静音：斜杠盖在压平的柱状上 */}
+          {muted && (
+            <svg
+              className="absolute inset-0 h-full w-full"
+              viewBox="0 0 44 44"
+              aria-hidden
+            >
+              <line
+                x1="13"
+                y1="31"
+                x2="31"
+                y2="13"
+                stroke="var(--starlight-dim)"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+              />
+            </svg>
+          )}
+        </button>
+      </div>
     </div>
   )
 }

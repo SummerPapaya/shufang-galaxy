@@ -257,7 +257,7 @@ export default function RoomView() {
         >
           {isMobile ? (
             /* ── 移动端：全屏纵向抽屉（§1）── */
-            <div className="h-full overflow-y-auto overscroll-contain">
+            <div className="scrollbar-starfield h-full overflow-y-auto overscroll-contain">
               <div className="mx-auto flex max-w-[560px] flex-col gap-6 px-4 pb-6 pt-2">
                 {topBar}
                 <div ref={stageScrollRef} className="scroll-mt-6">
@@ -330,7 +330,7 @@ export default function RoomView() {
                   <div className="w-full max-w-[min(100%,76vh)]">{stage}</div>
                 </div>
                 {/* 右栏：信息区 ~42% */}
-                <div className="flex max-h-full w-[45%] flex-col gap-5 overflow-y-auto pr-1 lg:w-[42%] lg:gap-6">
+                <div className="scrollbar-starfield flex max-h-full w-[45%] flex-col gap-5 overflow-y-auto pr-1 lg:w-[42%] lg:gap-6">
                   <RoomHeading room={room} roomIndex={roomIndex} ds={ds} reduced={reduced} />
                   <RoomQuote room={room} roomIndex={roomIndex} ds={ds} reduced={reduced} />
                   {showReading && (

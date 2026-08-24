@@ -219,7 +219,7 @@
   "reader": "安德烈司机",
   "title": "安德烈司机的书房",
   "role": "朗读者",
-  "style": "复古美式房车",
+  "style": "航海风原木书房",
   "starColor": "#ffb86b",
   "quote": "书房的那几年，曾经是我的「平行时空」。",
   "book": "《老人与海》· 欧内斯特·海明威",
@@ -472,19 +472,19 @@
   "audio": "assets/audio/xiaotang.mp3",
   "hotspots": [
    {
-    "x": 0.14,
-    "y": 0.52,
-    "label": "绿植书架 · 垂直花园"
+    "x": 0.18,
+    "y": 0.4,
+    "label": "书梯 · 够到最高那排"
    },
    {
-    "x": 0.48,
-    "y": 0.64,
-    "label": "阳光书桌 · 博物笔记"
+    "x": 0.55,
+    "y": 0.55,
+    "label": "书桌 · 花影落在纸上"
    },
    {
-    "x": 0.79,
-    "y": 0.71,
-    "label": "窗边盆栽 · 小型雨林"
+    "x": 0.72,
+    "y": 0.3,
+    "label": "窗边藤蔓 · 夕光穿进来"
    }
   ],
   "books": [
@@ -668,19 +668,19 @@
   "audio": "assets/audio/yitiaodahe.mp3",
   "hotspots": [
    {
-    "x": 0.3,
-    "y": 0.25,
-    "label": "荧光水母灯 · 深海之光"
+    "x": 0.5,
+    "y": 0.28,
+    "label": "圆形舷窗 · 水下的夕晖"
    },
    {
-    "x": 0.55,
-    "y": 0.55,
-    "label": "木椅 · 静观鱼群"
+    "x": 0.48,
+    "y": 0.58,
+    "label": "书桌 · 漂浮的书页"
    },
    {
-    "x": 0.75,
-    "y": 0.3,
-    "label": "热带鱼 · 窗外的海"
+    "x": 0.22,
+    "y": 0.45,
+    "label": "书架 · 船舱里的藏书"
    }
   ],
   "books": [
@@ -1132,6 +1132,104 @@
      {
       "title": "第 3 集 · 样片",
       "audio": "assets/audio/ep2.mp3"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "caishan",
+  "reader": "蔡杉",
+  "title": "蔡杉的书房",
+  "role": "朗读者",
+  "style": "夕晖绿植书房",
+  "starColor": "#c9d98f",
+  "quote": "把日子过成一门手艺，慢一点，就有了味道。",
+  "book": "《有味》· 汪涵",
+  "img": "assets/rooms/caishan.jpg",
+  "audio": "assets/audio/ep2.mp3",
+  "hotspots": [
+   {
+    "x": 0.28,
+    "y": 0.42,
+    "label": "窗边绿植 · 夕晖落在叶片上"
+   },
+   {
+    "x": 0.48,
+    "y": 0.55,
+    "label": "书桌 · 摊开的书稿"
+   },
+   {
+    "x": 0.78,
+    "y": 0.38,
+    "label": "书架 · 一墙安静的书脊"
+   }
+  ],
+  "books": [
+   {
+    "title": "有味",
+    "author": "汪涵",
+    "episodes": [
+     {
+      "title": "第 1 集 · 试音样片",
+      "audio": "assets/audio/ep2.mp3"
+     },
+     {
+      "title": "第 2 集 · 样片",
+      "audio": "assets/audio/ep3.mp3"
+     },
+     {
+      "title": "第 3 集 · 样片",
+      "audio": "assets/audio/ep2.mp3"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "yiwei",
+  "reader": "一苇",
+  "title": "一苇的书房",
+  "role": "朗读者",
+  "style": "竹影禅意书房",
+  "starColor": "#cfe3d8",
+  "quote": "过去已经过去，未来尚未到来；能安住的，只有此刻。",
+  "book": "《故道白云》· 一行禅师",
+  "img": "assets/rooms/yiwei.jpg",
+  "audio": "assets/audio/ep3.mp3",
+  "hotspots": [
+   {
+    "x": 0.62,
+    "y": 0.52,
+    "label": "矮案 · 摊开的经卷"
+   },
+   {
+    "x": 0.5,
+    "y": 0.24,
+    "label": "竹影 · 风过时的呼吸"
+   },
+   {
+    "x": 0.5,
+    "y": 0.72,
+    "label": "蒲团 · 坐下来的此刻"
+   }
+  ],
+  "books": [
+   {
+    "title": "故道白云",
+    "author": "一行禅师",
+    "episodes": [
+     {
+      "title": "第 1 集 · 试音样片",
+      "audio": "assets/audio/ep3.mp3"
+     },
+     {
+      "title": "第 2 集 · 样片",
+      "audio": "assets/audio/ep2.mp3"
+     },
+     {
+      "title": "第 3 集 · 样片",
+      "audio": "assets/audio/ep3.mp3"
      }
     ]
    }
