@@ -464,11 +464,11 @@ function GalaxyScene({
   const nebulae = useMemo(() => {
     const voidTint = new THREE.Color(0.02, 0.04, 0.1)
     const defs = [
-      { color: '#1a6aa8', scale: [88, 52, 1] as const, pos: [-6, 4, -72] as const, opacity: 0.32, spin: 0.018 },
+      { color: '#1a6aa8', scale: [88, 52, 1] as const, pos: [-6, 4, -72] as const, opacity: 0.24, spin: 0.018 },
       { color: '#3a1f4e', scale: [56, 38, 1] as const, pos: [18, -10, -60] as const, opacity: 0.28, spin: -0.012 },
-      { color: '#0d3a6e', scale: [96, 58, 1] as const, pos: [4, 2, -84] as const, opacity: 0.34, spin: 0.008 },
+      { color: '#0d3a6e', scale: [96, 58, 1] as const, pos: [4, 2, -84] as const, opacity: 0.26, spin: 0.008 },
       { color: '#6e2b55', scale: [44, 30, 1] as const, pos: [-22, -6, -54] as const, opacity: 0.22, spin: -0.02 },
-      { color: '#1488aa', scale: [38, 26, 1] as const, pos: [12, 10, -48] as const, opacity: 0.16, spin: 0.025 },
+      { color: '#1488aa', scale: [38, 26, 1] as const, pos: [12, 10, -48] as const, opacity: 0.12, spin: 0.025 },
     ]
     return defs.map((d) => {
       const darkened = `#${new THREE.Color(d.color).lerp(voidTint, 0.32).getHexString()}`
@@ -677,7 +677,7 @@ export default function GalaxyBackdrop({
           background:
             'radial-gradient(ellipse 75% 55% at 24% 26%, rgba(88,62,168,0.34) 0%, transparent 64%),' +
             'radial-gradient(ellipse 60% 48% at 78% 66%, rgba(120,42,96,0.32) 0%, transparent 60%),' +
-            'radial-gradient(ellipse 90% 70% at 50% 48%, rgba(22,68,128,0.14) 0%, transparent 72%)',
+            'radial-gradient(ellipse 90% 70% at 50% 48%, rgba(18,52,96,0.1) 0%, transparent 72%)',
         }}
       />
     </div>

@@ -174,20 +174,25 @@ function EchoCard({
   })
 
   useLayoutEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const vw = window.innerWidth
-    const vh = window.innerHeight
-    const w = el.offsetWidth
-    const h = el.offsetHeight
-    const starX = x * vw
-    const starY = y * vh
-    let left = starX - w / 2
-    left = Math.min(Math.max(left, CARD_PAD), Math.max(CARD_PAD, vw - w - CARD_PAD))
-    let top = starY + 16
-    if (top + h > vh - CARD_PAD) top = starY - 16 - h
-    if (top < CARD_PAD) top = CARD_PAD
-    setBox({ left, top })
+    const place = () => {
+      const el = ref.current
+      if (!el) return
+      const vw = window.innerWidth
+      const vh = window.innerHeight
+      const w = el.offsetWidth
+      const h = el.offsetHeight
+      const starX = x * vw
+      const starY = y * vh
+      let left = starX - w / 2
+      left = Math.min(Math.max(left, CARD_PAD), Math.max(CARD_PAD, vw - w - CARD_PAD))
+      let top = starY + 16
+      if (top + h > vh - CARD_PAD) top = starY - 16 - h
+      if (top < CARD_PAD) top = CARD_PAD
+      setBox({ left, top })
+    }
+    place()
+    window.addEventListener('resize', place)
+    return () => window.removeEventListener('resize', place)
   }, [x, y, echo.id, echo.message])
 
   return (
