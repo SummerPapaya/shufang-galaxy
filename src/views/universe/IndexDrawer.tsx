@@ -39,7 +39,7 @@ function WormholeButton({ controls }: { controls: UniverseControls }) {
       <motion.button
         type="button"
         data-cursor="interactive"
-        aria-label="虫洞越迁：前往星空图书馆"
+        aria-label="虫洞穿越：前往星空图书馆"
         onClick={onClick}
         className="flex h-7 items-center gap-1.5 rounded-full border border-gold/60 px-3 font-hud text-[11px] uppercase tracking-[0.22em] text-gold transition-colors hover:border-gold hover:text-starlight"
         animate={
@@ -55,7 +55,7 @@ function WormholeButton({ controls }: { controls: UniverseControls }) {
         }
         transition={{ duration: 1, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }}
       >
-        虫洞越迁
+        虫洞穿越
         <Sparkles className="h-3 w-3" aria-hidden />
       </motion.button>
       {/* hover tooltip */}
