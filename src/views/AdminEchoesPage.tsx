@@ -36,6 +36,46 @@ function formatTime(at: number): string {
   }
 }
 
+function csvEscape(value: string): string {
+  if (/[",\n\r]/.test(value)) return `"${value.replace(/"/g, '""')}"`
+  return value
+}
+
+/** UTF-8 BOM CSV，Excel 可直接打开中文 */
+function downloadEchoesCsv(rows: AdminEcho[], filename: string) {
+  const header = ['id', 'name', 'email', 'message', 'at', 'time']
+  const lines = [
+    header.join(','),
+    ...rows.map((e) =>
+      [
+        csvEscape(e.id),
+        csvEscape(e.name),
+        csvEscape(e.email || ''),
+        csvEscape(e.message),
+        String(e.at),
+        csvEscape(formatTime(e.at)),
+      ].join(','),
+    ),
+  ]
+  const blob = new Blob([`\uFEFF${lines.join('\n')}`], {
+    type: 'text/csv;charset=utf-8;',
+  })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.rel = 'noopener'
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
+
+function stampForFilename(d = new Date()): string {
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`
+}
+
 export default function AdminEchoesPage() {
   const [secret, setSecret] = useState(() => {
     try {
@@ -202,6 +242,20 @@ export default function AdminEchoesPage() {
                 className="rounded-full border border-white/20 px-3 py-2 font-hud text-[10px] tracking-[0.14em] text-[rgba(245,240,230,0.8)] hover:border-[rgba(255,217,160,0.45)] disabled:opacity-50"
               >
                 {loading ? '刷新中…' : '刷新'}
+              </button>
+              <button
+                type="button"
+                disabled={filtered.length === 0}
+                onClick={() =>
+                  downloadEchoesCsv(
+                    filtered,
+                    `宇宙回声-${stampForFilename()}.csv`,
+                  )
+                }
+                title="导出当前列表为 CSV（可用 Excel 打开）"
+                className="rounded-full border border-[rgba(255,217,160,0.45)] px-3 py-2 font-hud text-[10px] tracking-[0.14em] text-[#ffd9a0] hover:bg-[rgba(255,217,160,0.1)] disabled:opacity-40"
+              >
+                下载 CSV
               </button>
               <button
                 type="button"
