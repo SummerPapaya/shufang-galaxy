@@ -26,11 +26,31 @@ const RATE_LIMIT = 8
 const RATE_WINDOW_SEC = 60 * 60
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
+function envPresence() {
+  return {
+    UPSTASH_REDIS_REST_URL: Boolean(process.env.UPSTASH_REDIS_REST_URL),
+    UPSTASH_REDIS_REST_TOKEN: Boolean(process.env.UPSTASH_REDIS_REST_TOKEN),
+    KV_REST_API_URL: Boolean(process.env.KV_REST_API_URL),
+    KV_REST_API_TOKEN: Boolean(process.env.KV_REST_API_TOKEN),
+  }
+}
+
 function redisClient(): Redis | null {
   try {
-    const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
-    const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
+    const url =
+      process.env.UPSTASH_REDIS_REST_URL ||
+      process.env.KV_REST_API_URL ||
+      process.env.UPSTASH_REDIS_URL
+    const token =
+      process.env.UPSTASH_REDIS_REST_TOKEN ||
+      process.env.KV_REST_API_TOKEN ||
+      process.env.UPSTASH_REDIS_TOKEN
+    // REST client needs the REST URL (usually https://….upstash.io)
     if (!url || !token) return null
+    if (url.startsWith('redis://') || url.startsWith('rediss://')) {
+      console.error('[api/echoes] got TCP redis URL; need UPSTASH_REDIS_REST_URL instead')
+      return null
+    }
     return new Redis({ url, token })
   } catch (err) {
     console.error('[api/echoes] redis init failed', err)
@@ -119,7 +139,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       res.status(503).json({
         error: 'echo_store_unavailable',
         message:
-          '公共回声库尚未配置。请在 Vercel 接入 Upstash Redis，并确认已写入 UPSTASH_REDIS_REST_URL / TOKEN（或 KV_REST_API_*）后重新部署。',
+          '公共回声库尚未配置。请在 Vercel → Storage 接入 Upstash Redis，确认 Environment Variables 里有 UPSTASH_REDIS_REST_URL 与 UPSTASH_REDIS_REST_TOKEN（Production），然后 Redeploy。',
+        detected: envPresence(),
       })
       return
     }
