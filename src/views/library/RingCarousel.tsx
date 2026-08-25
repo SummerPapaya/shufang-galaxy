@@ -330,7 +330,7 @@ export default function RingCarousel({ books, reduced, onSelect }: RingCarouselP
 
   const spineW = narrow ? MOBILE_SPINE_W : DESKTOP_SPINE_W
   const spineH = narrow ? MOBILE_SPINE_H : DESKTOP_SPINE_H
-  const stageTop = narrow ? '44%' : '48%'
+  const stageTop = narrow ? '56%' : '48%'
 
   return (
     <div
@@ -390,17 +390,13 @@ export default function RingCarousel({ books, reduced, onSelect }: RingCarouselP
                       : 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1)',
                   }}
                 >
-                  {/* 信息卡：窄屏放书脊下方，避免顶到标题 */}
+                  {/* 信息卡：手机端在书脊上方（书环已下移，避开顶栏与播放器） */}
                   <div
                     aria-hidden={!hover}
-                    className={
-                      narrow
-                        ? 'pointer-events-none absolute left-1/2 top-full z-30 mt-3 w-[170px]'
-                        : 'pointer-events-none absolute bottom-full left-1/2 z-30 mb-4 w-[190px]'
-                    }
+                    className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-3 w-[170px] sm:mb-4 sm:w-[190px]"
                     style={{
                       opacity: hover ? 1 : 0,
-                      transform: `translateX(-50%) translateY(${hover ? 0 : narrow ? -6 : 8}px)`,
+                      transform: `translateX(-50%) translateY(${hover ? 0 : 8}px)`,
                       transition: 'opacity 200ms ease, transform 200ms ease',
                     }}
                   >

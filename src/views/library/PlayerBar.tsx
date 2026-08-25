@@ -152,7 +152,7 @@ export default function PlayerBar({ book, reduced, onClose }: PlayerBarProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: reduced ? 0 : 72 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="fixed inset-x-0 z-50 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] bottom-16 sm:bottom-0 sm:px-4 sm:pb-5"
+      className="fixed inset-x-0 bottom-0 z-50 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4 sm:pb-5"
     >
       <div
         className="glass-panel flex w-[min(96vw,660px)] flex-col gap-2.5 rounded-xl border px-3.5 py-3 backdrop-blur-md sm:flex-row sm:items-center sm:gap-4 sm:px-4"
