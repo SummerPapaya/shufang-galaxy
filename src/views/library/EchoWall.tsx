@@ -13,7 +13,7 @@ import type { Echo, EchoFieldError } from './echoes'
 /**
  * <EchoWall> 「宇宙回声」留言表单
  * - 深空玻璃面板 + 月白文字，保证可读
- * - 提交后把回声交给父级做「化作星星飞入星空」动效
+ * - 提交到公共回声库；成功后交给父级做「化作星星飞入星空」动效
  */
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
@@ -25,12 +25,14 @@ interface EchoWallProps {
 }
 
 export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProps) {
-  const { echoes, submit } = useEchoes()
+  const { echoes, status, errorMessage, submit } = useEchoes()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
   const [errors, setErrors] = useState<EchoFieldError>({})
+  const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
   const nameRef = useRef<HTMLInputElement>(null)
   const submitRef = useRef<HTMLButtonElement>(null)
 
@@ -46,26 +48,38 @@ export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProp
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (sending || sent) return
     const draft = { name, email, message }
     const found = validateEcho(draft)
     setErrors(found)
+    setSubmitError(null)
     if (Object.keys(found).length > 0) return
-    const echo = submit(draft)
-    const rect = submitRef.current?.getBoundingClientRect()
-    const origin = {
-      x: (rect?.left ?? window.innerWidth / 2) + (rect?.width ?? 0) / 2,
-      y: (rect?.top ?? window.innerHeight / 2) + (rect?.height ?? 0) / 2,
+
+    setSending(true)
+    try {
+      const echo = await submit(draft)
+      const rect = submitRef.current?.getBoundingClientRect()
+      const origin = {
+        x: (rect?.left ?? window.innerWidth / 2) + (rect?.width ?? 0) / 2,
+        y: (rect?.top ?? window.innerHeight / 2) + (rect?.height ?? 0) / 2,
+      }
+      setSent(true)
+      onSubmitted?.(echo, origin)
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : '送入星海失败，请稍后再试')
+    } finally {
+      setSending(false)
     }
-    setSent(true)
-    onSubmitted?.(echo, origin)
   }
 
   const fieldBase =
     'w-full rounded-md border bg-[rgba(6,10,24,0.88)] px-3 py-2.5 font-sans text-[15px] text-[#f6f2ea] ' +
     'outline-none transition-colors placeholder:text-[rgba(245,240,230,0.42)] ' +
     'focus:border-[rgba(255,217,160,0.65)] focus:bg-[rgba(10,14,32,0.95)]'
+
+  const publicCount = echoes.filter((e) => !e.seed).length
 
   return (
     <motion.div
@@ -104,7 +118,7 @@ export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProp
           <div>
             <h2 className="font-serif text-[21px] tracking-[0.04em] text-[#f6f2ea]">宇宙回声</h2>
             <p className="mt-1 font-sans text-[13px] leading-relaxed text-[rgba(245,240,230,0.82)]">
-              写下一句，它会化作星空里的一颗星
+              写下一句，它会化作星空里所有人都能看见的一颗星
             </p>
           </div>
           <button
@@ -119,6 +133,16 @@ export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProp
         </header>
 
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3.5 px-5 py-5">
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden
+            className="pointer-events-none absolute left-[-9999px] h-0 w-0 opacity-0"
+            defaultValue=""
+          />
+
           <div>
             <label
               htmlFor="echo-name"
@@ -146,7 +170,10 @@ export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProp
               htmlFor="echo-email"
               className="mb-1.5 block font-hud text-[10px] uppercase tracking-[0.22em] text-[rgba(245,240,230,0.78)]"
             >
-              邮箱 <span className="normal-case tracking-normal text-[rgba(245,240,230,0.62)]">（可选，不公开）</span>
+              邮箱{' '}
+              <span className="normal-case tracking-normal text-[rgba(245,240,230,0.62)]">
+                （可选，不公开）
+              </span>
             </label>
             <input
               id="echo-email"
@@ -186,9 +213,15 @@ export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProp
             <div className="mt-1.5 flex items-center justify-between gap-3">
               {errors.message ? (
                 <p className="font-sans text-[12px] text-[#ffb4b4]">{errors.message}</p>
+              ) : status === 'error' ? (
+                <p className="font-sans text-[12px] text-[#ffb4b4]">
+                  {errorMessage || '公共星海暂未连通'}
+                </p>
               ) : (
                 <span className="font-sans text-[12px] text-[rgba(245,240,230,0.58)]">
-                  星空中已有 {echoes.length} 颗回声
+                  {status === 'loading'
+                    ? '正在聆听星海…'
+                    : `公共星海已有 ${publicCount} 颗回声`}
                 </span>
               )}
               <span className="shrink-0 font-hud text-[10px] tracking-[0.12em] text-[rgba(245,240,230,0.58)]">
@@ -197,15 +230,21 @@ export default function EchoWall({ reduced, onClose, onSubmitted }: EchoWallProp
             </div>
           </div>
 
+          {submitError && (
+            <p role="alert" className="font-sans text-[12px] text-[#ffb4b4]">
+              {submitError}
+            </p>
+          )}
+
           <button
             ref={submitRef}
             type="submit"
             data-cursor="interactive"
-            disabled={sent}
+            disabled={sent || sending}
             className="mt-1 flex items-center justify-center gap-2 rounded-full border border-gold bg-gold/10 px-4 py-2.5 font-hud text-[11px] uppercase tracking-[0.2em] text-gold transition-colors hover:bg-gold/20 hover:text-starlight disabled:opacity-60"
           >
             <Send className="h-3.5 w-3.5" aria-hidden />
-            送入星海
+            {sending ? '送入中…' : '送入星海'}
           </button>
 
           <AnimatePresence>

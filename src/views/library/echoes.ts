@@ -1,152 +1,55 @@
-import { useCallback, useSyncExternalStore } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  MESSAGE_MAX,
+  NAME_MAX,
+  SEED_ECHOES,
+  composeEchoes,
+  validateEcho,
+  type Echo,
+  type EchoDraft,
+  type EchoFieldError,
+} from '../../../shared/echoes'
+
+export type { Echo, EchoDraft, EchoFieldError }
+export { MESSAGE_MAX, NAME_MAX, SEED_ECHOES, validateEcho }
 
 /**
- * 「宇宙回声」留言数据层。
+ * 「宇宙回声」公共留言墙数据层。
  *
- * 站点是纯静态托管（GitHub Pages），没有后端可写；因此回声先落在
- * localStorage：访客提交后立刻在自己的星海里看到留言，刷新仍在。
- * 若日后接入表单服务（Formspree / Cloudflare Worker 等），
- * 只要把 submitEcho 内部换成一次 POST，UI 层无需改动。
+ * - 读写走 `/api/echoes`（本地 Vite 中间件 / 生产 Vercel + KV）
+ * - 可通过 `VITE_ECHOES_API` 指向独立 API（例如 GitHub Pages 前端 + Vercel 后端）
+ * - 邮箱不会出现在列表响应里；示例星仅前端展示
  */
 
-export interface Echo {
-  id: string
-  /** 昵称（必填） */
-  name: string
-  /** 邮箱（可选，仅本地留存，不在墙上公开） */
-  email?: string
-  /** 留言正文 */
-  message: string
-  /** 提交时间戳（ms） */
-  at: number
-  /** 是否为初始展示的示例回声（不可删除，仅作氛围） */
-  seed?: boolean
+const OWN_IDS_KEY = 'shufang-galaxy:echo-own-ids:v1'
+
+function apiBase(): string {
+  const fromEnv = import.meta.env.VITE_ECHOES_API as string | undefined
+  if (fromEnv && fromEnv.trim()) return fromEnv.replace(/\/$/, '')
+  return '/api/echoes'
 }
 
-export const NAME_MAX = 24
-export const MESSAGE_MAX = 200
-
-const STORAGE_KEY = 'shufang-galaxy:echoes:v1'
-
-/** 星海里预先回响的几条示例留言（首次进入不至于空荡） */
-const SEED_ECHOES: Echo[] = [
-  {
-    id: 'seed-1',
-    name: '拾光者',
-    message: '在通勤的地铁里听完一集，抬头发现窗外的灯火也温柔了。',
-    at: Date.UTC(2026, 6, 14, 12, 20),
-    seed: true,
-  },
-  {
-    id: 'seed-2',
-    name: '南山雀',
-    message: '愿每个深夜赶稿的人，都有一间自己的书房可以躲一躲。',
-    at: Date.UTC(2026, 7, 2, 15, 45),
-    seed: true,
-  },
-  {
-    id: 'seed-3',
-    name: '海边的卡夫卡',
-    message: '声音真的可以带人走很远。谢谢你们把书读成了星星。',
-    at: Date.UTC(2026, 7, 19, 3, 10),
-    seed: true,
-  },
-]
-
-function readStored(): Echo[] {
-  if (typeof window === 'undefined') return []
+function readOwnIds(): Set<string> {
+  if (typeof window === 'undefined') return new Set()
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return []
+    const raw = window.localStorage.getItem(OWN_IDS_KEY)
+    if (!raw) return new Set()
     const parsed: unknown = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return []
-    return parsed.filter(
-      (e): e is Echo =>
-        !!e &&
-        typeof e === 'object' &&
-        typeof (e as Echo).id === 'string' &&
-        typeof (e as Echo).name === 'string' &&
-        typeof (e as Echo).message === 'string' &&
-        typeof (e as Echo).at === 'number',
-    )
+    if (!Array.isArray(parsed)) return new Set()
+    return new Set(parsed.filter((id): id is string => typeof id === 'string'))
   } catch {
-    return []
+    return new Set()
   }
 }
 
-function writeStored(list: Echo[]) {
+function rememberOwnId(id: string) {
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list))
+    const next = readOwnIds()
+    next.add(id)
+    window.localStorage.setItem(OWN_IDS_KEY, JSON.stringify([...next].slice(-80)))
   } catch {
-    /* 隐私模式 / 配额已满：这一条回声只活在当前会话里 */
+    /* ignore */
   }
-}
-
-/* ── 模块级 store：localStorage 是外部系统，用 useSyncExternalStore 订阅 ── */
-
-let snapshot: Echo[] | null = null
-const listeners = new Set<() => void>()
-
-/** 新的在前，示例回声垫在最后 */
-function compose(stored: Echo[]): Echo[] {
-  return [...stored].sort((a, b) => b.at - a.at).concat(SEED_ECHOES)
-}
-
-function getSnapshot(): Echo[] {
-  if (snapshot === null) snapshot = compose(readStored())
-  return snapshot
-}
-
-/** SSR / 预渲染时只给示例回声，避免读不到 localStorage */
-function getServerSnapshot(): Echo[] {
-  return SEED_ECHOES
-}
-
-function subscribe(onChange: () => void): () => void {
-  listeners.add(onChange)
-  // 跨标签页同步：另一个标签留言后这里也会刷新
-  const onStorage = (e: StorageEvent) => {
-    if (e.key !== null && e.key !== STORAGE_KEY) return
-    snapshot = compose(readStored())
-    listeners.forEach((l) => l())
-  }
-  window.addEventListener('storage', onStorage)
-  return () => {
-    listeners.delete(onChange)
-    window.removeEventListener('storage', onStorage)
-  }
-}
-
-export interface EchoDraft {
-  name: string
-  email: string
-  message: string
-}
-
-export type EchoFieldError = Partial<Record<'name' | 'email' | 'message', string>>
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
-
-export function validateEcho(draft: EchoDraft): EchoFieldError {
-  const errors: EchoFieldError = {}
-  const name = draft.name.trim()
-  const message = draft.message.trim()
-  const email = draft.email.trim()
-
-  if (!name) errors.name = '留个称呼吧，星海需要知道是谁在说话'
-  else if (name.length > NAME_MAX) errors.name = `昵称请不超过 ${NAME_MAX} 字`
-
-  if (!message) errors.message = '还没有内容，写一句想说的话'
-  else if (message.length > MESSAGE_MAX) errors.message = `留言请不超过 ${MESSAGE_MAX} 字`
-
-  if (email && !EMAIL_RE.test(email)) errors.email = '邮箱格式看起来不太对'
-
-  return errors
-}
-
-function makeId(): string {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID()
-  return `echo-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
 
 /** 相对时间：刚刚 / N 分钟前 / N 小时前 / N 天前 / 具体日期 */
@@ -159,35 +62,106 @@ export function formatEchoTime(at: number, now = Date.now()): string {
   if (hour < 24) return `${hour} 小时前`
   const day = Math.floor(hour / 24)
   if (day < 30) return `${day} 天前`
-  return new Date(at).toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
+  return new Date(at).toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  })
 }
+
+export type EchoesStatus = 'loading' | 'ready' | 'error'
 
 export interface UseEchoesResult {
   echoes: Echo[]
-  /** 访客自己提交的条数（示例回声不计） */
+  status: EchoesStatus
+  /** 本机提交过的公共回声数量（用于轻提示，非权威） */
   ownCount: number
-  submit: (draft: EchoDraft) => Echo
+  errorMessage: string | null
+  refresh: () => Promise<void>
+  submit: (draft: EchoDraft) => Promise<Echo>
 }
 
 export function useEchoes(): UseEchoesResult {
-  const echoes = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+  const [remote, setRemote] = useState<Echo[]>([])
+  const [status, setStatus] = useState<EchoesStatus>('loading')
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [ownIds, setOwnIds] = useState<Set<string>>(() => readOwnIds())
+  const alive = useRef(true)
 
-  const submit = useCallback((draft: EchoDraft): Echo => {
-    const echo: Echo = {
-      id: makeId(),
-      name: draft.name.trim(),
-      message: draft.message.trim(),
-      at: Date.now(),
+  useEffect(() => {
+    alive.current = true
+    return () => {
+      alive.current = false
     }
-    const email = draft.email.trim()
-    if (email) echo.email = email
+  }, [])
 
-    const next = [echo, ...readStored()]
-    writeStored(next)
-    snapshot = compose(next)
-    listeners.forEach((l) => l())
+  const refresh = useCallback(async () => {
+    try {
+      const res = await fetch(apiBase(), { headers: { Accept: 'application/json' } })
+      if (!res.ok) {
+        const payload = (await res.json().catch(() => null)) as { message?: string } | null
+        throw new Error(payload?.message || `加载失败（${res.status}）`)
+      }
+      const data = (await res.json()) as { echoes?: Echo[] }
+      const list = Array.isArray(data.echoes) ? data.echoes : []
+      if (!alive.current) return
+      setRemote(list)
+      setStatus('ready')
+      setErrorMessage(null)
+    } catch (err) {
+      if (!alive.current) return
+      setStatus('error')
+      setErrorMessage(err instanceof Error ? err.message : '星海暂时听不清')
+      setRemote([])
+    }
+  }, [])
+
+  useEffect(() => {
+    void refresh()
+  }, [refresh])
+
+  const submit = useCallback(async (draft: EchoDraft): Promise<Echo> => {
+    const found = validateEcho(draft)
+    if (Object.keys(found).length > 0) {
+      const first = Object.values(found).find((v): v is string => typeof v === 'string')
+      throw new Error(first || '请检查留言内容')
+    }
+
+    const res = await fetch(apiBase(), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        name: draft.name,
+        email: draft.email,
+        message: draft.message,
+        website: '',
+      }),
+    })
+
+    const payload = (await res.json().catch(() => null)) as
+      | { echo?: Echo; message?: string; errors?: EchoFieldError }
+      | null
+
+    if (!res.ok) {
+      const fromFields = payload?.errors && Object.values(payload.errors)[0]
+      throw new Error(fromFields || payload?.message || `提交失败（${res.status}）`)
+    }
+
+    const echo = payload?.echo
+    if (!echo || typeof echo.id !== 'string') {
+      throw new Error('星海没有回传这颗星，请稍后再试')
+    }
+
+    rememberOwnId(echo.id)
+    setOwnIds(readOwnIds())
+    setRemote((prev) => [echo, ...prev.filter((e) => e.id !== echo.id)])
+    setStatus('ready')
+    setErrorMessage(null)
     return echo
   }, [])
 
-  return { echoes, ownCount: echoes.filter((e) => !e.seed).length, submit }
+  const echoes = composeEchoes(remote)
+  const ownCount = echoes.filter((e: Echo) => !e.seed && ownIds.has(e.id)).length
+
+  return { echoes, status, ownCount, errorMessage, refresh, submit }
 }
