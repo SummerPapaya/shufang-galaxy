@@ -96,7 +96,6 @@ export default function RingCarousel({ books, reduced, onSelect }: RingCarouselP
   )
 
   const setHover = (id: string | null) => {
-    if (!finePointer.current && id) return
     hoverRef.current = id
     setHoverId(id)
     if (id) lastInteractRef.current = performance.now()
@@ -324,12 +323,14 @@ export default function RingCarousel({ books, reduced, onSelect }: RingCarouselP
 
   const handleBookClick = (book: Book) => {
     if (dragRef.current.moved || pinchRef.current.active) return
+    // 触屏也先点亮信息卡，再打开播放器
+    setHover(book.id)
     onSelect(book)
   }
 
   const spineW = narrow ? MOBILE_SPINE_W : DESKTOP_SPINE_W
   const spineH = narrow ? MOBILE_SPINE_H : DESKTOP_SPINE_H
-  const stageTop = narrow ? '58%' : '48%'
+  const stageTop = narrow ? '44%' : '48%'
 
   return (
     <div
@@ -431,10 +432,18 @@ export default function RingCarousel({ books, reduced, onSelect }: RingCarouselP
                     data-cursor="interactive"
                     data-cursor-color={c}
                     onClick={() => handleBookClick(book)}
-                    onMouseEnter={() => setHover(book.id)}
-                    onMouseLeave={() => setHover(null)}
-                    onFocus={() => setHover(book.id)}
-                    onBlur={() => setHover(null)}
+                    onMouseEnter={() => {
+                      if (finePointer.current) setHover(book.id)
+                    }}
+                    onMouseLeave={() => {
+                      if (finePointer.current) setHover(null)
+                    }}
+                    onFocus={() => {
+                      if (finePointer.current) setHover(book.id)
+                    }}
+                    onBlur={() => {
+                      if (finePointer.current) setHover(null)
+                    }}
                     className="relative block h-full w-full overflow-hidden rounded-[4px] border outline-none backdrop-blur-sm"
                     style={{
                       borderColor: hover ? hexToRgba(c, 0.55) : 'rgba(245,240,230,0.18)',

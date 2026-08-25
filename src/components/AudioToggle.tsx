@@ -73,7 +73,13 @@ export default function AudioToggle() {
   const active = !muted && (state.ambienceStarted || state.playing)
 
   return (
-    <div ref={rootRef} className="fixed bottom-6 right-6 z-[90]">
+    <div
+      ref={rootRef}
+      className={cn(
+        'fixed right-4 z-[90] sm:right-6',
+        state.playingId ? 'bottom-[9.5rem] sm:bottom-6' : 'bottom-6',
+      )}
+    >
       {open && (
         <div
           role="menu"

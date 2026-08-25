@@ -300,7 +300,8 @@ export default function LibraryView() {
       {/* ── 底部提示（播放器打开时让位） ── */}
       {!activeBook && (
         <motion.footer
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center pb-6"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center pb-6 sm:pb-6"
+          style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: reduced ? 0.15 : 0.7 }}
