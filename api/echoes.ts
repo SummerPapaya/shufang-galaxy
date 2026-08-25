@@ -1,33 +1,41 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { Redis } from '@upstash/redis'
-import {
-  ECHO_REDIS_KEY,
-  ECHO_STORE_MAX,
-  MESSAGE_MAX,
-  NAME_MAX,
-  isPublicEcho,
-  validateEcho,
-  type Echo,
-} from '../shared/echoes'
 
 /**
  * GET  /api/echoes  → { echoes: Echo[] }
  * POST /api/echoes  → { echo: Echo }
  *
- * 存储：Vercel KV / Upstash Redis（环境变量 KV_REST_API_* 或 UPSTASH_REDIS_REST_*）
- * 邮箱仅服务端私存（另 key），永不出现在 GET 响应里。
+ * 自包含实现（避免 Vercel 打包时无法解析 ../shared）。
+ * 存储：Upstash Redis（UPSTASH_REDIS_REST_* 或 KV_REST_API_*）
  */
 
+interface Echo {
+  id: string
+  name: string
+  message: string
+  at: number
+}
+
+const NAME_MAX = 24
+const MESSAGE_MAX = 200
+const ECHO_STORE_MAX = 300
+const ECHO_REDIS_KEY = 'shufang-galaxy:echoes:v1'
 const EMAIL_REDIS_KEY = 'shufang-galaxy:echo-emails:v1'
 const RATE_PREFIX = 'shufang-galaxy:echo-rate:'
 const RATE_LIMIT = 8
 const RATE_WINDOW_SEC = 60 * 60
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/
 
 function redisClient(): Redis | null {
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
-  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
-  if (!url || !token) return null
-  return new Redis({ url, token })
+  try {
+    const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
+    const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
+    if (!url || !token) return null
+    return new Redis({ url, token })
+  } catch (err) {
+    console.error('[api/echoes] redis init failed', err)
+    return null
+  }
 }
 
 function setCors(res: VercelResponse, origin: string | undefined) {
@@ -37,7 +45,7 @@ function setCors(res: VercelResponse, origin: string | undefined) {
       ? '*'
       : origin && allowed.includes(origin)
         ? origin
-        : allowed[0]
+        : allowed[0]!
   res.setHeader('Access-Control-Allow-Origin', ok)
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
@@ -49,7 +57,7 @@ function clientIp(req: VercelRequest): string {
   const xf = req.headers['x-forwarded-for']
   if (typeof xf === 'string' && xf.length > 0) return xf.split(',')[0]!.trim()
   if (Array.isArray(xf) && xf[0]) return xf[0].split(',')[0]!.trim()
-  return req.socket.remoteAddress || 'unknown'
+  return req.socket?.remoteAddress || 'unknown'
 }
 
 function makeId(): string {
@@ -57,9 +65,33 @@ function makeId(): string {
   return `echo-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 }
 
+function isPublicEcho(value: unknown): value is Echo {
+  if (!value || typeof value !== 'object') return false
+  const e = value as Echo
+  return (
+    typeof e.id === 'string' &&
+    typeof e.name === 'string' &&
+    typeof e.message === 'string' &&
+    typeof e.at === 'number'
+  )
+}
+
+function validate(draft: { name: string; email: string; message: string }) {
+  const errors: Record<string, string> = {}
+  const name = draft.name.trim()
+  const message = draft.message.trim()
+  const email = draft.email.trim()
+  if (!name) errors.name = '留个称呼吧，星海需要知道是谁在说话'
+  else if (name.length > NAME_MAX) errors.name = `昵称请不超过 ${NAME_MAX} 字`
+  if (!message) errors.message = '还没有内容，写一句想说的话'
+  else if (message.length > MESSAGE_MAX) errors.message = `留言请不超过 ${MESSAGE_MAX} 字`
+  if (email && !EMAIL_RE.test(email)) errors.email = '邮箱格式看起来不太对'
+  return errors
+}
+
 async function listEchoes(redis: Redis): Promise<Echo[]> {
-  const rows = await redis.lrange<Echo | string>(ECHO_REDIS_KEY, 0, ECHO_STORE_MAX - 1)
-  return rows
+  const rows = await redis.lrange(ECHO_REDIS_KEY, 0, ECHO_STORE_MAX - 1)
+  return (rows as unknown[])
     .map((row) => {
       if (typeof row === 'string') {
         try {
@@ -74,23 +106,24 @@ async function listEchoes(redis: Redis): Promise<Echo[]> {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  setCors(res, typeof req.headers.origin === 'string' ? req.headers.origin : undefined)
-
-  if (req.method === 'OPTIONS') {
-    res.status(204).end()
-    return
-  }
-
-  const redis = redisClient()
-  if (!redis) {
-    res.status(503).json({
-      error: 'echo_store_unavailable',
-      message: '公共回声库尚未配置（缺少 Vercel KV / Upstash 环境变量）',
-    })
-    return
-  }
-
   try {
+    setCors(res, typeof req.headers.origin === 'string' ? req.headers.origin : undefined)
+
+    if (req.method === 'OPTIONS') {
+      res.status(204).end()
+      return
+    }
+
+    const redis = redisClient()
+    if (!redis) {
+      res.status(503).json({
+        error: 'echo_store_unavailable',
+        message:
+          '公共回声库尚未配置。请在 Vercel 接入 Upstash Redis，并确认已写入 UPSTASH_REDIS_REST_URL / TOKEN（或 KV_REST_API_*）后重新部署。',
+      })
+      return
+    }
+
     if (req.method === 'GET') {
       const echoes = await listEchoes(redis)
       res.setHeader('Cache-Control', 'public, s-maxage=15, stale-while-revalidate=60')
@@ -108,13 +141,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return
       }
 
-      const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body
+      const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body ?? {}
       const draft = {
         name: String(body?.name ?? ''),
         email: String(body?.email ?? ''),
         message: String(body?.message ?? ''),
       }
-      // 蜜罐：有值视为机器人
+
       if (body?.website) {
         res.status(200).json({
           echo: {
@@ -127,7 +160,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return
       }
 
-      const errors = validateEcho(draft)
+      const errors = validate(draft)
       if (Object.keys(errors).length > 0) {
         res.status(400).json({ error: 'validation', errors })
         return
@@ -140,13 +173,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         at: Date.now(),
       }
 
-      await redis.lpush(ECHO_REDIS_KEY, echo)
+      await redis.lpush(ECHO_REDIS_KEY, JSON.stringify(echo))
       await redis.ltrim(ECHO_REDIS_KEY, 0, ECHO_STORE_MAX - 1)
 
       const email = draft.email.trim()
-      if (email) {
-        await redis.hset(EMAIL_REDIS_KEY, { [echo.id]: email })
-      }
+      if (email) await redis.hset(EMAIL_REDIS_KEY, { [echo.id]: email })
 
       res.status(201).json({ echo })
       return
@@ -156,6 +187,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.status(405).json({ error: 'method_not_allowed' })
   } catch (err) {
     console.error('[api/echoes]', err)
-    res.status(500).json({ error: 'server_error', message: '星海暂时听不清，请稍后再试' })
+    try {
+      setCors(res, typeof req.headers.origin === 'string' ? req.headers.origin : undefined)
+    } catch {
+      /* ignore */
+    }
+    res.status(500).json({
+      error: 'server_error',
+      message: '星海暂时听不清，请稍后再试',
+      detail: err instanceof Error ? err.message : String(err),
+    })
   }
 }
