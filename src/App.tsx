@@ -10,23 +10,42 @@ import LandingView from '@/views/LandingView'
 import UniverseView from '@/views/UniverseView'
 import RoomView from '@/views/RoomView'
 import LibraryView from '@/views/LibraryView'
+import AdminEchoesPage from '@/views/AdminEchoesPage'
 
 /**
  * 视图装配（design.md §1 / §7.6：无传统 Navbar/Footer，单页状态机切换视图）
  *
  * 挂载位置约定：
- * - view === 'landing'  → <LandingView />（已实现，含穿越 timeline，白场峰值调用 enterUniverse）
- * - view === 'universe' → TODO(universe-agent): 在此挂载 <UniverseView />
- * - view === 'room'     → TODO(room-agent): 在此挂载 <RoomView />
+ * - view === 'landing'  → <LandingView />
+ * - view === 'universe' → <UniverseView />
+ * - view === 'room'     → <RoomView />
+ * - view === 'library'  → <LibraryView />
+ * - hash #/admin/echoes → 宇宙回声审核页（Pages / Vercel 均可，不依赖服务端路由）
  */
 
-/** landing→universe 穿越的白场淡出（landing 内部推进到白场峰值后切视图，由此层 500ms 淡出露出星野） */
+function useAdminEchoesRoute(): boolean {
+  const [admin, setAdmin] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.location.hash.replace(/^#/, '') === '/admin/echoes'
+  })
+
+  useEffect(() => {
+    const sync = () => {
+      setAdmin(window.location.hash.replace(/^#/, '') === '/admin/echoes')
+    }
+    window.addEventListener('hashchange', sync)
+    return () => window.removeEventListener('hashchange', sync)
+  }, [])
+
+  return admin
+}
+
+/** landing→universe 穿越的白场淡出 */
 function WarpFlash() {
   const view = useAppStore((s) => s.view)
   const [prevView, setPrevView] = useState(view)
   const [flashing, setFlashing] = useState(false)
 
-  // 渲染期间检测视图切换（React 推荐的 adjust-state-during-render 模式）
   if (prevView !== view) {
     if (prevView === 'landing' && view === 'universe') {
       setFlashing(true)
@@ -49,17 +68,22 @@ function WarpFlash() {
 
 export default function App() {
   const view = useAppStore((s) => s.view)
+  const adminEchoes = useAdminEchoesRoute()
 
-  // 预载书房数据（写入 store.roomOrder，供 nextRoom/prevRoom 循环）
   useEffect(() => {
+    if (adminEchoes) return
     void fetchRooms()
-  }, [])
+  }, [adminEchoes])
 
-  // ambience 音量随视图调整（design.md §8）
   useEffect(() => {
+    if (adminEchoes) return
     if (view === 'landing') audioManager.setAmbienceLevel('landing')
     else audioManager.setAmbienceLevel('universe')
-  }, [view])
+  }, [view, adminEchoes])
+
+  if (adminEchoes) {
+    return <AdminEchoesPage />
+  }
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-void text-starlight">
@@ -73,7 +97,6 @@ export default function App() {
 
       <WarpFlash />
 
-      {/* 常驻 HUD（design.md §7.6） */}
       <StarfieldCursor />
       <BrandMark />
       <AudioToggle />

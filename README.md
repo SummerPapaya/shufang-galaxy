@@ -47,6 +47,14 @@ npm run build    # 产物输出到 dist/
 3. 部署后，前端通过同域 `/api/echoes` 读写公共回声。
 4. 在 Upstash / Vercel 控制台可查看 Redis 列表键 `shufang-galaxy:echoes:v1` 管理留言；可选邮箱在 `shufang-galaxy:echo-emails:v1`（不对外返回）。
 
+**网页审核 / 删除**
+
+1. 在 Vercel → Environment Variables 新增 `ECHOES_ADMIN_SECRET`（自设强密码）→ Redeploy  
+2. 浏览器打开：`https://你的域名/#/admin/echoes`（或 `https://shufang-galaxy.vercel.app/#/admin/echoes`）  
+3. 输入密钥后可查看全部公开留言（含可选邮箱）并删除  
+
+本地开发默认密钥为 `dev-echoes-admin`（可用环境变量 `ECHOES_ADMIN_SECRET` 覆盖）。
+
 若前端仍托管在 GitHub Pages，可只把 API 部署到 Vercel，并在 Pages 构建时设置：
 
 ```bash
