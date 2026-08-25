@@ -11,13 +11,13 @@ import { hexToRgba } from '../room/utils'
  * - hover 信息卡：桌面在书脊上方，窄屏改到下方以免顶到标题
  */
 
-const DESKTOP_RADIUS = 430
-const MOBILE_RADIUS = 230
+const DESKTOP_RADIUS = 450
+const MOBILE_RADIUS = 248
 const PERSPECTIVE = 1500
-const DESKTOP_SPINE_W = 58
-const DESKTOP_SPINE_H = 216
-const MOBILE_SPINE_W = 40
-const MOBILE_SPINE_H = 150
+const DESKTOP_SPINE_W = 64
+const DESKTOP_SPINE_H = 268
+const MOBILE_SPINE_W = 46
+const MOBILE_SPINE_H = 192
 /** 拖拽像素 → 角度（度 / px） */
 const DEG_PER_PX = 0.22
 /** 惯性摩擦：速度每帧 ×0.93 */
@@ -470,17 +470,17 @@ export default function RingCarousel({ books, reduced, onSelect }: RingCarouselP
                       style={{ background: 'rgba(245,240,230,0.22)' }}
                     />
                     <span
-                      className="absolute inset-0 flex items-center justify-between px-0 py-[14px] sm:py-[18px]"
+                      className="absolute inset-0 flex items-center justify-between px-0 py-[16px] sm:py-[22px]"
                       style={{ writingMode: 'vertical-rl', flexDirection: 'row' }}
                     >
                       <span
-                        className="font-serif font-medium tracking-[0.2em] text-starlight"
+                        className="font-serif font-medium tracking-[0.18em] text-starlight whitespace-nowrap"
                         style={{ fontSize: narrow ? 11 : 13, lineHeight: 1 }}
                       >
                         {book.title}
                       </span>
                       <span
-                        className="font-hud tracking-[0.12em] text-starlight-dim"
+                        className="font-hud tracking-[0.12em] text-starlight-dim whitespace-nowrap"
                         style={{ fontSize: narrow ? 8 : 9, lineHeight: 1 }}
                       >
                         {book.author}
