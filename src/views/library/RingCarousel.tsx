@@ -12,12 +12,12 @@ import { hexToRgba } from '../room/utils'
  */
 
 const DESKTOP_RADIUS = 430
-const MOBILE_RADIUS = 255
+const MOBILE_RADIUS = 230
 const PERSPECTIVE = 1500
 const DESKTOP_SPINE_W = 58
 const DESKTOP_SPINE_H = 216
-const MOBILE_SPINE_W = 44
-const MOBILE_SPINE_H = 164
+const MOBILE_SPINE_W = 40
+const MOBILE_SPINE_H = 150
 /** 拖拽像素 → 角度（度 / px） */
 const DEG_PER_PX = 0.22
 /** 惯性摩擦：速度每帧 ×0.93 */
@@ -329,7 +329,7 @@ export default function RingCarousel({ books, reduced, onSelect }: RingCarouselP
 
   const spineW = narrow ? MOBILE_SPINE_W : DESKTOP_SPINE_W
   const spineH = narrow ? MOBILE_SPINE_H : DESKTOP_SPINE_H
-  const stageTop = narrow ? '54%' : '48%'
+  const stageTop = narrow ? '58%' : '48%'
 
   return (
     <div

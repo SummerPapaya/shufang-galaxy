@@ -217,58 +217,60 @@ export default function LibraryView() {
         arrivingId={arrivingId}
       />
 
-      {/* ── 顶部 HUD：手机端单列标题 + 右上角按钮，避免与品牌标叠压 ── */}
-      <motion.header
-        className="pointer-events-none absolute inset-x-0 top-0 z-20 flex flex-col items-center px-4 pt-[max(1rem,env(safe-area-inset-top))]"
-        initial={{ opacity: 0, y: reduced ? 0 : -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: reduced ? 0.1 : 0.45 }}
-      >
-        <h1 className="mt-1 text-center font-serif text-[15px] tracking-[0.1em] text-starlight sm:mt-2 sm:text-[16px] md:text-[19px]">
-          <TypeGlow glowColor="rgba(255,217,160,0.45)">星空图书馆</TypeGlow>
-          <span className="ml-2 hidden font-hud text-[11px] tracking-[0.3em] text-starlight-dim sm:inline">
-            · Starlight Library
-          </span>
-        </h1>
-        <p className="mt-1.5 font-hud text-[9px] uppercase tracking-[0.28em] text-starlight-faint sm:mt-2 sm:text-[10px] sm:tracking-[0.35em]">
-          {books ? `${books.length} Volumes` : '…'} · A Ring of Starlight
-        </p>
-      </motion.header>
+      {/* ── 顶部 HUD：手机端按钮单独一行，标题在其下，避免横向叠压 ── */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-30 flex flex-col gap-2 px-3 pt-[max(0.75rem,env(safe-area-inset-top))] sm:px-5">
+        <motion.div
+          className="pointer-events-auto flex items-center justify-end gap-1.5 sm:gap-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: reduced ? 0.1 : 0.5 }}
+        >
+          <button
+            type="button"
+            aria-label="打开宇宙回声留言板"
+            data-cursor="interactive"
+            onClick={() => setEchoOpen(true)}
+            className="flex items-center gap-1 rounded-full border px-2.5 py-1.5 font-hud text-[10px] tracking-[0.14em] text-gold transition-colors duration-200 hover:bg-gold/10 hover:text-starlight sm:gap-1.5 sm:px-3.5 sm:text-[11px] sm:tracking-[0.18em]"
+            style={{ borderColor: 'rgba(255,217,160,0.4)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(255,217,160,0.85)')}
+            onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'rgba(255,217,160,0.4)')}
+          >
+            <Radio className="h-3 w-3" aria-hidden />
+            <span className="sm:hidden">回声</span>
+            <span className="hidden sm:inline">宇宙回声</span>
+          </button>
+          <button
+            type="button"
+            aria-label="返回星空"
+            data-cursor="interactive"
+            onClick={closeLibrary}
+            className="rounded-full border px-2.5 py-1.5 font-hud text-[10px] tracking-[0.14em] text-starlight-dim transition-colors duration-200 hover:text-starlight sm:px-3.5 sm:text-[11px] sm:tracking-[0.18em]"
+            style={{ borderColor: 'rgba(255,217,160,0.35)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(255,217,160,0.75)')}
+            onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'rgba(255,217,160,0.35)')}
+          >
+            <span className="sm:hidden">← 返回</span>
+            <span className="hidden sm:inline">← 返回星空</span>
+          </button>
+        </motion.div>
 
-      <motion.div
-        className="absolute right-3 top-[max(0.75rem,env(safe-area-inset-top))] z-30 flex items-center gap-1.5 sm:right-5 sm:top-5 sm:gap-2 md:right-8 md:top-7"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5, delay: reduced ? 0.1 : 0.5 }}
-      >
-        <button
-          type="button"
-          aria-label="打开宇宙回声留言板"
-          data-cursor="interactive"
-          onClick={() => setEchoOpen(true)}
-          className="flex items-center gap-1 rounded-full border px-2.5 py-1.5 font-hud text-[10px] tracking-[0.14em] text-gold transition-colors duration-200 hover:bg-gold/10 hover:text-starlight sm:gap-1.5 sm:px-3.5 sm:text-[11px] sm:tracking-[0.18em]"
-          style={{ borderColor: 'rgba(255,217,160,0.4)' }}
-          onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(255,217,160,0.85)')}
-          onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'rgba(255,217,160,0.4)')}
+        <motion.header
+          className="flex flex-col items-center text-center"
+          initial={{ opacity: 0, y: reduced ? 0 : -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: reduced ? 0.1 : 0.45 }}
         >
-          <Radio className="h-3 w-3" aria-hidden />
-          <span className="sm:hidden">回声</span>
-          <span className="hidden sm:inline">宇宙回声</span>
-        </button>
-        <button
-          type="button"
-          aria-label="返回星空"
-          data-cursor="interactive"
-          onClick={closeLibrary}
-          className="rounded-full border px-2.5 py-1.5 font-hud text-[10px] tracking-[0.14em] text-starlight-dim transition-colors duration-200 hover:text-starlight sm:px-3.5 sm:text-[11px] sm:tracking-[0.18em]"
-          style={{ borderColor: 'rgba(255,217,160,0.35)' }}
-          onMouseEnter={(e) => (e.currentTarget.style.borderColor = 'rgba(255,217,160,0.75)')}
-          onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'rgba(255,217,160,0.35)')}
-        >
-          <span className="sm:hidden">← 返回</span>
-          <span className="hidden sm:inline">← 返回星空</span>
-        </button>
-      </motion.div>
+          <h1 className="font-serif text-[15px] tracking-[0.1em] text-starlight sm:text-[16px] md:text-[19px]">
+            <TypeGlow glowColor="rgba(255,217,160,0.45)">星空图书馆</TypeGlow>
+            <span className="ml-2 hidden font-hud text-[11px] tracking-[0.3em] text-starlight-dim sm:inline">
+              · Starlight Library
+            </span>
+          </h1>
+          <p className="mt-1 font-hud text-[9px] uppercase tracking-[0.28em] text-starlight-faint sm:mt-1.5 sm:text-[10px] sm:tracking-[0.35em]">
+            {books ? `${books.length} Volumes` : '…'} · A Ring of Starlight
+          </p>
+        </motion.header>
+      </div>
 
       {/* ── 环形书廊（数据就绪后点亮） ── */}
       {books && <RingCarousel books={books} reduced={reduced} onSelect={handleSelect} />}
