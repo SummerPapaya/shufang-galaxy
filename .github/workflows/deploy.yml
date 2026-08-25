@@ -28,7 +28,13 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run build
+      - name: Build
+        run: npm run build
+        env:
+          # 前端仍部署在 GitHub Pages 时，指向 Vercel 上的公共回声 API
+          # 在仓库 Settings → Secrets and variables → Actions 中新增：
+          #   VITE_ECHOES_API = https://你的项目.vercel.app/api/echoes
+          VITE_ECHOES_API: ${{ secrets.VITE_ECHOES_API }}
 
       # 重跑（Re-run）时旧的 github-pages 产物不会被自动删除，
       # 会导致 deploy-pages 发现多个同名产物而报错，这里先清理
