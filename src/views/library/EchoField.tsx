@@ -105,7 +105,7 @@ export default function EchoField({ reduced, hiddenId, arrivingId }: EchoFieldPr
             title={pinnedId === echo.id ? '再次点击关闭' : '点击查看这条回声'}
             data-cursor="interactive"
             className="pointer-events-auto absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-full border-0 bg-transparent p-0"
-            style={{ left: `${x * 100}%`, top: `${y * 100}%`, width: 40, height: 40 }}
+            style={{ left: `${x * 100}%`, top: `${y * 100}%`, width: 36, height: 36 }}
             onMouseEnter={() => {
               if (finePointer) setHoverId(echo.id)
             }}
@@ -128,15 +128,15 @@ export default function EchoField({ reduced, hiddenId, arrivingId }: EchoFieldPr
               className={`echo-star absolute left-1/2 top-1/2 block ${active ? 'echo-star--active' : ''} ${reduced ? 'echo-star--reduced' : ''}`}
               style={
                 {
-                  '--echo-delay': `${(i % 7) * 0.55}s`,
-                  '--echo-flash-delay': `${(i % 5) * 0.85 + 0.4}s`,
+                  '--echo-delay': `${(i % 7) * 0.7}s`,
+                  '--echo-flash-delay': `${(i % 5) * 1.4 + 0.8}s`,
                 } as CSSProperties
               }
               animate={
                 reduced
-                  ? { scale: active ? 1.2 : 1, opacity: 1 }
+                  ? { scale: active ? 1.12 : 1, opacity: 1 }
                   : {
-                      scale: active ? 1.28 : [1, 1.06, 0.97, 1.04, 1],
+                      scale: active ? 1.14 : [1, 1.04, 0.98, 1.03, 1],
                       opacity: 1,
                     }
               }
@@ -144,7 +144,7 @@ export default function EchoField({ reduced, hiddenId, arrivingId }: EchoFieldPr
                 reduced
                   ? { duration: 0.2 }
                   : {
-                      duration: 3.6 + (i % 4) * 0.4,
+                      duration: 4.8 + (i % 4) * 0.5,
                       repeat: Infinity,
                       ease: 'easeInOut',
                     }
