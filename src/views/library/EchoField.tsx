@@ -51,6 +51,11 @@ export default function EchoField({ reduced, hiddenId, arrivingId }: EchoFieldPr
   const { echoes } = useEchoes()
   const [hoverId, setHoverId] = useState<string | null>(null)
   const [pinnedId, setPinnedId] = useState<string | null>(null)
+  const finePointer = useMemo(
+    () =>
+      typeof window !== 'undefined' && window.matchMedia('(pointer: fine)').matches,
+    [],
+  )
 
   useEffect(() => {
     if (arrivingId) setPinnedId(arrivingId)
@@ -64,11 +69,29 @@ export default function EchoField({ reduced, hiddenId, arrivingId }: EchoFieldPr
     [echoes, hiddenId],
   )
 
-  const activeId = hoverId ?? pinnedId
+  const activeId = (finePointer ? hoverId : null) ?? pinnedId
   const hovered = placed.find((p) => p.echo.id === activeId)
+
+  const togglePin = (id: string) => {
+    setHoverId(null)
+    setPinnedId((cur) => (cur === id ? null : id))
+  }
+
+  const dismiss = () => {
+    setHoverId(null)
+    setPinnedId(null)
+  }
 
   return (
     <div className="pointer-events-none absolute inset-0 z-[15]" aria-label="宇宙回声星群">
+      {pinnedId && (
+        <button
+          type="button"
+          aria-label="关闭回声卡片"
+          className="pointer-events-auto absolute inset-0 z-10 cursor-default border-0 bg-transparent p-0"
+          onClick={dismiss}
+        />
+      )}
       {placed.map(({ echo, x, y }, i) => {
         const arriving = arrivingId === echo.id
         const active = activeId === echo.id || arriving
@@ -77,16 +100,31 @@ export default function EchoField({ reduced, hiddenId, arrivingId }: EchoFieldPr
           <button
             key={echo.id}
             type="button"
-            aria-label={`${echo.name}的回声，点击查看`}
-            title="点击查看这条回声"
+            aria-label={
+              pinnedId === echo.id
+                ? `${echo.name}的回声，再次点击关闭`
+                : `${echo.name}的回声，点击查看`
+            }
+            title={pinnedId === echo.id ? '再次点击关闭' : '点击查看这条回声'}
             data-cursor="interactive"
-            className="pointer-events-auto absolute -translate-x-1/2 -translate-y-1/2 rounded-full border-0 bg-transparent p-0"
+            className="pointer-events-auto absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-full border-0 bg-transparent p-0"
             style={{ left: `${x * 100}%`, top: `${y * 100}%`, width: 28, height: 28 }}
-            onMouseEnter={() => setHoverId(echo.id)}
-            onMouseLeave={() => setHoverId((id) => (id === echo.id ? null : id))}
-            onFocus={() => setHoverId(echo.id)}
-            onBlur={() => setHoverId((id) => (id === echo.id ? null : id))}
-            onClick={() => setPinnedId((id) => (id === echo.id ? null : echo.id))}
+            onMouseEnter={() => {
+              if (finePointer) setHoverId(echo.id)
+            }}
+            onMouseLeave={() => {
+              if (finePointer) setHoverId((id) => (id === echo.id ? null : id))
+            }}
+            onFocus={() => {
+              if (finePointer) setHoverId(echo.id)
+            }}
+            onBlur={() => {
+              if (finePointer) setHoverId((id) => (id === echo.id ? null : id))
+            }}
+            onClick={(e) => {
+              e.stopPropagation()
+              togglePin(echo.id)
+            }}
           >
             <span
               aria-hidden
@@ -139,7 +177,15 @@ export default function EchoField({ reduced, hiddenId, arrivingId }: EchoFieldPr
 
       <AnimatePresence>
         {hovered && (
-          <EchoCard key={hovered.echo.id} echo={hovered.echo} x={hovered.x} y={hovered.y} reduced={reduced} />
+          <EchoCard
+            key={hovered.echo.id}
+            echo={hovered.echo}
+            x={hovered.x}
+            y={hovered.y}
+            reduced={reduced}
+            dismissible={pinnedId === hovered.echo.id}
+            onDismiss={dismiss}
+          />
         )}
       </AnimatePresence>
     </div>
@@ -151,11 +197,15 @@ function EchoCard({
   x,
   y,
   reduced,
+  dismissible,
+  onDismiss,
 }: {
   echo: Echo
   x: number
   y: number
   reduced: boolean
+  dismissible?: boolean
+  onDismiss?: () => void
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [box, setBox] = useState(() => {
@@ -199,12 +249,17 @@ function EchoCard({
     <motion.div
       ref={ref}
       role="tooltip"
-      className="pointer-events-none absolute z-20 w-[min(260px,70vw)]"
+      className={`absolute z-30 w-[min(260px,70vw)] ${dismissible ? 'pointer-events-auto' : 'pointer-events-none'}`}
       style={{ left: box.left, top: box.top }}
       initial={{ opacity: 0, y: reduced ? 0 : 6 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: reduced ? 0 : 4 }}
       transition={{ duration: 0.22, ease: EASE }}
+      onClick={(e) => {
+        if (!dismissible) return
+        e.stopPropagation()
+        onDismiss?.()
+      }}
     >
       <div
         className="rounded-lg border px-3.5 py-3 shadow-[0_16px_48px_rgba(0,0,0,0.55)]"

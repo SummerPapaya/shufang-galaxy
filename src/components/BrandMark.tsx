@@ -4,12 +4,16 @@ import { useAppStore } from '@/store'
  * <BrandMark> 左上角常驻品牌小标（design.md §7.6）
  * 仅中文官方 SVG logo 可点击返回 landing；英文副标展示用、无点击热点
  * （避免手机上与右上角「虫洞越迁 / 书房索引」重叠误触回首页）。
+ * 星空图书馆有自有顶栏，隐藏本标以免与标题 / 宇宙回声按钮叠在一起。
  */
 export default function BrandMark() {
+  const view = useAppStore((s) => s.view)
   const backToLanding = useAppStore((s) => s.backToLanding)
 
+  if (view === 'library') return null
+
   return (
-    <div className="fixed left-6 top-6 z-[90] flex items-center gap-3 text-left">
+    <div className="fixed left-4 top-4 z-[90] flex items-center gap-3 text-left md:left-6 md:top-6">
       {/* 仅中文 LOGO 可点击返回；英文副标不做热点，避免与右上角按钮重叠误触 */}
       <button
         type="button"
@@ -21,7 +25,7 @@ export default function BrandMark() {
         <img
           src="/assets/logo.svg"
           alt="一個人的書房"
-          className="h-8 w-auto select-none"
+          className="h-7 w-auto select-none md:h-8"
           draggable={false}
         />
       </button>

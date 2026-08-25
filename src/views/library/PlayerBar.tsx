@@ -11,8 +11,8 @@ import { formatTime, hexToRgba } from '../room/utils'
  * - fixed bottom，framer-motion 滑入 / 滑出 300ms（reduced-motion 仅淡入淡出）
  * - starColor 封面色块（书名首字）+ 书名 / 作者 /「XXX 正在朗读」
  * - 播放暂停、可点击 / 拖动 seek 的进度条 + 当前时间 / 总时长、关闭按钮
- * - 音频走全局 audioManager 单例：play(id, src) 内部自动 duck ambience 至 0.12，
- *   stop() 恢复基准；进度 / 时长经 subscribe 轮询同步（250ms）
+ * - 音频走全局 audioManager 单例：play(id, src) 内部自动暂停背景片花，
+ *   stop() 后恢复；进度 / 时长经 subscribe 轮询同步（250ms）
  */
 
 interface PlayerBarProps {

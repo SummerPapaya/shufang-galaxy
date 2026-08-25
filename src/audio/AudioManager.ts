@@ -2,7 +2,7 @@
  * 全局音频单例（design.md §8）
  *
  * - 星河背景音：在 trailer1 / trailer2 片花间随机（或锁定）播放；
- *   universe 0.35，landing 0.15；朗读 sample 播放时 duck 至 0.12
+ *   universe 0.35，landing 0.15；朗读 sample 播放时暂停片花，结束后恢复
  * - 朗读者 sample：书房详情播放器通过 play(id) 触发
  * - 浏览器自动播放策略：首次用户手势（点击「进入星空」）时调用 unlock()
  * - 同一时间只有一个朗读者声源；切换时 300ms 淡出旧音频
@@ -389,7 +389,7 @@ class AudioManager {
 
   /**
    * 播放某书房的朗读 sample（淡入）；若有其它 sample 在播，300ms 淡出后切换。
-   * 播放期间 ambience 自动 duck 至 0.12。
+   * 播放期间暂停背景片花，停止后恢复。
    */
   play(roomId: string, src?: string) {
     const url = src ?? `/assets/audio/${roomId}.mp3`
@@ -507,12 +507,23 @@ class AudioManager {
 
   /* ── duck / 静音 ──────────────────────────────────── */
 
-  /** ambience 闪避：true → 降至 0.12，false → 恢复基准 */
+  /** ambience 闪避：朗读时真正暂停片花（iOS 上 volume 不可靠），停止后恢复 */
   duck(on: boolean) {
     this.ducked = on
-    if (this.state.ambienceStarted) {
-      this.fadeAmbienceTo(this.effectiveAmbienceVolume(), FADE_MS)
+    if (!this.state.ambienceStarted) return
+    if (on) {
+      this.silenceAmbience()
+      return
     }
+    if (this.state.muted || this.state.ambienceMode === 'muted') {
+      this.silenceAmbience()
+      return
+    }
+    const el = this.ambience
+    if (!el) return
+    el.muted = false
+    void el.play().catch(() => {})
+    this.fadeAmbienceTo(this.effectiveAmbienceVolume(), FADE_MS)
   }
 
   setMuted(muted: boolean) {
