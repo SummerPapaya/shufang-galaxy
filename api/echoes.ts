@@ -32,23 +32,25 @@ function envPresence() {
     UPSTASH_REDIS_REST_TOKEN: Boolean(process.env.UPSTASH_REDIS_REST_TOKEN),
     KV_REST_API_URL: Boolean(process.env.KV_REST_API_URL),
     KV_REST_API_TOKEN: Boolean(process.env.KV_REST_API_TOKEN),
+    shufang_KV_REST_API_URL: Boolean(process.env.shufang_KV_REST_API_URL),
+    shufang_KV_REST_API_TOKEN: Boolean(process.env.shufang_KV_REST_API_TOKEN),
   }
 }
 
 function redisClient(): Redis | null {
   try {
+    // Vercel Upstash 集成若数据库名含前缀，会写成 shufang_KV_REST_API_*
     const url =
+      process.env.shufang_KV_REST_API_URL ||
       process.env.UPSTASH_REDIS_REST_URL ||
-      process.env.KV_REST_API_URL ||
-      process.env.UPSTASH_REDIS_URL
+      process.env.KV_REST_API_URL
     const token =
+      process.env.shufang_KV_REST_API_TOKEN ||
       process.env.UPSTASH_REDIS_REST_TOKEN ||
-      process.env.KV_REST_API_TOKEN ||
-      process.env.UPSTASH_REDIS_TOKEN
-    // REST client needs the REST URL (usually https://….upstash.io)
+      process.env.KV_REST_API_TOKEN
     if (!url || !token) return null
     if (url.startsWith('redis://') || url.startsWith('rediss://')) {
-      console.error('[api/echoes] got TCP redis URL; need UPSTASH_REDIS_REST_URL instead')
+      console.error('[api/echoes] got TCP redis URL; need *_KV_REST_API_URL / UPSTASH_REDIS_REST_URL')
       return null
     }
     return new Redis({ url, token })
