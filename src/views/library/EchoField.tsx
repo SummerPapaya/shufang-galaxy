@@ -1,18 +1,16 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { formatEchoTime, useEchoes } from './echoes'
 import type { Echo } from './echoes'
 
 /**
  * <EchoField> 宇宙回声 · 漂浮在星空图书馆背景里的留言星
- * - 小核 + 羽化光晕 + 缓慢呼吸，和背景星区分，引导悬停 / 点击
+ * - 亮核 + 十字星芒 + 羽化光晕 + 间歇闪光，和背景粒子明显区分
  * - 位置由 id 稳定散列，避开中央书廊
  * - 留言卡根据视口夹紧，避免贴边溢出
  */
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
-const MILK = '#f5f0e6'
-const HALO = 'rgba(255,217,160,0.4)'
 const CARD_PAD = 14
 
 function hash(s: string): number {
@@ -95,7 +93,6 @@ export default function EchoField({ reduced, hiddenId, arrivingId }: EchoFieldPr
       {placed.map(({ echo, x, y }, i) => {
         const arriving = arrivingId === echo.id
         const active = activeId === echo.id || arriving
-        const core = active ? 6 : 5
         return (
           <button
             key={echo.id}
@@ -108,7 +105,7 @@ export default function EchoField({ reduced, hiddenId, arrivingId }: EchoFieldPr
             title={pinnedId === echo.id ? '再次点击关闭' : '点击查看这条回声'}
             data-cursor="interactive"
             className="pointer-events-auto absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-full border-0 bg-transparent p-0"
-            style={{ left: `${x * 100}%`, top: `${y * 100}%`, width: 28, height: 28 }}
+            style={{ left: `${x * 100}%`, top: `${y * 100}%`, width: 40, height: 40 }}
             onMouseEnter={() => {
               if (finePointer) setHoverId(echo.id)
             }}
@@ -126,51 +123,43 @@ export default function EchoField({ reduced, hiddenId, arrivingId }: EchoFieldPr
               togglePin(echo.id)
             }}
           >
-            <span
-              aria-hidden
-              className="echo-star-halo absolute left-1/2 top-1/2 block rounded-full"
-              style={{
-                width: 18,
-                height: 18,
-                marginLeft: -9,
-                marginTop: -9,
-                background:
-                  'radial-gradient(circle, rgba(245,240,230,0.34) 0%, rgba(255,217,160,0.16) 42%, transparent 78%)',
-                animationDelay: `${(i % 5) * 0.4}s`,
-                animationPlayState: reduced ? 'paused' : 'running',
-              }}
-            />
             <motion.span
               aria-hidden
-              className="absolute left-1/2 top-1/2 block rounded-full"
-              style={{
-                width: core,
-                height: core,
-                marginLeft: -core / 2,
-                marginTop: -core / 2,
-                background: MILK,
-                boxShadow: active
-                  ? `0 0 6px ${MILK}, 0 0 14px ${HALO}`
-                  : `0 0 5px ${MILK}, 0 0 10px ${HALO}`,
-              }}
+              className={`echo-star absolute left-1/2 top-1/2 block ${active ? 'echo-star--active' : ''} ${reduced ? 'echo-star--reduced' : ''}`}
+              style={
+                {
+                  '--echo-delay': `${(i % 7) * 0.55}s`,
+                  '--echo-flash-delay': `${(i % 5) * 0.85 + 0.4}s`,
+                } as CSSProperties
+              }
               animate={
                 reduced
-                  ? { opacity: 0.9 }
+                  ? { scale: active ? 1.2 : 1, opacity: 1 }
                   : {
-                      opacity: [0.45, 0.95, 0.55, 0.95, 0.45],
-                      scale: active ? 1.12 : [1, 1.1, 0.94, 1.08, 1],
+                      scale: active ? 1.28 : [1, 1.06, 0.97, 1.04, 1],
+                      opacity: 1,
                     }
               }
               transition={
                 reduced
                   ? { duration: 0.2 }
                   : {
-                      duration: 3.2 + (i % 4) * 0.35,
+                      duration: 3.6 + (i % 4) * 0.4,
                       repeat: Infinity,
                       ease: 'easeInOut',
                     }
               }
-            />
+            >
+              <span className="echo-star-glow" />
+              <span className="echo-star-spikes">
+                <span className="echo-star-spike echo-star-spike--h" />
+                <span className="echo-star-spike echo-star-spike--v" />
+                <span className="echo-star-spike echo-star-spike--d1" />
+                <span className="echo-star-spike echo-star-spike--d2" />
+              </span>
+              <span className="echo-star-core" />
+              <span className="echo-star-flash" />
+            </motion.span>
           </button>
         )
       })}

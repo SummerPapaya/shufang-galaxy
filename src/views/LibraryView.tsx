@@ -82,6 +82,62 @@ function FlyingEchoStar({
         }}
       />
       <span
+        aria-hidden
+        className="absolute left-1/2 top-1/2 block"
+        style={{ width: 48, height: 48, marginLeft: -24, marginTop: -24 }}
+      >
+        <span
+          className="absolute left-1/2 top-1/2 block"
+          style={{
+            width: 42,
+            height: 2.5,
+            marginLeft: -21,
+            marginTop: -1.25,
+            background:
+              'linear-gradient(90deg, transparent, rgba(255,250,240,0.95), transparent)',
+            boxShadow: '0 0 10px rgba(255,217,160,0.8)',
+          }}
+        />
+        <span
+          className="absolute left-1/2 top-1/2 block"
+          style={{
+            width: 2.5,
+            height: 42,
+            marginLeft: -1.25,
+            marginTop: -21,
+            background:
+              'linear-gradient(180deg, transparent, rgba(255,250,240,0.95), transparent)',
+            boxShadow: '0 0 10px rgba(255,217,160,0.8)',
+          }}
+        />
+        <span
+          className="absolute left-1/2 top-1/2 block"
+          style={{
+            width: 28,
+            height: 1.5,
+            marginLeft: -14,
+            marginTop: -0.75,
+            transform: 'rotate(45deg)',
+            opacity: 0.65,
+            background:
+              'linear-gradient(90deg, transparent, rgba(255,248,235,0.85), transparent)',
+          }}
+        />
+        <span
+          className="absolute left-1/2 top-1/2 block"
+          style={{
+            width: 28,
+            height: 1.5,
+            marginLeft: -14,
+            marginTop: -0.75,
+            transform: 'rotate(-45deg)',
+            opacity: 0.65,
+            background:
+              'linear-gradient(90deg, transparent, rgba(255,248,235,0.85), transparent)',
+          }}
+        />
+      </span>
+      <span
         className="absolute left-1/2 top-1/2 block rounded-full"
         style={{
           width: 16,
