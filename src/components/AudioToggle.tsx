@@ -5,6 +5,7 @@ import {
   type AmbienceMode,
   type AudioManagerState,
 } from '@/audio/AudioManager'
+import { useAppStore } from '@/store'
 import { cn } from '@/lib/utils'
 
 /**
@@ -71,9 +72,12 @@ export default function AudioToggle() {
   const muted = state.muted || state.ambienceMode === 'muted'
   /** 片花（或朗读样片）确实在响 → 播放声波动画 */
   const active = !muted && (state.ambienceStarted || state.playing)
+  const view = useAppStore((s) => s.view)
+  /** 图书馆有声书播放器打开时隐藏片花钮，避免与关闭键叠在右下角（片花此时已暂停） */
+  if (view === 'library' && state.playingId) return null
 
   return (
-    <div ref={rootRef} className="fixed bottom-6 right-6 z-[90]">
+    <div ref={rootRef} className="fixed bottom-6 right-4 z-[90] sm:right-6">
       {open && (
         <div
           role="menu"

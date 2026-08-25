@@ -141,10 +141,10 @@ export default function PlayerBar({ book, reduced, onClose }: PlayerBarProps) {
   }
 
   const status = playing
-    ? `${book.reader} 正在朗读 · ${ep.title}`
+    ? `${book.reader} 正在朗读`
     : isCurrent
-      ? `已暂停 · ${ep.title}`
-      : '正在接续星光信号 …'
+      ? `已暂停 · ${book.reader}`
+      : `${book.reader} · 接续星光信号`
 
   return (
     <motion.div
@@ -152,132 +152,158 @@ export default function PlayerBar({ book, reduced, onClose }: PlayerBarProps) {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: reduced ? 0 : 72 }}
       transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="fixed inset-x-0 bottom-0 z-50 flex justify-center px-4 pb-5"
+      className="fixed inset-x-0 bottom-0 z-50 flex justify-center px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:px-4 sm:pb-5"
     >
       <div
-        className="glass-panel flex w-[min(94vw,660px)] items-center gap-4 rounded-xl border px-4 py-3 backdrop-blur-md"
+        className="glass-panel flex w-[min(96vw,660px)] flex-col gap-2.5 rounded-xl border px-3.5 py-3 backdrop-blur-md sm:flex-row sm:items-center sm:gap-4 sm:px-4"
         style={{
           borderColor: 'rgba(245,240,230,0.16)',
           boxShadow: `0 18px 60px rgba(0,0,0,0.55), 0 0 32px ${hexToRgba(book.starColor, 0.12)}`,
         }}
       >
-        {/* 封面色块：starColor 渐变 + 书名首字 */}
-        <div
-          aria-hidden
-          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border font-serif text-[18px]"
-          style={{
-            borderColor: hexToRgba(book.starColor, 0.5),
-            background: `linear-gradient(160deg, ${hexToRgba(book.starColor, 0.85)} 0%, ${hexToRgba(book.starColor, 0.35)} 100%)`,
-            color: 'rgba(11,16,38,0.9)',
-            boxShadow: `0 0 16px ${hexToRgba(book.starColor, 0.35)}`,
-          }}
-        >
-          {book.title.charAt(0)}
-        </div>
-
-        {/* 文本：书名 / 作者 / 朗读状态 */}
-        <div className="hidden min-w-0 shrink-0 basis-[160px] sm:block">
-          <p className="truncate font-serif text-[14px] leading-snug text-starlight">
-            《{book.title}》
-          </p>
-          <p className="truncate text-[11px] text-starlight-dim">{book.author} 著</p>
-          <p
-            className="mt-0.5 flex items-center gap-1.5 font-hud text-[10px] tracking-[0.14em]"
-            style={{ color: hexToRgba(book.starColor, 0.9) }}
+        <div className="flex min-w-0 items-center gap-3">
+          {/* 封面色块：starColor 渐变 + 书名首字 */}
+          <div
+            aria-hidden
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border font-serif text-[17px] sm:h-12 sm:w-12 sm:text-[18px]"
+            style={{
+              borderColor: hexToRgba(book.starColor, 0.5),
+              background: `linear-gradient(160deg, ${hexToRgba(book.starColor, 0.85)} 0%, ${hexToRgba(book.starColor, 0.35)} 100%)`,
+              color: 'rgba(11,16,38,0.9)',
+              boxShadow: `0 0 16px ${hexToRgba(book.starColor, 0.35)}`,
+            }}
           >
-            <motion.span
-              aria-hidden
-              className="inline-block h-1.5 w-1.5 shrink-0 rounded-full"
-              style={{
-                backgroundColor: book.starColor,
-                boxShadow: `0 0 8px ${hexToRgba(book.starColor, 0.8)}`,
-              }}
-              animate={
-                playing && !reduced ? { opacity: [1, 0.25, 1] } : { opacity: playing ? 1 : 0.35 }
-              }
-              transition={
-                playing && !reduced
-                  ? { duration: 1.4, repeat: Infinity, ease: 'easeInOut' }
-                  : { duration: 0.2 }
-              }
-            />
-            <span className="truncate">{status}</span>
-          </p>
-        </div>
-
-        {/* 播放 / 暂停 */}
-        <button
-          type="button"
-          aria-label={playing ? '暂停朗读' : '播放朗读'}
-          data-cursor="interactive"
-          data-cursor-color={book.starColor}
-          onClick={handleToggle}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-shadow duration-200"
-          style={{
-            borderColor: hexToRgba(book.starColor, 0.8),
-            boxShadow: playing ? `0 0 16px ${hexToRgba(book.starColor, 0.4)}` : undefined,
-          }}
-        >
-          <PlayIcon playing={playing} color={book.starColor} />
-        </button>
-
-        {/* 单集切换 + 进度条 + 时间 */}
-        <div className="min-w-0 flex-1">
-          {episodes.length > 1 && (
-            <div
-              className="mb-1.5 flex gap-1.5 overflow-x-auto pb-0.5"
-              data-cursor="interactive"
-              aria-label="单集列表"
-            >
-              {episodes.map((e2, i) => {
-                const active = i === Math.min(epIdx, episodes.length - 1)
-                return (
-                  <button
-                    key={`${book.id}-ep-${i}`}
-                    type="button"
-                    data-cursor="interactive"
-                    data-cursor-color={book.starColor}
-                    onClick={() => setEpIdx(i)}
-                    className={cn(
-                      'shrink-0 rounded-full border px-2.5 py-0.5 font-hud text-[10px] tracking-[0.1em] transition-colors duration-150',
-                      active ? 'text-starlight' : 'text-starlight-faint hover:text-starlight-dim',
-                    )}
-                    style={{
-                      borderColor: hexToRgba(book.starColor, active ? 0.7 : 0.22),
-                      background: active ? hexToRgba(book.starColor, 0.12) : 'transparent',
-                    }}
-                  >
-                    {e2.title.split('·')[0].trim()}
-                  </button>
-                )
-              })}
-            </div>
-          )}
-          <SeekBar ratio={progress} color={book.starColor} onSeek={(r) => audioManager.seek(r)} />
-          <div className="mt-1 flex items-center justify-between font-hud text-[10px] tabular-nums text-starlight-dim">
-            <span>{formatTime(progress * duration)}</span>
-            <span>{formatTime(duration)}</span>
+            {book.title.charAt(0)}
           </div>
+
+          {/* 书名 / 作者 / 朗读者 — 手机端也显示 */}
+          <div className="min-w-0 flex-1">
+            <p className="truncate font-serif text-[13px] leading-snug text-starlight sm:text-[14px]">
+              《{book.title}》
+            </p>
+            <p className="truncate text-[11px] text-starlight-dim">
+              {book.author} 著
+              <span className="mx-1.5 text-starlight-faint">·</span>
+              {book.reader} 朗读
+            </p>
+            <p
+              className="mt-0.5 flex items-center gap-1.5 font-hud text-[10px] tracking-[0.12em]"
+              style={{ color: hexToRgba(book.starColor, 0.9) }}
+            >
+              <motion.span
+                aria-hidden
+                className="inline-block h-1.5 w-1.5 shrink-0 rounded-full"
+                style={{
+                  backgroundColor: book.starColor,
+                  boxShadow: `0 0 8px ${hexToRgba(book.starColor, 0.8)}`,
+                }}
+                animate={
+                  playing && !reduced ? { opacity: [1, 0.25, 1] } : { opacity: playing ? 1 : 0.35 }
+                }
+                transition={
+                  playing && !reduced
+                    ? { duration: 1.4, repeat: Infinity, ease: 'easeInOut' }
+                    : { duration: 0.2 }
+                }
+              />
+              <span className="truncate">{status}</span>
+            </p>
+          </div>
+
+          <button
+            type="button"
+            aria-label="关闭播放器"
+            data-cursor="interactive"
+            onClick={onClose}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-starlight-dim transition-colors duration-200 hover:text-starlight sm:hidden"
+            style={{ borderColor: 'rgba(245,240,230,0.22)' }}
+          >
+            <svg width="11" height="11" viewBox="0 0 12 12" aria-hidden>
+              <path
+                d="M1 1l10 10M11 1L1 11"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
         </div>
 
-        {/* 关闭 */}
-        <button
-          type="button"
-          aria-label="关闭播放器"
-          data-cursor="interactive"
-          onClick={onClose}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-starlight-dim transition-colors duration-200 hover:text-starlight"
-          style={{ borderColor: 'rgba(245,240,230,0.22)' }}
-        >
-          <svg width="11" height="11" viewBox="0 0 12 12" aria-hidden>
-            <path
-              d="M1 1l10 10M11 1L1 11"
-              stroke="currentColor"
-              strokeWidth="1.4"
-              strokeLinecap="round"
-            />
-          </svg>
-        </button>
+        <div className="flex min-w-0 items-center gap-3 sm:flex-1">
+          {/* 播放 / 暂停 */}
+          <button
+            type="button"
+            aria-label={playing ? '暂停朗读' : '播放朗读'}
+            data-cursor="interactive"
+            data-cursor-color={book.starColor}
+            onClick={handleToggle}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border transition-shadow duration-200"
+            style={{
+              borderColor: hexToRgba(book.starColor, 0.8),
+              boxShadow: playing ? `0 0 16px ${hexToRgba(book.starColor, 0.4)}` : undefined,
+            }}
+          >
+            <PlayIcon playing={playing} color={book.starColor} />
+          </button>
+
+          {/* 单集切换 + 进度条 + 时间 */}
+          <div className="min-w-0 flex-1">
+            {episodes.length > 1 && (
+              <div
+                className="mb-1.5 flex gap-1.5 overflow-x-auto pb-0.5"
+                data-cursor="interactive"
+                aria-label="单集列表"
+              >
+                {episodes.map((e2, i) => {
+                  const active = i === Math.min(epIdx, episodes.length - 1)
+                  return (
+                    <button
+                      key={`${book.id}-ep-${i}`}
+                      type="button"
+                      data-cursor="interactive"
+                      data-cursor-color={book.starColor}
+                      onClick={() => setEpIdx(i)}
+                      className={cn(
+                        'shrink-0 rounded-full border px-2.5 py-0.5 font-hud text-[10px] tracking-[0.1em] transition-colors duration-150',
+                        active ? 'text-starlight' : 'text-starlight-faint hover:text-starlight-dim',
+                      )}
+                      style={{
+                        borderColor: hexToRgba(book.starColor, active ? 0.7 : 0.22),
+                        background: active ? hexToRgba(book.starColor, 0.12) : 'transparent',
+                      }}
+                    >
+                      {e2.title.split('·')[0].trim()}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+            <SeekBar ratio={progress} color={book.starColor} onSeek={(r) => audioManager.seek(r)} />
+            <div className="mt-1 flex items-center justify-between font-hud text-[10px] tabular-nums text-starlight-dim">
+              <span>{formatTime(progress * duration)}</span>
+              <span>{formatTime(duration)}</span>
+            </div>
+          </div>
+
+          {/* 桌面关闭 */}
+          <button
+            type="button"
+            aria-label="关闭播放器"
+            data-cursor="interactive"
+            onClick={onClose}
+            className="hidden h-8 w-8 shrink-0 items-center justify-center rounded-full border text-starlight-dim transition-colors duration-200 hover:text-starlight sm:flex"
+            style={{ borderColor: 'rgba(245,240,230,0.22)' }}
+          >
+            <svg width="11" height="11" viewBox="0 0 12 12" aria-hidden>
+              <path
+                d="M1 1l10 10M11 1L1 11"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
     </motion.div>
   )

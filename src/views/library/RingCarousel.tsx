@@ -11,13 +11,13 @@ import { hexToRgba } from '../room/utils'
  * - hover 信息卡：桌面在书脊上方，窄屏改到下方以免顶到标题
  */
 
-const DESKTOP_RADIUS = 430
-const MOBILE_RADIUS = 230
+const DESKTOP_RADIUS = 450
+const MOBILE_RADIUS = 248
 const PERSPECTIVE = 1500
-const DESKTOP_SPINE_W = 58
-const DESKTOP_SPINE_H = 216
-const MOBILE_SPINE_W = 40
-const MOBILE_SPINE_H = 150
+const DESKTOP_SPINE_W = 64
+const DESKTOP_SPINE_H = 268
+const MOBILE_SPINE_W = 46
+const MOBILE_SPINE_H = 192
 /** 拖拽像素 → 角度（度 / px） */
 const DEG_PER_PX = 0.22
 /** 惯性摩擦：速度每帧 ×0.93 */
@@ -96,7 +96,6 @@ export default function RingCarousel({ books, reduced, onSelect }: RingCarouselP
   )
 
   const setHover = (id: string | null) => {
-    if (!finePointer.current && id) return
     hoverRef.current = id
     setHoverId(id)
     if (id) lastInteractRef.current = performance.now()
@@ -324,12 +323,14 @@ export default function RingCarousel({ books, reduced, onSelect }: RingCarouselP
 
   const handleBookClick = (book: Book) => {
     if (dragRef.current.moved || pinchRef.current.active) return
+    // 触屏也先点亮信息卡，再打开播放器
+    setHover(book.id)
     onSelect(book)
   }
 
   const spineW = narrow ? MOBILE_SPINE_W : DESKTOP_SPINE_W
   const spineH = narrow ? MOBILE_SPINE_H : DESKTOP_SPINE_H
-  const stageTop = narrow ? '58%' : '48%'
+  const stageTop = narrow ? '56%' : '48%'
 
   return (
     <div
@@ -389,17 +390,13 @@ export default function RingCarousel({ books, reduced, onSelect }: RingCarouselP
                       : 'transform 320ms cubic-bezier(0.22, 1, 0.36, 1)',
                   }}
                 >
-                  {/* 信息卡：窄屏放书脊下方，避免顶到标题 */}
+                  {/* 信息卡：手机端在书脊上方（书环已下移，避开顶栏与播放器） */}
                   <div
                     aria-hidden={!hover}
-                    className={
-                      narrow
-                        ? 'pointer-events-none absolute left-1/2 top-full z-30 mt-3 w-[170px]'
-                        : 'pointer-events-none absolute bottom-full left-1/2 z-30 mb-4 w-[190px]'
-                    }
+                    className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-3 w-[170px] sm:mb-4 sm:w-[190px]"
                     style={{
                       opacity: hover ? 1 : 0,
-                      transform: `translateX(-50%) translateY(${hover ? 0 : narrow ? -6 : 8}px)`,
+                      transform: `translateX(-50%) translateY(${hover ? 0 : 8}px)`,
                       transition: 'opacity 200ms ease, transform 200ms ease',
                     }}
                   >
@@ -431,10 +428,18 @@ export default function RingCarousel({ books, reduced, onSelect }: RingCarouselP
                     data-cursor="interactive"
                     data-cursor-color={c}
                     onClick={() => handleBookClick(book)}
-                    onMouseEnter={() => setHover(book.id)}
-                    onMouseLeave={() => setHover(null)}
-                    onFocus={() => setHover(book.id)}
-                    onBlur={() => setHover(null)}
+                    onMouseEnter={() => {
+                      if (finePointer.current) setHover(book.id)
+                    }}
+                    onMouseLeave={() => {
+                      if (finePointer.current) setHover(null)
+                    }}
+                    onFocus={() => {
+                      if (finePointer.current) setHover(book.id)
+                    }}
+                    onBlur={() => {
+                      if (finePointer.current) setHover(null)
+                    }}
                     className="relative block h-full w-full overflow-hidden rounded-[4px] border outline-none backdrop-blur-sm"
                     style={{
                       borderColor: hover ? hexToRgba(c, 0.55) : 'rgba(245,240,230,0.18)',
@@ -465,17 +470,17 @@ export default function RingCarousel({ books, reduced, onSelect }: RingCarouselP
                       style={{ background: 'rgba(245,240,230,0.22)' }}
                     />
                     <span
-                      className="absolute inset-0 flex items-center justify-between px-0 py-[14px] sm:py-[18px]"
+                      className="absolute inset-0 flex items-center justify-between px-0 py-[16px] sm:py-[22px]"
                       style={{ writingMode: 'vertical-rl', flexDirection: 'row' }}
                     >
                       <span
-                        className="font-serif font-medium tracking-[0.2em] text-starlight"
+                        className="font-serif font-medium tracking-[0.18em] text-starlight whitespace-nowrap"
                         style={{ fontSize: narrow ? 11 : 13, lineHeight: 1 }}
                       >
                         {book.title}
                       </span>
                       <span
-                        className="font-hud tracking-[0.12em] text-starlight-dim"
+                        className="font-hud tracking-[0.12em] text-starlight-dim whitespace-nowrap"
                         style={{ fontSize: narrow ? 8 : 9, lineHeight: 1 }}
                       >
                         {book.author}

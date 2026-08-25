@@ -82,6 +82,62 @@ function FlyingEchoStar({
         }}
       />
       <span
+        aria-hidden
+        className="absolute left-1/2 top-1/2 block"
+        style={{ width: 48, height: 48, marginLeft: -24, marginTop: -24 }}
+      >
+        <span
+          className="absolute left-1/2 top-1/2 block"
+          style={{
+            width: 42,
+            height: 2.5,
+            marginLeft: -21,
+            marginTop: -1.25,
+            background:
+              'linear-gradient(90deg, transparent, rgba(255,250,240,0.95), transparent)',
+            boxShadow: '0 0 10px rgba(255,217,160,0.8)',
+          }}
+        />
+        <span
+          className="absolute left-1/2 top-1/2 block"
+          style={{
+            width: 2.5,
+            height: 42,
+            marginLeft: -1.25,
+            marginTop: -21,
+            background:
+              'linear-gradient(180deg, transparent, rgba(255,250,240,0.95), transparent)',
+            boxShadow: '0 0 10px rgba(255,217,160,0.8)',
+          }}
+        />
+        <span
+          className="absolute left-1/2 top-1/2 block"
+          style={{
+            width: 28,
+            height: 1.5,
+            marginLeft: -14,
+            marginTop: -0.75,
+            transform: 'rotate(45deg)',
+            opacity: 0.65,
+            background:
+              'linear-gradient(90deg, transparent, rgba(255,248,235,0.85), transparent)',
+          }}
+        />
+        <span
+          className="absolute left-1/2 top-1/2 block"
+          style={{
+            width: 28,
+            height: 1.5,
+            marginLeft: -14,
+            marginTop: -0.75,
+            transform: 'rotate(-45deg)',
+            opacity: 0.65,
+            background:
+              'linear-gradient(90deg, transparent, rgba(255,248,235,0.85), transparent)',
+          }}
+        />
+      </span>
+      <span
         className="absolute left-1/2 top-1/2 block rounded-full"
         style={{
           width: 16,
@@ -300,7 +356,8 @@ export default function LibraryView() {
       {/* ── 底部提示（播放器打开时让位） ── */}
       {!activeBook && (
         <motion.footer
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center pb-6"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center pb-6 sm:pb-6"
+          style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: reduced ? 0.15 : 0.7 }}

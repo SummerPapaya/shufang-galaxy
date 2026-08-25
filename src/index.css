@@ -124,29 +124,268 @@
     background: transparent;
   }
 
-  /* 宇宙回声星：柔和羽化光晕，缓慢呼吸 */
-  .echo-star-halo {
-    animation: echo-star-breathe 2.8s ease-in-out infinite;
+  /* 宇宙回声星：亮核 + 十字星芒 + 羽化光晕 + 缓慢间歇闪光（尺寸较初版约 -20%） */
+  .echo-star {
+    width: 29px;
+    height: 29px;
+    margin-left: -14.5px;
+    margin-top: -14.5px;
+    --echo-delay: 0s;
+    --echo-flash-delay: 0s;
+  }
+
+  .echo-star-glow {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 22px;
+    height: 22px;
+    margin-left: -11px;
+    margin-top: -11px;
+    border-radius: 999px;
+    background: radial-gradient(
+      circle,
+      rgba(255, 248, 235, 0.65) 0%,
+      rgba(255, 217, 160, 0.32) 38%,
+      rgba(255, 217, 160, 0.08) 62%,
+      transparent 78%
+    );
+    animation: echo-star-breathe 3.6s ease-in-out infinite;
+    animation-delay: var(--echo-delay);
+  }
+
+  .echo-star-spikes {
+    position: absolute;
+    inset: 0;
+    animation: echo-spike-pulse 4.2s ease-in-out infinite;
+    animation-delay: var(--echo-delay);
+  }
+
+  .echo-star-spike {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    pointer-events: none;
+  }
+
+  .echo-star-spike--h {
+    width: 27px;
+    height: 1.5px;
+    margin-left: -13.5px;
+    margin-top: -0.75px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 244, 220, 0.12) 18%,
+      rgba(255, 250, 240, 0.88) 50%,
+      rgba(255, 244, 220, 0.12) 82%,
+      transparent 100%
+    );
+    box-shadow: 0 0 5px rgba(255, 217, 160, 0.45);
+  }
+
+  .echo-star-spike--v {
+    width: 1.5px;
+    height: 27px;
+    margin-left: -0.75px;
+    margin-top: -13.5px;
+    background: linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(255, 244, 220, 0.12) 18%,
+      rgba(255, 250, 240, 0.88) 50%,
+      rgba(255, 244, 220, 0.12) 82%,
+      transparent 100%
+    );
+    box-shadow: 0 0 5px rgba(255, 217, 160, 0.45);
+  }
+
+  .echo-star-spike--d1,
+  .echo-star-spike--d2 {
+    width: 18px;
+    height: 1px;
+    margin-left: -9px;
+    margin-top: -0.5px;
+    opacity: 0.45;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 240, 210, 0.18) 22%,
+      rgba(255, 248, 235, 0.65) 50%,
+      rgba(255, 240, 210, 0.18) 78%,
+      transparent 100%
+    );
+  }
+
+  .echo-star-spike--d1 {
+    transform: rotate(45deg);
+  }
+
+  .echo-star-spike--d2 {
+    transform: rotate(-45deg);
+  }
+
+  .echo-star-core {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 4.5px;
+    height: 4.5px;
+    margin-left: -2.25px;
+    margin-top: -2.25px;
+    border-radius: 999px;
+    background: #fffaf0;
+    box-shadow:
+      0 0 2px #fffaf0,
+      0 0 6px rgba(255, 240, 210, 0.85),
+      0 0 12px rgba(255, 217, 160, 0.55),
+      0 0 18px rgba(255, 217, 160, 0.25);
+  }
+
+  .echo-star-flash {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 11px;
+    height: 11px;
+    margin-left: -5.5px;
+    margin-top: -5.5px;
+    border-radius: 999px;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.85) 0%, transparent 70%);
+    opacity: 0;
+    animation: echo-star-flash 8.5s ease-in-out infinite;
+    animation-delay: var(--echo-flash-delay);
+  }
+
+  .echo-star--active .echo-star-glow {
+    width: 29px;
+    height: 29px;
+    margin-left: -14.5px;
+    margin-top: -14.5px;
+    opacity: 1;
+    background: radial-gradient(
+      circle,
+      rgba(255, 250, 240, 0.82) 0%,
+      rgba(255, 217, 160, 0.42) 36%,
+      rgba(255, 217, 160, 0.12) 60%,
+      transparent 78%
+    );
+  }
+
+  .echo-star--active .echo-star-spike--h {
+    width: 35px;
+    margin-left: -17.5px;
+  }
+
+  .echo-star--active .echo-star-spike--v {
+    height: 35px;
+    margin-top: -17.5px;
+  }
+
+  .echo-star--active .echo-star-spike--d1,
+  .echo-star--active .echo-star-spike--d2 {
+    width: 22px;
+    margin-left: -11px;
+    opacity: 0.7;
+  }
+
+  .echo-star--active .echo-star-core {
+    width: 5.5px;
+    height: 5.5px;
+    margin-left: -2.75px;
+    margin-top: -2.75px;
+    box-shadow:
+      0 0 3px #fffaf0,
+      0 0 8px rgba(255, 240, 210, 0.9),
+      0 0 16px rgba(255, 217, 160, 0.65),
+      0 0 24px rgba(255, 217, 160, 0.3);
   }
 
   @keyframes echo-star-breathe {
     0%,
     100% {
-      transform: scale(0.82);
-      opacity: 0.35;
+      transform: scale(0.92);
+      opacity: 0.5;
     }
     50% {
-      transform: scale(1.18);
-      opacity: 0.72;
+      transform: scale(1.12);
+      opacity: 0.85;
+    }
+  }
+
+  @keyframes echo-spike-pulse {
+    0%,
+    100% {
+      opacity: 0.5;
+      transform: scale(0.95);
+    }
+    50% {
+      opacity: 0.88;
+      transform: scale(1.03);
+    }
+  }
+
+  @keyframes echo-star-flash {
+    0%,
+    82%,
+    100% {
+      opacity: 0;
+      transform: scale(0.7);
+    }
+    88% {
+      opacity: 0.55;
+      transform: scale(1.12);
+    }
+    92% {
+      opacity: 0.2;
+      transform: scale(1);
+    }
+    96% {
+      opacity: 0.4;
+      transform: scale(1.08);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .echo-star-halo {
+    .echo-star-glow,
+    .echo-star-spikes,
+    .echo-star-flash {
       animation: none;
-      opacity: 0.5;
+    }
+
+    .echo-star-glow {
+      opacity: 0.75;
       transform: scale(1);
     }
+
+    .echo-star-spikes {
+      opacity: 0.85;
+      transform: scale(1);
+    }
+
+    .echo-star-flash {
+      opacity: 0;
+    }
+  }
+
+  .echo-star--reduced .echo-star-glow,
+  .echo-star--reduced .echo-star-spikes,
+  .echo-star--reduced .echo-star-flash {
+    animation: none;
+  }
+
+  .echo-star--reduced .echo-star-glow {
+    opacity: 0.75;
+    transform: scale(1);
+  }
+
+  .echo-star--reduced .echo-star-spikes {
+    opacity: 0.85;
+    transform: scale(1);
+  }
+
+  .echo-star--reduced .echo-star-flash {
+    opacity: 0;
   }
 
   /* Landing 整页 SLOGAN（伍尔夫引言打字机）：月白 + 柔和星光/暖金辉光 */

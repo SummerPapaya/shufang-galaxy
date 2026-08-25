@@ -6,8 +6,8 @@ import type { UniverseControls } from './controls'
  * 星空漫游 HUD（universe.md §2，DOM 覆盖层，pointer-events-none）
  * - Crosshair：固定于画面正中的第一版望远镜十字分划（外环刻度 + 水平十字丝）；
  *   静止时横丝水平；左右转视角时整组轻微倾转；掠过书房星时着色锁定
- * - CompassStrip：右下罗盘刻度带（每 15° 刻线，四象星宿名，金色三角指针随 yaw 滚动）
- * - HintBar：左下操作提示，入场 6s 后降至 40% 透明度
+ * - CompassStrip：罗盘刻度带（每 15° 刻线，四象星宿名，金色三角指针随 yaw 滚动）
+ * - HintBar：操作提示；手机端在罗盘下方居中，桌面在左下；入场 6s 后降至 40% 透明度
  * 入场：0.5s 起依序淡入（stagger 150ms，y +10→0）。
  */
 
@@ -175,8 +175,7 @@ export function CompassStrip({ controls }: { controls: UniverseControls }) {
   return (
     <motion.div
       aria-hidden
-      className="pointer-events-none fixed bottom-6 z-10"
-      style={{ right: 132 }} // 音频钮（right 24 + 44 宽）左侧 64px
+      className="pointer-events-none fixed z-10 bottom-[4.75rem] left-1/2 -translate-x-1/2 sm:bottom-6 sm:left-auto sm:right-[132px] sm:translate-x-0"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.95, ease: EASE }}
@@ -242,7 +241,7 @@ export function CompassStrip({ controls }: { controls: UniverseControls }) {
   )
 }
 
-/* ── 左下操作提示 ───────────────────────────────── */
+/* ── 操作提示：手机端置于罗盘下方居中，避免与刻度带叠字 ── */
 
 export function HintBar() {
   const [dimmed, setDimmed] = useState(false)
@@ -254,7 +253,7 @@ export function HintBar() {
 
   return (
     <motion.p
-      className="pointer-events-none fixed bottom-6 left-6 z-10 font-hud text-[11px] uppercase tracking-[0.22em] text-starlight-faint"
+      className="pointer-events-none fixed inset-x-0 z-10 px-4 text-center font-hud text-[10px] uppercase tracking-[0.16em] text-starlight-faint bottom-[max(1.1rem,env(safe-area-inset-bottom))] sm:inset-x-auto sm:bottom-6 sm:left-6 sm:px-0 sm:text-left sm:text-[11px] sm:tracking-[0.22em]"
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: dimmed ? 0.4 : 1, y: 0 }}
       transition={{
@@ -262,7 +261,8 @@ export function HintBar() {
         y: { duration: 0.5, delay: 0.8, ease: EASE },
       }}
     >
-      拖动环顾 · 方向键旋转 · 点击星星进入书房
+      <span className="sm:hidden">拖动环顾 · 点击星星进入书房</span>
+      <span className="hidden sm:inline">拖动环顾 · 方向键旋转 · 点击星星进入书房</span>
     </motion.p>
   )
 }
