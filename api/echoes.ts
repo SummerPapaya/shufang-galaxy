@@ -149,7 +149,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (req.method === 'GET') {
       const echoes = await listEchoes(redis)
-      res.setHeader('Cache-Control', 'public, s-maxage=15, stale-while-revalidate=60')
+      res.setHeader('Cache-Control', 'no-store')
       res.status(200).json({ echoes })
       return
     }
