@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useSyncExternalStore } from 'react'
 import {
   MESSAGE_MAX,
   NAME_MAX,
@@ -17,8 +17,8 @@ export { MESSAGE_MAX, NAME_MAX, SEED_ECHOES, validateEcho }
  * 「宇宙回声」公共留言墙数据层。
  *
  * - 读写走 `/api/echoes`（本地 Vite 中间件 / 生产 Vercel + KV）
- * - 可通过 `VITE_ECHOES_API` 指向独立 API（例如 GitHub Pages 前端 + Vercel 后端）
- * - 邮箱不会出现在列表响应里；示例星仅前端展示
+ * - 模块级 store + useSyncExternalStore：EchoWall / EchoField 共享同一份列表
+ *   （避免提交后飞星闪一下、星空层却没有这颗星）
  */
 
 const OWN_IDS_KEY = 'shufang-galaxy:echo-own-ids:v1'
@@ -71,6 +71,133 @@ export function formatEchoTime(at: number, now = Date.now()): string {
 
 export type EchoesStatus = 'loading' | 'ready' | 'error'
 
+interface EchoStoreState {
+  remote: Echo[]
+  status: EchoesStatus
+  errorMessage: string | null
+  ownIds: Set<string>
+}
+
+const listeners = new Set<() => void>()
+
+let store: EchoStoreState = {
+  remote: [],
+  status: 'loading',
+  errorMessage: null,
+  ownIds: readOwnIds(),
+}
+
+let fetchGeneration = 0
+
+function emit() {
+  listeners.forEach((l) => l())
+}
+
+function setStore(patch: Partial<EchoStoreState>) {
+  store = { ...store, ...patch }
+  emit()
+}
+
+function getSnapshot(): EchoStoreState {
+  return store
+}
+
+function getServerSnapshot(): EchoStoreState {
+  return {
+    remote: [],
+    status: 'loading',
+    errorMessage: null,
+    ownIds: new Set(),
+  }
+}
+
+function subscribe(onChange: () => void): () => void {
+  const becameActive = listeners.size === 0
+  listeners.add(onChange)
+  if (becameActive) void refreshEchoes()
+  return () => {
+    listeners.delete(onChange)
+  }
+}
+
+async function refreshEchoes(): Promise<void> {
+  const gen = ++fetchGeneration
+  try {
+    const res = await fetch(apiBase(), { headers: { Accept: 'application/json' } })
+    if (!res.ok) {
+      const payload = (await res.json().catch(() => null)) as { message?: string } | null
+      throw new Error(payload?.message || `加载失败（${res.status}）`)
+    }
+    const data = (await res.json()) as { echoes?: Echo[] }
+    const list = Array.isArray(data.echoes) ? data.echoes : []
+    if (gen !== fetchGeneration) return
+    setStore({
+      remote: list,
+      status: 'ready',
+      errorMessage: null,
+      ownIds: readOwnIds(),
+    })
+  } catch (err) {
+    if (gen !== fetchGeneration) return
+    setStore({
+      status: 'error',
+      errorMessage: err instanceof Error ? err.message : '星海暂时听不清',
+      // 保留已有 remote，避免提交后闪一下被清空
+      ownIds: readOwnIds(),
+    })
+  }
+}
+
+async function submitEcho(draft: EchoDraft): Promise<Echo> {
+  const found = validateEcho(draft)
+  if (Object.keys(found).length > 0) {
+    const first = Object.values(found).find((v): v is string => typeof v === 'string')
+    throw new Error(first || '请检查留言内容')
+  }
+
+  const res = await fetch(apiBase(), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify({
+      name: draft.name,
+      email: draft.email,
+      message: draft.message,
+      website: '',
+    }),
+  })
+
+  const payload = (await res.json().catch(() => null)) as
+    | { echo?: Echo; message?: string; errors?: EchoFieldError }
+    | null
+
+  if (!res.ok) {
+    const fromFields = payload?.errors && Object.values(payload.errors)[0]
+    throw new Error(
+      (typeof fromFields === 'string' ? fromFields : null) ||
+        payload?.message ||
+        `提交失败（${res.status}）`,
+    )
+  }
+
+  const echo = payload?.echo
+  if (!echo || typeof echo.id !== 'string') {
+    throw new Error('星海没有回传这颗星，请稍后再试')
+  }
+
+  rememberOwnId(echo.id)
+  // 乐观写入共享列表，确保飞星落地后 EchoField 立刻能看到
+  setStore({
+    remote: [echo, ...store.remote.filter((e) => e.id !== echo.id)],
+    status: 'ready',
+    errorMessage: null,
+    ownIds: readOwnIds(),
+  })
+
+  // 后台再拉一次，与服务器对齐（不阻断动画）
+  void refreshEchoes()
+  return echo
+}
+
 export interface UseEchoesResult {
   echoes: Echo[]
   status: EchoesStatus
@@ -82,86 +209,20 @@ export interface UseEchoesResult {
 }
 
 export function useEchoes(): UseEchoesResult {
-  const [remote, setRemote] = useState<Echo[]>([])
-  const [status, setStatus] = useState<EchoesStatus>('loading')
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [ownIds, setOwnIds] = useState<Set<string>>(() => readOwnIds())
-  const alive = useRef(true)
+  const state = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
-  useEffect(() => {
-    alive.current = true
-    return () => {
-      alive.current = false
-    }
-  }, [])
+  const refresh = useCallback(() => refreshEchoes(), [])
+  const submit = useCallback((draft: EchoDraft) => submitEcho(draft), [])
 
-  const refresh = useCallback(async () => {
-    try {
-      const res = await fetch(apiBase(), { headers: { Accept: 'application/json' } })
-      if (!res.ok) {
-        const payload = (await res.json().catch(() => null)) as { message?: string } | null
-        throw new Error(payload?.message || `加载失败（${res.status}）`)
-      }
-      const data = (await res.json()) as { echoes?: Echo[] }
-      const list = Array.isArray(data.echoes) ? data.echoes : []
-      if (!alive.current) return
-      setRemote(list)
-      setStatus('ready')
-      setErrorMessage(null)
-    } catch (err) {
-      if (!alive.current) return
-      setStatus('error')
-      setErrorMessage(err instanceof Error ? err.message : '星海暂时听不清')
-      setRemote([])
-    }
-  }, [])
+  const echoes = composeEchoes(state.remote)
+  const ownCount = echoes.filter((e) => !e.seed && state.ownIds.has(e.id)).length
 
-  useEffect(() => {
-    void refresh()
-  }, [refresh])
-
-  const submit = useCallback(async (draft: EchoDraft): Promise<Echo> => {
-    const found = validateEcho(draft)
-    if (Object.keys(found).length > 0) {
-      const first = Object.values(found).find((v): v is string => typeof v === 'string')
-      throw new Error(first || '请检查留言内容')
-    }
-
-    const res = await fetch(apiBase(), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({
-        name: draft.name,
-        email: draft.email,
-        message: draft.message,
-        website: '',
-      }),
-    })
-
-    const payload = (await res.json().catch(() => null)) as
-      | { echo?: Echo; message?: string; errors?: EchoFieldError }
-      | null
-
-    if (!res.ok) {
-      const fromFields = payload?.errors && Object.values(payload.errors)[0]
-      throw new Error(fromFields || payload?.message || `提交失败（${res.status}）`)
-    }
-
-    const echo = payload?.echo
-    if (!echo || typeof echo.id !== 'string') {
-      throw new Error('星海没有回传这颗星，请稍后再试')
-    }
-
-    rememberOwnId(echo.id)
-    setOwnIds(readOwnIds())
-    setRemote((prev) => [echo, ...prev.filter((e) => e.id !== echo.id)])
-    setStatus('ready')
-    setErrorMessage(null)
-    return echo
-  }, [])
-
-  const echoes = composeEchoes(remote)
-  const ownCount = echoes.filter((e: Echo) => !e.seed && ownIds.has(e.id)).length
-
-  return { echoes, status, ownCount, errorMessage, refresh, submit }
+  return {
+    echoes,
+    status: state.status,
+    ownCount,
+    errorMessage: state.errorMessage,
+    refresh,
+    submit,
+  }
 }
