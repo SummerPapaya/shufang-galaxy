@@ -134,6 +134,40 @@
     --echo-flash-delay: 0s;
   }
 
+  /* 手机：略放大，避免被书环/顶栏挤掉、或当成背景粒子 */
+  @media (max-width: 640px) {
+    .echo-star {
+      width: 36px;
+      height: 36px;
+      margin-left: -18px;
+      margin-top: -18px;
+    }
+
+    .echo-star-glow {
+      width: 28px;
+      height: 28px;
+      margin-left: -14px;
+      margin-top: -14px;
+    }
+
+    .echo-star-spike--h {
+      width: 34px;
+      margin-left: -17px;
+    }
+
+    .echo-star-spike--v {
+      height: 34px;
+      margin-top: -17px;
+    }
+
+    .echo-star-core {
+      width: 5.5px;
+      height: 5.5px;
+      margin-left: -2.75px;
+      margin-top: -2.75px;
+    }
+  }
+
   .echo-star-glow {
     position: absolute;
     left: 50%;
