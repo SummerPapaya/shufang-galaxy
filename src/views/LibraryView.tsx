@@ -292,8 +292,7 @@ export default function LibraryView() {
             onMouseLeave={(e) => (e.currentTarget.style.borderColor = 'rgba(255,217,160,0.4)')}
           >
             <Radio className="h-3 w-3" aria-hidden />
-            <span className="sm:hidden">回声</span>
-            <span className="hidden sm:inline">宇宙回声</span>
+            <span>宇宙回声</span>
           </button>
           <button
             type="button"
