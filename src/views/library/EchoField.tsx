@@ -22,9 +22,33 @@ function hash(s: string): number {
   return h >>> 0
 }
 
-/** 把回声安放在画面边缘带，避开中央环形书廊 */
+/** 把回声安放在画面边缘带，避开中央书廊；窄屏优先放在上半侧可见区 */
 export function placeEcho(echo: Echo, index = 0): { x: number; y: number } {
   const h = hash(echo.id + echo.name)
+  const narrow =
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 640px)').matches
+
+  if (narrow) {
+    // 手机：书环约在 56% 高度，留言星放在上半区两侧，避免被顶栏/书环挡住
+    const slots = [
+      { x: 0.14, y: 0.18 },
+      { x: 0.86, y: 0.2 },
+      { x: 0.22, y: 0.3 },
+      { x: 0.78, y: 0.28 },
+      { x: 0.1, y: 0.4 },
+      { x: 0.9, y: 0.38 },
+      { x: 0.3, y: 0.16 },
+      { x: 0.7, y: 0.15 },
+    ]
+    const base = slots[(h + index * 3) % slots.length]!
+    const jitterX = ((h % 70) - 35) / 1000
+    const jitterY = (((h >> 8) % 70) - 35) / 1000
+    return {
+      x: Math.min(0.92, Math.max(0.08, base.x + jitterX)),
+      y: Math.min(0.44, Math.max(0.12, base.y + jitterY)),
+    }
+  }
+
   const ring = 0.14 + ((h % 1000) / 1000) * 0.18
   const angle = ((h % 360) + index * 47) * (Math.PI / 180)
   let x = 0.5 + Math.cos(angle) * (0.38 + ring)
@@ -105,7 +129,12 @@ export default function EchoField({ reduced, hiddenId, arrivingId }: EchoFieldPr
             title={pinnedId === echo.id ? '再次点击关闭' : '点击查看这条回声'}
             data-cursor="interactive"
             className="pointer-events-auto absolute z-20 -translate-x-1/2 -translate-y-1/2 rounded-full border-0 bg-transparent p-0"
-            style={{ left: `${x * 100}%`, top: `${y * 100}%`, width: 36, height: 36 }}
+            style={{
+              left: `${x * 100}%`,
+              top: `${y * 100}%`,
+              width: finePointer ? 36 : 44,
+              height: finePointer ? 36 : 44,
+            }}
             onMouseEnter={() => {
               if (finePointer) setHoverId(echo.id)
             }}
