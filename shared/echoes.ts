@@ -75,17 +75,33 @@ export function validateEcho(draft: EchoDraft): EchoFieldError {
 export function isPublicEcho(value: unknown): value is Echo {
   if (!value || typeof value !== 'object') return false
   const e = value as Echo
+  const at = typeof e.at === 'number' ? e.at : Number((e as { at?: unknown }).at)
   return (
     typeof e.id === 'string' &&
     typeof e.name === 'string' &&
     typeof e.message === 'string' &&
-    typeof e.at === 'number' &&
+    Number.isFinite(at) &&
     !e.seed
   )
 }
 
+/** 规范化公共回声（兼容 at 被序列化成字符串的情况） */
+export function normalizePublicEcho(value: unknown): Echo | null {
+  if (!isPublicEcho(value)) return null
+  const at = typeof value.at === 'number' ? value.at : Number(value.at)
+  return {
+    id: value.id,
+    name: value.name,
+    message: value.message,
+    at,
+  }
+}
+
 /** 合并公共回声 + 示例星；新的在前，示例垫底 */
 export function composeEchoes(remote: Echo[]): Echo[] {
-  const cleaned = remote.filter(isPublicEcho).sort((a, b) => b.at - a.at)
+  const cleaned = remote
+    .map(normalizePublicEcho)
+    .filter((e): e is Echo => !!e)
+    .sort((a, b) => b.at - a.at)
   return [...cleaned, ...SEED_ECHOES]
 }
