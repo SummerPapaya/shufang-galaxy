@@ -6,9 +6,10 @@ import type { UniverseControls } from './controls'
  * 星空漫游 HUD（universe.md §2，DOM 覆盖层，pointer-events-none）
  * - Crosshair：固定于画面正中的第一版望远镜十字分划（外环刻度 + 水平十字丝）；
  *   静止时横丝水平；左右转视角时整组轻微倾转；掠过书房星时着色锁定
+ *   （居中用 CSS translate，入场动画只用 opacity，避免 framer-motion 覆盖居中）
  * - CompassStrip：罗盘刻度带（每 15° 刻线，四象星宿名，金色三角指针随 yaw 滚动）
  * - HintBar：操作提示；手机端在罗盘下方居中，桌面在左下；入场 6s 后降至 40% 透明度
- * 入场：0.5s 起依序淡入（stagger 150ms，y +10→0）。
+ * 入场：0.5s 起依序淡入（stagger 150ms）。
  */
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
@@ -82,61 +83,64 @@ export function Crosshair({ controls }: { controls: UniverseControls }) {
   }, [controls])
 
   return (
-    <motion.div
+    <div
       aria-hidden
       className="pointer-events-none fixed left-1/2 top-1/2 z-10 -translate-x-1/2 -translate-y-1/2"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.5, ease: EASE }}
     >
-      <div
-        ref={reticleRef}
-        className="crosshair-reticle relative h-[72px] w-[72px] text-[rgba(245,240,230,0.2)] will-change-transform"
-        style={{ transform: 'rotate(0deg) scale(1)' }}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.5, ease: EASE }}
       >
-        {/* 外环刻度：慢转；十字丝本身保持相对水平，只随扫视倾转 */}
-        <svg
-          className={REDUCED_MOTION ? 'absolute inset-0' : 'crosshair-reticle-spin absolute inset-0'}
-          viewBox="0 0 72 72"
-          fill="none"
+        <div
+          ref={reticleRef}
+          className="crosshair-reticle relative h-[72px] w-[72px] text-[rgba(245,240,230,0.2)] will-change-transform"
+          style={{ transform: 'rotate(0deg) scale(1)' }}
         >
-          <circle cx="36" cy="36" r="33" stroke="currentColor" strokeWidth="0.75" strokeOpacity="0.35" />
-          {Array.from({ length: 24 }, (_, i) => {
-            const a = (i / 24) * Math.PI * 2
-            const major = i % 3 === 0
-            const inner = major ? 28 : 30.5
-            const outer = 33
-            return (
-              <line
-                key={i}
-                x1={36 + Math.cos(a) * inner}
-                y1={36 + Math.sin(a) * inner}
-                x2={36 + Math.cos(a) * outer}
-                y2={36 + Math.sin(a) * outer}
-                stroke="currentColor"
-                strokeOpacity={major ? 0.4 : 0.22}
-                strokeWidth={major ? 1.1 : 0.7}
-                strokeLinecap="square"
-              />
-            )
-          })}
-        </svg>
+          {/* 外环刻度：慢转；十字丝本身保持相对水平，只随扫视倾转 */}
+          <svg
+            className={REDUCED_MOTION ? 'absolute inset-0' : 'crosshair-reticle-spin absolute inset-0'}
+            viewBox="0 0 72 72"
+            fill="none"
+          >
+            <circle cx="36" cy="36" r="33" stroke="currentColor" strokeWidth="0.75" strokeOpacity="0.35" />
+            {Array.from({ length: 24 }, (_, i) => {
+              const a = (i / 24) * Math.PI * 2
+              const major = i % 3 === 0
+              const inner = major ? 28 : 30.5
+              const outer = 33
+              return (
+                <line
+                  key={i}
+                  x1={36 + Math.cos(a) * inner}
+                  y1={36 + Math.sin(a) * inner}
+                  x2={36 + Math.cos(a) * outer}
+                  y2={36 + Math.sin(a) * outer}
+                  stroke="currentColor"
+                  strokeOpacity={major ? 0.4 : 0.22}
+                  strokeWidth={major ? 1.1 : 0.7}
+                  strokeLinecap="square"
+                />
+              )
+            })}
+          </svg>
 
-        {/* 静止十字丝：横丝水平、中心留空 */}
-        <svg className="absolute inset-0" viewBox="0 0 72 72" fill="none">
-          <circle cx="36" cy="36" r="11" stroke="currentColor" strokeWidth="0.85" strokeOpacity="0.4" />
-          <line x1="3" y1="36" x2="25" y2="36" stroke="currentColor" strokeWidth="0.9" strokeOpacity="0.5" />
-          <line x1="47" y1="36" x2="69" y2="36" stroke="currentColor" strokeWidth="0.9" strokeOpacity="0.5" />
-          <line x1="36" y1="3" x2="36" y2="25" stroke="currentColor" strokeWidth="0.9" strokeOpacity="0.5" />
-          <line x1="36" y1="47" x2="36" y2="69" stroke="currentColor" strokeWidth="0.9" strokeOpacity="0.5" />
-          <line x1="20" y1="36" x2="24" y2="36" stroke="currentColor" strokeWidth="1.4" strokeOpacity="0.55" />
-          <line x1="48" y1="36" x2="52" y2="36" stroke="currentColor" strokeWidth="1.4" strokeOpacity="0.55" />
-          <line x1="36" y1="20" x2="36" y2="24" stroke="currentColor" strokeWidth="1.4" strokeOpacity="0.55" />
-          <line x1="36" y1="48" x2="36" y2="52" stroke="currentColor" strokeWidth="1.4" strokeOpacity="0.55" />
-          <circle cx="36" cy="36" r="1.15" fill="currentColor" fillOpacity="0.55" />
-        </svg>
-      </div>
-    </motion.div>
+          {/* 静止十字丝：横丝水平、中心留空 */}
+          <svg className="absolute inset-0" viewBox="0 0 72 72" fill="none">
+            <circle cx="36" cy="36" r="11" stroke="currentColor" strokeWidth="0.85" strokeOpacity="0.4" />
+            <line x1="3" y1="36" x2="25" y2="36" stroke="currentColor" strokeWidth="0.9" strokeOpacity="0.5" />
+            <line x1="47" y1="36" x2="69" y2="36" stroke="currentColor" strokeWidth="0.9" strokeOpacity="0.5" />
+            <line x1="36" y1="3" x2="36" y2="25" stroke="currentColor" strokeWidth="0.9" strokeOpacity="0.5" />
+            <line x1="36" y1="47" x2="36" y2="69" stroke="currentColor" strokeWidth="0.9" strokeOpacity="0.5" />
+            <line x1="20" y1="36" x2="24" y2="36" stroke="currentColor" strokeWidth="1.4" strokeOpacity="0.55" />
+            <line x1="48" y1="36" x2="52" y2="36" stroke="currentColor" strokeWidth="1.4" strokeOpacity="0.55" />
+            <line x1="36" y1="20" x2="36" y2="24" stroke="currentColor" strokeWidth="1.4" strokeOpacity="0.55" />
+            <line x1="36" y1="48" x2="36" y2="52" stroke="currentColor" strokeWidth="1.4" strokeOpacity="0.55" />
+            <circle cx="36" cy="36" r="1.15" fill="currentColor" fillOpacity="0.55" />
+          </svg>
+        </div>
+      </motion.div>
+    </div>
   )
 }
 
@@ -173,15 +177,17 @@ export function CompassStrip({ controls }: { controls: UniverseControls }) {
   }, [controls])
 
   return (
-    <motion.div
+    <div
       aria-hidden
       className="pointer-events-none fixed z-10 bottom-[4.75rem] left-1/2 -translate-x-1/2 sm:bottom-6 sm:left-auto sm:right-[132px] sm:translate-x-0"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: 0.95, ease: EASE }}
     >
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.95, ease: EASE }}
+      >
       <div
-        className="relative h-9 w-40 overflow-hidden"
+        className="relative mx-auto h-9 w-40 overflow-hidden"
         style={{
           WebkitMaskImage:
             'linear-gradient(to right, transparent 0%, black 20%, black 80%, transparent 100%)',
@@ -237,7 +243,8 @@ export function CompassStrip({ controls }: { controls: UniverseControls }) {
           }}
         />
       </div>
-    </motion.div>
+      </motion.div>
+    </div>
   )
 }
 
