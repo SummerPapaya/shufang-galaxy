@@ -4,6 +4,7 @@ import {
   NAME_MAX,
   SEED_ECHOES,
   composeEchoes,
+  normalizePublicEcho,
   validateEcho,
   type Echo,
   type EchoDraft,
@@ -18,10 +19,11 @@ export { MESSAGE_MAX, NAME_MAX, SEED_ECHOES, validateEcho }
  *
  * - 读写走 `/api/echoes`（本地 Vite 中间件 / 生产 Vercel + KV）
  * - 模块级 store + useSyncExternalStore：EchoWall / EchoField 共享同一份列表
- *   （避免提交后飞星闪一下、星空层却没有这颗星）
+ * - 成功拉取后写入 localStorage 缓存；刷新时先展示缓存，避免 API 短暂失败时留言「消失」
  */
 
 const OWN_IDS_KEY = 'shufang-galaxy:echo-own-ids:v1'
+const CACHE_KEY = 'shufang-galaxy:echoes-cache:v1'
 
 function apiBase(): string {
   const fromEnv = import.meta.env.VITE_ECHOES_API as string | undefined
@@ -47,6 +49,28 @@ function rememberOwnId(id: string) {
     const next = readOwnIds()
     next.add(id)
     window.localStorage.setItem(OWN_IDS_KEY, JSON.stringify([...next].slice(-80)))
+  } catch {
+    /* ignore */
+  }
+}
+
+function readCache(): Echo[] {
+  if (typeof window === 'undefined') return []
+  try {
+    const raw = window.localStorage.getItem(CACHE_KEY)
+    if (!raw) return []
+    const parsed: unknown = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    return parsed.map(normalizePublicEcho).filter((e): e is Echo => !!e)
+  } catch {
+    return []
+  }
+}
+
+function writeCache(list: Echo[]) {
+  try {
+    const cleaned = list.map(normalizePublicEcho).filter((e): e is Echo => !!e)
+    window.localStorage.setItem(CACHE_KEY, JSON.stringify(cleaned.slice(0, 300)))
   } catch {
     /* ignore */
   }
@@ -80,9 +104,11 @@ interface EchoStoreState {
 
 const listeners = new Set<() => void>()
 
+const cached = readCache()
+
 let store: EchoStoreState = {
-  remote: [],
-  status: 'loading',
+  remote: cached,
+  status: cached.length > 0 ? 'ready' : 'loading',
   errorMessage: null,
   ownIds: readOwnIds(),
 }
@@ -123,14 +149,20 @@ function subscribe(onChange: () => void): () => void {
 async function refreshEchoes(): Promise<void> {
   const gen = ++fetchGeneration
   try {
-    const res = await fetch(apiBase(), { headers: { Accept: 'application/json' } })
+    const res = await fetch(apiBase(), {
+      headers: { Accept: 'application/json' },
+      cache: 'no-store',
+    })
     if (!res.ok) {
       const payload = (await res.json().catch(() => null)) as { message?: string } | null
       throw new Error(payload?.message || `加载失败（${res.status}）`)
     }
     const data = (await res.json()) as { echoes?: Echo[] }
-    const list = Array.isArray(data.echoes) ? data.echoes : []
+    const list = Array.isArray(data.echoes)
+      ? data.echoes.map(normalizePublicEcho).filter((e): e is Echo => !!e)
+      : []
     if (gen !== fetchGeneration) return
+    writeCache(list)
     setStore({
       remote: list,
       status: 'ready',
@@ -139,10 +171,11 @@ async function refreshEchoes(): Promise<void> {
     })
   } catch (err) {
     if (gen !== fetchGeneration) return
+    const fallback = store.remote.length > 0 ? store.remote : readCache()
     setStore({
-      status: 'error',
+      remote: fallback,
+      status: fallback.length > 0 ? 'ready' : 'error',
       errorMessage: err instanceof Error ? err.message : '星海暂时听不清',
-      // 保留已有 remote，避免提交后闪一下被清空
       ownIds: readOwnIds(),
     })
   }
@@ -158,6 +191,7 @@ async function submitEcho(draft: EchoDraft): Promise<Echo> {
   const res = await fetch(apiBase(), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    cache: 'no-store',
     body: JSON.stringify({
       name: draft.name,
       email: draft.email,
@@ -179,21 +213,23 @@ async function submitEcho(draft: EchoDraft): Promise<Echo> {
     )
   }
 
-  const echo = payload?.echo
-  if (!echo || typeof echo.id !== 'string') {
+  const echo = normalizePublicEcho(payload?.echo)
+  if (!echo) {
     throw new Error('星海没有回传这颗星，请稍后再试')
   }
 
   rememberOwnId(echo.id)
+  const next = [echo, ...store.remote.filter((e) => e.id !== echo.id)]
+  writeCache(next)
   // 乐观写入共享列表，确保飞星落地后 EchoField 立刻能看到
   setStore({
-    remote: [echo, ...store.remote.filter((e) => e.id !== echo.id)],
+    remote: next,
     status: 'ready',
     errorMessage: null,
     ownIds: readOwnIds(),
   })
 
-  // 后台再拉一次，与服务器对齐（不阻断动画）
+  // 后台再拉一次，与服务器对齐（失败时保留乐观结果 + 缓存）
   void refreshEchoes()
   return echo
 }
