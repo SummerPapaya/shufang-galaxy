@@ -492,7 +492,7 @@ export default function RingCarousel({ books, reduced, onSelect }: RingCarouselP
                         className="font-serif font-medium tracking-[0.18em] text-starlight whitespace-nowrap"
                         style={{ fontSize: narrow ? 11 : 13, lineHeight: 1 }}
                       >
-                        {book.title}
+                        {book.spineTitle ?? book.title}
                       </span>
                       <span
                         className="font-hud tracking-[0.12em] text-starlight-dim whitespace-nowrap"
