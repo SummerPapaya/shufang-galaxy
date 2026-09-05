@@ -1,5 +1,20 @@
 [
  {
+  "id": "ten-years",
+  "title": "你的，我的，我们的房间",
+  "author": "一个人的书房",
+  "reader": "朗读者们",
+  "starColor": "#ffd9a0",
+  "audio": "https://ting-2023.shufang.org/10-years.mp3",
+  "externalUrl": "https://shufang.org/10-years.html",
+  "episodes": [
+   {
+    "title": "十周年特别节目 · 完整集",
+    "audio": "https://ting-2023.shufang.org/10-years.mp3"
+   }
+  ]
+ },
+ {
   "id": "xiaxiaomai",
   "title": "失乐园",
   "author": "渡边淳一",

@@ -17,10 +17,12 @@ export interface Book {
   author: string
   reader: string
   starColor: string
-  /** 归一化为 '/assets/audio/{id}.mp3' */
+  /** 归一化为 '/assets/audio/{id}.mp3'；外链 https 保持原样 */
   audio: string
   /** 单集列表（R3）：播放器内可切换同一本书的不同单集 */
   episodes: BookEpisode[]
+  /** 可选：跳转到官网文稿 / 外链页面 */
+  externalUrl?: string
 }
 
 interface RawBook {
@@ -31,10 +33,16 @@ interface RawBook {
   starColor: string
   audio: string
   episodes?: { title: string; audio: string }[]
+  externalUrl?: string
 }
 
 let cache: Book[] | null = null
 let inflight: Promise<Book[]> | null = null
+
+function normAudio(p: string): string {
+  if (/^https?:\/\//i.test(p) || p.startsWith('/')) return p
+  return `/${p}`
+}
 
 export function fetchBooks(): Promise<Book[]> {
   if (cache) return Promise.resolve(cache)
@@ -45,14 +53,18 @@ export function fetchBooks(): Promise<Book[]> {
         return res.json() as Promise<RawBook[]>
       })
       .then((raw) => {
-        const norm = (p: string) => (p.startsWith('/') ? p : `/${p}`)
         cache = raw.map((b) => ({
-          ...b,
-          audio: norm(b.audio),
+          id: b.id,
+          title: b.title,
+          author: b.author,
+          reader: b.reader,
+          starColor: b.starColor,
+          audio: normAudio(b.audio),
+          externalUrl: b.externalUrl?.trim() || undefined,
           episodes: (b.episodes && b.episodes.length > 0
             ? b.episodes
             : [{ title: '第 1 集 · 试音样片', audio: b.audio }]
-          ).map((ep) => ({ ...ep, audio: norm(ep.audio) })),
+          ).map((ep) => ({ ...ep, audio: normAudio(ep.audio) })),
         }))
         return cache
       })
