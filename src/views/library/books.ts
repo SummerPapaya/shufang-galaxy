@@ -14,6 +14,8 @@ export interface BookEpisode {
 export interface Book {
   id: string
   title: string
+  /** 书脊竖排短名；缺省时回退到 title */
+  spineTitle?: string
   author: string
   reader: string
   starColor: string
@@ -28,6 +30,7 @@ export interface Book {
 interface RawBook {
   id: string
   title: string
+  spineTitle?: string
   author: string
   reader: string
   starColor: string
@@ -56,6 +59,7 @@ export function fetchBooks(): Promise<Book[]> {
         cache = raw.map((b) => ({
           id: b.id,
           title: b.title,
+          spineTitle: b.spineTitle?.trim() || undefined,
           author: b.author,
           reader: b.reader,
           starColor: b.starColor,
