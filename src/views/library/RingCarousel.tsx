@@ -73,8 +73,8 @@ export default function RingCarousel({ books, reduced, onSelect }: RingCarouselP
   const velRef = useRef(0)
   /** 方向键步进目标角（null = 无步进） */
   const targetRef = useRef<number | null>(null)
-  /** 最近一次交互时间戳（自动旋转 8 秒静默期） */
-  const lastInteractRef = useRef(-1e9)
+  /** 最近一次交互时间戳（自动旋转 8 秒静默期）；入场先暂停，让正中册停留一会儿 */
+  const lastInteractRef = useRef(typeof performance !== 'undefined' ? performance.now() : 0)
   const radiusRef = useRef(isNarrow() ? MOBILE_RADIUS : DESKTOP_RADIUS)
   const scaleRef = useRef(1)
   const pinchRef = useRef<PinchState>({ active: false, startDist: 0, startScale: 1 })
@@ -419,6 +419,21 @@ export default function RingCarousel({ books, reduced, onSelect }: RingCarouselP
                         />
                         朗读 · {book.reader}
                       </p>
+                      {book.externalUrl && (
+                        <a
+                          href={book.externalUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          data-cursor="interactive"
+                          data-cursor-color={c}
+                          className="pointer-events-auto mt-2 inline-flex items-center gap-1 font-hud text-[10px] tracking-[0.12em] text-gold transition-colors hover:text-starlight"
+                          onClick={(e) => e.stopPropagation()}
+                          onPointerDown={(e) => e.stopPropagation()}
+                        >
+                          打开官网特辑页
+                          <span aria-hidden>↗</span>
+                        </a>
+                      )}
                     </div>
                   </div>
 

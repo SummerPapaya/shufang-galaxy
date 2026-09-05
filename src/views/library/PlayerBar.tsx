@@ -186,6 +186,21 @@ export default function PlayerBar({ book, reduced, onClose }: PlayerBarProps) {
               <span className="mx-1.5 text-starlight-faint">·</span>
               {book.reader} 朗读
             </p>
+            {book.externalUrl && (
+              <a
+                href={book.externalUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-cursor="interactive"
+                data-cursor-color={book.starColor}
+                className="mt-1 inline-flex items-center gap-1 font-hud text-[10px] tracking-[0.12em] transition-colors hover:text-starlight"
+                style={{ color: hexToRgba(book.starColor, 0.95) }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                打开官网特辑页
+                <span aria-hidden>↗</span>
+              </a>
+            )}
             <p
               className="mt-0.5 flex items-center gap-1.5 font-hud text-[10px] tracking-[0.12em]"
               style={{ color: hexToRgba(book.starColor, 0.9) }}
